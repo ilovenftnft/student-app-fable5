@@ -25,12 +25,16 @@
 
 | # | 功能 | 一句话验收标准 |
 |---|---|---|
-| 1 | 每日闭环页 | 孩子从打开到结束页全程只按主按钮就能走完：章节勾选 → 到期卡 → 三问（点选）→ 结束页；无照片、无 LLM 时全程可用；正计时只显示分钟；60 分钟硬停 |
-| 2 | 教材章节目录 + 记忆库 | 七上七科的章节树可勾选"今天学到这"；地理/生物/历史/道法的章节级条目进入间隔复习，每周到期量 ≤ 10 分钟 |
+| 1 | 每日闭环页 | 孩子从打开到结束页全程只按主按钮就能走完：章节勾选 → 引导式回想 → 到期卡 → 三问（点选）→ 结束页；无照片、无 LLM 时全程可用；正计时只显示分钟；60 分钟硬停 |
+| 2 | 教材章节目录 + 记忆库 | 七上七科的章节树可勾选"今天学到这"，每节带 3–5 条要点（教材小节标题，有出处）；地理/生物/历史/道法的章节级条目进入间隔复习，每周到期量 ≤ 10 分钟 |
 | 3 | 复习卡片 + FSRS | 卡片正面/背面分离；孩子只点"会 / 不会"，FSRS 四档由耗时推断；错题卡跨 3 次间隔会话各答对 1 次才归档；每日到期上限 10 分钟，超出顺延 |
 | 4 | 收件箱 | `~/StudyInbox/` 出现新照片 → 30 秒内入库并排队 → Codex 识题产出 JSON → 进"待确认"队列 → 家长确认后成卡；Codex 不可用时照片仍入库、队列显示"稍后重试" |
 | 5 | 家长周报页 | 一页四项：本周完成天数 / 已掌握卡片数 / 本周最薄弱的一个知识点 / 一句建议的家长行为；不含逐题、时长、时间戳 |
 | 6 | 成绩与位次录入 | 家长录入每次考试的科目、分数、班级/年级排名；周报能显示位次趋势 |
+
+### 引导式回想（每日闭环第 2 步，约 3 分钟）
+
+勾选"今天学到 §X"后：显示节名，"这一节讲了什么？先想 1 分钟"（正计时，不锁按钮）→ 点"想好了"→ 展开该节要点（`chapter.points`）→ 勾"没想起来的"→ 写入 `recall`，勾中的要点次日作为到期项出现。**默想，不打字，不计十分钟，不强制**；没勾章节时跳过这一步。依据：`docs/增补清单.md` 第二节第 9 条（儿童证据支持引导式检索而非空白自由回忆；默想与写出等效）。
 
 ## 数据
 
@@ -43,7 +47,7 @@
 
 ### 数据库（`node:sqlite`，单文件，路径由 `DATA_DIR` 决定，默认 `./data/app.db`）
 
-核心表（详见 `src/server/db/schema.sql`）：`subject`、`chapter`、`item`（内容项，含 `kind: recitation|concept|vocab|listen|wrong|prestudy`、`source_quote`、`source_ref`、`pool`）、`card_state`（ts-fsrs 状态）、`review`（每次作答：item、评分、耗时 ms、时间）、`session`（每日会话：开始/结束/分钟数）、`checkin`（当天勾选的章节）、`reflection`（三问的点选结果）、`inbox_photo`、`problem`（识别出的题目，含 `status: pending|confirmed|rejected`）、`exam_score`。
+核心表（详见 `src/server/db/schema.sql`）：`subject`、`chapter`、`item`（内容项，含 `kind: recitation|concept|vocab|listen|wrong|prestudy`、`source_quote`、`source_ref`、`pool`）、`card_state`（ts-fsrs 状态）、`review`（每次作答：item、评分、耗时 ms、时间）、`session`（每日会话：开始/结束/分钟数）、`checkin`（当天勾选的章节）、`recall`（引导式回想：章节、没想起来的要点）、`reflection`（三问的点选结果）、`inbox_photo`、`problem`（识别出的题目，含 `status: pending|confirmed|rejected`）、`exam_score`。
 
 规则：所有路径相对 `DATA_DIR` 存；备份 = `sqlite3 app.db "vacuum into 'backup.db'"` + 拷 `photos/`；WAL 模式下不要直接复制 db 文件。
 
