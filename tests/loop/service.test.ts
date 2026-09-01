@@ -1,0 +1,112 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { openDb } from "../../src/server/db/open.ts";
+import { upsertItems } from "../../src/server/content/store.ts";
+import { flattenChapters, upsertChapters } from "../../src/server/content/chapters.ts";
+import { createApp } from "../../src/server/app.ts";
+import * as repo from "../../src/server/db/repo.ts";
+import type { Item } from "../../src/shared/types.ts";
+import type { DatabaseSync } from "node:sqlite";
+import type { Hono } from "hono";
+
+const items: Item[] = Array.from({ length: 5 }, (_, i) => ({
+  id: `concept:生物:t:${i}`, subject: "生物", kind: "concept", subtype: "fill", front: `问 ${i}`, back: `答 ${i}`,
+  sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 0, meta: { 重要概念: "细胞" },
+}));
+const chapters = flattenChapters({ 科目: "生物", 节点: [{ 标题: "第一章", 子: [
+  { 标题: "第一节", pdf页: 4, 要点: [{ 文: "A", 出处: "a" }, { 文: "B", 出处: "b" }] },
+  { 标题: "第二节", pdf页: 8 },
+] }] }).rows;
+
+let db: DatabaseSync, app: Hono, now: Date;
+const j = async (path: string, body?: unknown) => {
+  const res = await app.request(path, body === undefined ? undefined : { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
+  return res.json() as Promise<any>;
+};
+
+beforeEach(() => {
+  db = openDb(":memory:");
+  repo.invalidateItems();
+  upsertItems(db, items);
+  upsertChapters(db, chapters);
+  repo.setSetting(db, "content_start", "2026-09-07");
+  now = new Date("2026-09-07T09:00:00Z");
+  app = createApp(db, () => now);
+});
+
+describe("每日闭环端到端（API）", () => {
+  it("勾选 → 回想 → 到期卡 → 三问 → 结束页", async () => {
+    let t = await j("/api/today");
+    expect(t.step).toBe("checkin");
+    expect(t.session).toBeNull();
+
+    t = await j("/api/checkin", { chapterIds: ["生物:第一章/第一节", "生物:第一章/第二节"] });
+    expect(t.step).toBe("recall");
+    expect(t.recallPending).toEqual([{ chapterId: "生物:第一章/第一节", title: "第一节", points: ["A", "B"] }]);
+    expect(t.timer.minutes).toBe(0);
+
+    t = await j("/api/recall", { chapterId: "生物:第一章/第一节", thinkMs: 60000, missed: [1] });
+    expect(t.step).toBe("review");
+    expect(t.queue.remaining).toBe(5);
+
+    // 先作答再看答案
+    let card = await j("/api/card/next");
+    expect(card.front).toBe("问 0");
+    expect(card.isNew).toBe(true);
+    const ans = await j(`/api/card/${card.itemId}/answer`);
+    expect(ans.back).toBe("答 0");
+    let r = await j("/api/review", { itemId: card.itemId, knew: true, elapsedMs: 12000 });
+    expect(r.feedback).toBe("对了。");
+    expect(r.next.front).toBe("问 1");
+    r = await j("/api/review", { itemId: r.next.itemId, knew: false, elapsedMs: 30000 });
+    expect(r.feedback).toBe("再看一眼答案。");
+    expect(r.rating).toBe(1);
+    for (let i = 0; i < 6; i++) { const c = await j("/api/card/next"); if (!c) break; await j("/api/review", { itemId: c.itemId, knew: true, elapsedMs: 10000 }); }
+
+    t = await j("/api/today");
+    // 答错的那张同日学习步骤在会话窗口内会再来一次，最终队列清空
+    while (t.step === "review") { const c = await j("/api/card/next"); await j("/api/review", { itemId: c.itemId, knew: true, elapsedMs: 10000 }); t = await j("/api/today"); }
+    expect(t.step).toBe("reflect");
+
+    t = await j("/api/reflect", { hardest: "concept:生物:t:1", guessed: null, tomorrow: "concept:生物:t:1" });
+    expect(t.step).toBe("done");
+    expect(t.summary.reviews).toBeGreaterThanOrEqual(6);
+    t = await j("/api/session/end", {});
+    expect(t.session.ended).toBe(true);
+    expect(t.step).toBe("done");
+  });
+
+  it("没勾章节、没到期卡：冷启动 = 勾选 + 三问", async () => {
+    repo.setSetting(db, "content_start", "2026-10-01"); // 内容还没启用
+    let t = await j("/api/checkin", { chapterIds: [] });
+    expect(t.step).toBe("reflect");
+  });
+
+  it("昨天没想起来的要点，第二天进 carry", async () => {
+    await j("/api/checkin", { chapterIds: ["生物:第一章/第一节"] });
+    await j("/api/recall", { chapterId: "生物:第一章/第一节", thinkMs: 1000, missed: [0] });
+    expect(await j("/api/recall/carry")).toEqual([]);
+    now = new Date("2026-09-08T09:00:00Z");
+    expect(await j("/api/recall/carry")).toEqual([{ chapterId: "生物:第一章/第一节", title: "第一节", points: [{ text: "A", quote: "a" }] }]);
+  });
+
+  it("60 分钟硬停：读取 today 时落库", async () => {
+    await j("/api/checkin", { chapterIds: [] });
+    now = new Date("2026-09-07T10:01:00Z");
+    const t = await j("/api/today");
+    expect(t.session.ended).toBe(true);
+    expect(t.step).toBe("done");
+    expect(repo.sessionOn(db, "2026-09-07")!.ended_by).toBe("hard_stop");
+  });
+
+  it("周报：四项，无逐题无时长", async () => {
+    await j("/api/checkin", { chapterIds: [] });
+    const c = await j("/api/card/next");
+    await j("/api/review", { itemId: c.itemId, knew: false, elapsedMs: 5000 });
+    await j("/api/session/end", {});
+    const w = await j("/api/parent/weekly");
+    expect(w.week).toEqual({ from: "2026-09-07", to: "2026-09-13" });
+    expect(w.daysDone).toBe(1);
+    expect(w.weakest).toEqual({ subject: "生物", topic: "细胞" });
+    expect(Object.keys(w).sort()).toEqual(["daysDone", "daysTotal", "masteredCards", "suggestion", "weakest", "week"]);
+  });
+});

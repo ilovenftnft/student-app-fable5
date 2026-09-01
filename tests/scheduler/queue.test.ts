@@ -76,6 +76,12 @@ describe("buildQueue", () => {
     const q = buildQueue({ items: [fill, ctx], states: new Map([["f", mature]]), now, dayIndex: 0 });
     expect(q.entries.map((e) => e.item.id)).toEqual(["x"]);
   });
+  it("今天稍后才到期的排在新卡后面", () => {
+    const items = [concept(0, 999), concept(1, 0)];
+    const states = new Map([["c0", dueState("c0", new Date(now.getTime() + 10 * 60_000))]]);
+    const q = buildQueue({ items, states, now, dayIndex: 0 });
+    expect(q.entries.map((e) => e.item.id)).toEqual(["c1", "c0"]);
+  });
   it("prestudy 不进队列", () => {
     const items = [{ ...concept(0), kind: "prestudy" as const, subtype: "definition" }];
     expect(buildQueue({ items, states: new Map(), now, dayIndex: 0 }).entries).toHaveLength(0);

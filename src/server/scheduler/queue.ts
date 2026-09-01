@@ -57,19 +57,24 @@ export function buildQueue(q: QueueInput): Queue {
   }
   due.sort((a, b) => q.states.get(a.item.id)!.card.due.getTime() - q.states.get(b.item.id)!.card.due.getTime());
 
-  const entries: QueueEntry[] = [];
+  const picked: QueueEntry[] = [];
   let est = 0, deferred = 0;
   for (const e of due) {
-    if (entries.length > 0 && est + e.estSeconds > budget) { deferred++; continue; }
-    entries.push(e); est += e.estSeconds;
+    if (picked.length > 0 && est + e.estSeconds > budget) { deferred++; continue; }
+    picked.push(e); est += e.estSeconds;
   }
 
   let newWaiting = 0;
+  const freshEntries: QueueEntry[] = [];
   const fresh = q.items.filter((i) => eligibleNew(i, q.states, q.dayIndex)).sort((a, b) => a.introDay - b.introDay);
   for (const item of fresh) {
     const sec = secondsFor(item) * 1.5;
     if (est + sec > budget) { newWaiting++; continue; }
-    entries.push({ item, isNew: true, estSeconds: sec }); est += sec;
+    freshEntries.push({ item, isNew: true, estSeconds: sec }); est += sec;
   }
-  return { entries, deferred, newWaiting, estSeconds: est };
+  // 顺序：现在已到期 → 新卡 → 今天稍后才到期（同日学习步骤，刚答过的不立刻再出现）
+  const nowMs = q.now.getTime();
+  const dueNow = picked.filter((e) => q.states.get(e.item.id)!.card.due.getTime() <= nowMs);
+  const dueLater = picked.filter((e) => q.states.get(e.item.id)!.card.due.getTime() > nowMs);
+  return { entries: [...dueNow, ...freshEntries, ...dueLater], deferred, newWaiting, estSeconds: est };
 }
