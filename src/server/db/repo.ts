@@ -66,16 +66,18 @@ export function sessionsBetween(db: DatabaseSync, from: string, to: string): Ses
 export interface ChapterRow { id: string; subject_id: string; parent_id: string | null; title: string; sort: number; page: number | null; points: string }
 export interface ChapterNode { id: string; title: string; page: number | null; points: Point[]; children: ChapterNode[] }
 
-export function chapterTree(db: DatabaseSync, subject: string): ChapterNode[] {
-  const rows = db.prepare("SELECT * FROM chapter WHERE subject_id = ? ORDER BY sort").all(subject) as unknown as ChapterRow[];
+/** 全部科目的章节树：{ 科目: 根节点[] }。路径里不放中文（本机代理会改写编码后的路径）。 */
+export function chapterTrees(db: DatabaseSync): Record<string, ChapterNode[]> {
+  const rows = db.prepare("SELECT * FROM chapter ORDER BY subject_id, sort").all() as unknown as ChapterRow[];
   const nodes = new Map<string, ChapterNode>();
   for (const r of rows) nodes.set(r.id, { id: r.id, title: r.title, page: r.page, points: JSON.parse(r.points), children: [] });
-  const roots: ChapterNode[] = [];
+  const out: Record<string, ChapterNode[]> = {};
   for (const r of rows) {
     const n = nodes.get(r.id)!;
-    if (r.parent_id && nodes.has(r.parent_id)) nodes.get(r.parent_id)!.children.push(n); else roots.push(n);
+    if (r.parent_id && nodes.has(r.parent_id)) nodes.get(r.parent_id)!.children.push(n);
+    else (out[r.subject_id] ??= []).push(n);
   }
-  return roots;
+  return out;
 }
 export function chapter(db: DatabaseSync, id: string): ChapterRow | undefined {
   return db.prepare("SELECT * FROM chapter WHERE id = ?").get(id) as ChapterRow | undefined;

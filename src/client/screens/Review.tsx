@@ -18,7 +18,9 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
 
   const submit = async (knew: boolean) => {
     if (!card) return;
-    const r = await api.review(card.itemId, knew, Date.now() - shownAt.current);
+    let r: Awaited<ReturnType<typeof api.review>>;
+    try { r = await api.review(card.itemId, knew, Date.now() - shownAt.current); }
+    catch { setFeedback({ text: "没记上，再点一次。", ok: false }); setTimeout(() => setFeedback(null), 1500); return; }
     setFeedback({ text: r.feedback, ok: r.rating > 1 });
     setN((x) => x + 1);
     setTimeout(() => { if (r.next) { setCard(r.next); setAnswer(null); setFeedback(null); shownAt.current = Date.now(); } else onDone(); }, 600);

@@ -33,3 +33,6 @@ __pycache__/
 
 # 运行数据
 data/
+tests/e2e/.tmp/
+test-results/
+playwright-report/

@@ -4,9 +4,11 @@ import { api, SUBJECTS, type ChapterNode, type Today } from "../api.ts";
 /** 章节勾选："今天学到这"。一次看一科的叶子；勾好按主按钮。 */
 export function Checkin({ onDone }: { onDone: (t: Today) => void }) {
   const [subject, setSubject] = useState(SUBJECTS[0]!);
-  const [tree, setTree] = useState<ChapterNode[]>([]);
+  const [trees, setTrees] = useState<Record<string, ChapterNode[]>>({});
+  const [error, setError] = useState<string | null>(null);
   const [picked, setPicked] = useState<Map<string, string>>(new Map());
-  useEffect(() => { void api.chapters(subject).then(setTree); }, [subject]);
+  useEffect(() => { api.chapters().then(setTrees).catch((e) => setError(String(e))); }, []);
+  const tree = trees[subject] ?? [];
 
   const leaves: { id: string; title: string; path: string }[] = [];
   const walk = (nodes: ChapterNode[], path: string[]) => {
@@ -26,7 +28,8 @@ export function Checkin({ onDone }: { onDone: (t: Today) => void }) {
         {SUBJECTS.map((s) => <button key={s} className="btn-text" aria-pressed={s === subject} style={{ color: s === subject ? "var(--text)" : undefined, fontSize: 16 }} onClick={() => setSubject(s)}>{s}</button>)}
       </div>
       <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
-        {leaves.length === 0 && <p className="muted t-small">这一科还没有章节目录。</p>}
+        {error && <p className="muted t-small">章节目录没取到。{error}</p>}
+        {!error && leaves.length === 0 && <p className="muted t-small">这一科还没有章节目录。</p>}
         {leaves.map((l) => (
           <button key={l.id} className="choice" aria-pressed={picked.has(l.id)} onClick={() => toggle(l.id, `${subject} ${l.title}`)}>
             <span>{l.title}</span>

@@ -23,7 +23,7 @@ async function req<T>(path: string, body?: unknown): Promise<T> {
 
 export const api = {
   today: () => req<Today>("/api/today"),
-  chapters: (subject: string) => req<ChapterNode[]>(`/api/chapters/${encodeURIComponent(subject)}`),
+  chapters: () => req<Record<string, ChapterNode[]>>("/api/chapters"),
   checkin: (chapterIds: string[]) => req<Today>("/api/checkin", { chapterIds }),
   recallCarry: () => req<{ chapterId: string; title: string; points: { text: string }[] }[]>("/api/recall/carry"),
   recall: (chapterId: string, thinkMs: number, missed: number[]) => req<Today>("/api/recall", { chapterId, thinkMs, missed }),

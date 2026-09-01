@@ -16,7 +16,7 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   app.post("/api/session/start", (c) => { const s = svc.start(db, clock()); return c.json({ id: s.id }); });
   app.post("/api/session/end", (c) => { svc.end(db, clock()); return c.json(svc.today(db, clock())); });
 
-  app.get("/api/chapters/:subject", (c) => c.json(repo.chapterTree(db, c.req.param("subject"))));
+  app.get("/api/chapters", (c) => c.json(repo.chapterTrees(db)));
   app.post("/api/checkin", async (c) => {
     const body = await c.req.json<{ chapterIds: string[] }>();
     svc.checkin(db, clock(), Array.isArray(body.chapterIds) ? body.chapterIds.map(String) : []);
