@@ -43,7 +43,8 @@ export function eligibleNew(item: Item, states: Map<string, CardState>, dayIndex
 }
 
 export function buildQueue(q: QueueInput): Queue {
-  const budget = (q.budgetSeconds ?? DAILY_BUDGET_SECONDS) - (q.spentSeconds ?? 0);
+  const spent = q.spentSeconds ?? 0;
+  const budget = (q.budgetSeconds ?? DAILY_BUDGET_SECONDS) - spent;
   const { end } = dayBounds(q.now);
   const byId = new Map(q.items.map((i) => [i.id, i]));
 
@@ -60,7 +61,9 @@ export function buildQueue(q: QueueInput): Queue {
   const picked: QueueEntry[] = [];
   let est = 0, deferred = 0;
   for (const e of due) {
-    if (picked.length > 0 && est + e.estSeconds > budget) { deferred++; continue; }
+    // 今天一秒还没花时，哪怕第一张就超预算也派一张（否则永远做不到）；中途预算用完就全部顺延
+    const firstOfDay = picked.length === 0 && spent === 0;
+    if (!firstOfDay && est + e.estSeconds > budget) { deferred++; continue; }
     picked.push(e); est += e.estSeconds;
   }
 

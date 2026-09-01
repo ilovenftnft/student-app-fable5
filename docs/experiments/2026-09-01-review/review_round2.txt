@@ -1,0 +1,5 @@
+BLOCK: 发现 1 个确定的 high 级问题：每日 10 分钟到期复习上限在会话中途会失效，可能让孩子继续做超过预算的到期卡。
+- [high] src/server/scheduler/queue.ts: 预算耗尽后仍会继续派发到期卡
+    buildQueue 用 spentSeconds 扣减预算后，如果 budget 已经小于等于 0，due 循环仍会因为 picked.length === 0 而放入第一张到期卡。submitReview 每次都会重新调用 nextCard/buildQueue，所以一旦会话复习耗时超过 10 分钟，系统仍可能一张接一张继续派发到期卡，违反 AGENTS.md 中“每日到期上限 10 分钟，超出顺延”的验收约定。现有测试只覆盖了“一开始单张卡超过预算也至少排一张”，没有覆盖 spentSeconds 已耗尽后的中途重算场景。
+(codex 149s, thread 01a05d7e-26b8-7851-88bb-e7e7a98d4938)
+EXIT 1

@@ -46,6 +46,15 @@ describe("buildQueue", () => {
     const q = buildQueue({ items, states, now, dayIndex: 0, budgetSeconds: 30 });
     expect(q.entries).toHaveLength(1);
   });
+  it("会话中途预算用完：到期卡全部顺延，不再派发", () => {
+    const items = Array.from({ length: 5 }, (_, i) => concept(i, 999));
+    const states = new Map(items.map((it) => [it.id, dueState(it.id, now)]));
+    const q = buildQueue({ items, states, now, dayIndex: 0, spentSeconds: 600 });
+    expect(q.entries).toHaveLength(0);
+    expect(q.deferred).toBe(5);
+    const almost = buildQueue({ items, states, now, dayIndex: 0, spentSeconds: 590 });
+    expect(almost.entries).toHaveLength(0); // 剩 10 秒，一张 15 秒也装不下
+  });
   it("明天才到期的不进队列；归档的不进", () => {
     const items = [concept(0, 999), concept(1, 999)];
     const states = new Map([
