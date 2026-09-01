@@ -177,13 +177,20 @@ interface Word {
   教材页?: number | null;
 }
 
+/** 词汇按组分别铺开：本册新词跟教学进度走一学期；小学段（课标二级词，默认"都没掌握"）摊到一年，家长决定 2026-09-01。 */
+export const VOCAB_SPAN_BY_GROUP: Record<string, number> = { 本册新词: DEFAULT_SPAN_DAYS, 小学段: 365 };
+
 function parseVocab(file: PoolFile): Item[] {
   const subject = subjectOf(file.name);
   const words = file.json.词 as Word[];
-  const plan = introPlan(file.json);
+  const filePlan = introPlan(file.json);
+  const groups = new Map<string, Word[]>();
+  for (const w of words) groups.set(w.组, [...(groups.get(w.组) ?? []), w]);
   const items: Item[] = [];
-  words.forEach((w, i) => {
-    const introDay = introDayOf(plan, i, words.length);
+  for (const [group, ws] of groups) {
+    const plan = { start: filePlan.start, span: VOCAB_SPAN_BY_GROUP[group] ?? filePlan.span };
+    ws.forEach((w, i) => {
+      const introDay = introDayOf(plan, i, ws.length);
     const meta = { 词: w.词, 释义: w.释义, 音标: w.音标, 组: w.组, 课标重点: w.课标重点 ?? false, 单元: w.单元 };
     const common = {
       subject,
@@ -206,6 +213,7 @@ function parseVocab(file: PoolFile): Item[] {
         parentId: `vocab:${w.词}`,
       });
     }
-  });
+    });
+  }
   return items;
 }

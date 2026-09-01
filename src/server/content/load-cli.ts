@@ -3,7 +3,7 @@
  *   npm run load            全部入库（核不上的跳过并列出）
  *   npm run verify          只核对不写库（= --dry-run）
  *   npm run load -- 生物-七上第一单元 地理-七上第三章
- *   --vocab 本册新词|小学段|all（默认 本册新词）  --no-listen
+ *   --vocab 本册新词|小学段|all（默认 all）  --no-listen
  */
 import { applyFilter, collect, filterFromArgs, positional, printReport } from "./pipeline.ts";
 import { openDb } from "../db/open.ts";

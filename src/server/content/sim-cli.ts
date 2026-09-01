@@ -1,5 +1,5 @@
 /**
- * 负荷模拟：npm run sim [-- 池文件名…] [--days 150] [--seed 1] [--vocab 本册新词|小学段|all] [--no-listen]
+ * 负荷模拟：npm run sim [-- 池文件名…] [--days 150] [--seed 1] [--vocab 本册新词|小学段|all，默认 all] [--no-listen]
  * 只算核对通过、且在装载范围内的条目（和 npm run load 装进去的一致）。
  */
 import { applyFilter, collect, filterFromArgs, positional, printReport } from "./pipeline.ts";

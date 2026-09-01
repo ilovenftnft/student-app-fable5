@@ -88,6 +88,21 @@ describe("词汇池", () => {
   });
 });
 
+describe("词汇引入计划", () => {
+  it("本册新词铺 150 天，小学段铺 365 天，各自独立计数", () => {
+    const words = [
+      ...Array.from({ length: 10 }, (_, i) => ({ 词: `n${i}`, 释义: "x", 组: "本册新词", 课标重点: true, 教材页: 122 })),
+      ...Array.from({ length: 10 }, (_, i) => ({ 词: `p${i}`, 释义: "x", 组: "小学段", 课标重点: false, 教材页: 130 })),
+    ];
+    const items = parsePool({ name: "英语-七上-词汇", json: { 词: words } });
+    const day = (id: string) => items.find((i) => i.id === id)!.introDay;
+    expect(day("vocab:n0")).toBe(0);
+    expect(day("vocab:n9")).toBe(135);
+    expect(day("vocab:p0")).toBe(0);
+    expect(day("vocab:p9")).toBe(328);
+  });
+});
+
 describe("文件分类", () => {
   it("草稿与附属文件不产出条目", () => {
     expect(parsePool({ name: "草稿-语文七上文言注释", json: {} })).toEqual([]);
@@ -108,8 +123,11 @@ describe("装载范围", () => {
     ] },
     audioWords: new Set(["smart", "ability"]),
   });
-  it("默认只装本册新词，含其听写卡", () => {
-    expect(applyFilter(vocab).map((i) => i.id)).toEqual(["vocab:ability", "listen:ability"]);
+  it("默认全装", () => {
+    expect(applyFilter(vocab).map((i) => i.id)).toEqual(["vocab:ability", "listen:ability", "vocab:smart", "listen:smart"]);
+  });
+  it("--vocab 本册新词 只装本册新词及其听写卡", () => {
+    expect(applyFilter(vocab, filterFromArgs(["--vocab", "本册新词"])).map((i) => i.id)).toEqual(["vocab:ability", "listen:ability"]);
   });
   it("--vocab all --no-listen", () => {
     const f = filterFromArgs(["--vocab", "all", "--no-listen"]);

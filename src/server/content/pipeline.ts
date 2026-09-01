@@ -45,13 +45,13 @@ export function printReport(files: FileReport[], verbose = true): void {
   console.log(`合计：通过 ${ok}，例外 ${ex}，核不上（不入库）${miss}`);
 }
 
-/** 装载范围（硬约束 8"只装一部分"的落点）。默认：英语词汇只装本册新词，听写卡开。 */
+/** 装载范围（硬约束 8"只装一部分"的落点）。默认全装：小学段词已按 365 天铺开（pools.ts VOCAB_SPAN_BY_GROUP）。 */
 export interface LoadFilter {
   /** 词汇组：本册新词 | 小学段 | all */
   vocab: string;
   listen: boolean;
 }
-export const DEFAULT_FILTER: LoadFilter = { vocab: "本册新词", listen: true };
+export const DEFAULT_FILTER: LoadFilter = { vocab: "all", listen: true };
 
 export function applyFilter(items: Item[], f: LoadFilter = DEFAULT_FILTER): Item[] {
   return items.filter((i) => {
