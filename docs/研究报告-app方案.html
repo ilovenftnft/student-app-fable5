@@ -1,0 +1,190 @@
+<title>初一学习 App 方案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+:root {
+  --bg: #F6F7F5; --surface: #FFFFFF; --ink: #1B2028; --muted: #5C6570;
+  --accent: #3A55B4; --accent-ink: #FFFFFF; --rule: #E1E4DE; --rule-strong: #C9CEC6;
+  --summary-bg: #EEF1FA; --code-bg: #EEF0EC; --ok: #2E7D5B; --warn: #A66A1B;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171B; --surface: #1B1F25; --ink: #E7E9EC; --muted: #9AA3AE;
+    --accent: #8FA3F0; --accent-ink: #0F1320; --rule: #2A3038; --rule-strong: #3A424C;
+    --summary-bg: #1E2536; --code-bg: #232830; --ok: #6CC4A1; --warn: #E0A85A;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171B; --surface: #1B1F25; --ink: #E7E9EC; --muted: #9AA3AE;
+  --accent: #8FA3F0; --accent-ink: #0F1320; --rule: #2A3038; --rule-strong: #3A424C;
+  --summary-bg: #1E2536; --code-bg: #232830; --ok: #6CC4A1; --warn: #E0A85A;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Noto Sans SC", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 16px; line-height: 1.75; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; outline: none; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.shell { display: grid; grid-template-columns: 1fr; gap: 0; max-width: 1080px; margin: 0 auto; padding: 0 20px 96px; }
+@media (min-width: 1000px) { .shell { grid-template-columns: 232px minmax(0, 720px); gap: 48px; } }
+header.masthead { grid-column: 1 / -1; padding: 56px 0 24px; border-bottom: 1px solid var(--rule-strong); margin-bottom: 40px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+h1 {
+  font-family: "Noto Serif SC", "Songti SC", "STSong", serif; font-weight: 700;
+  font-size: clamp(30px, 4vw, 42px); line-height: 1.2; margin: 10px 0 12px; text-wrap: balance; letter-spacing: 0.01em;
+}
+.meta { color: var(--muted); font-size: 14px; max-width: 720px; }
+nav.toc { display: none; }
+@media (min-width: 1000px) {
+  nav.toc { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 24px; align-self: start; font-size: 13.5px; }
+  nav.toc .label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  nav.toc a { color: var(--muted); padding: 4px 0 4px 10px; border-left: 2px solid transparent; line-height: 1.4; }
+  nav.toc a:hover { color: var(--ink); text-decoration: none; }
+  nav.toc a.active { color: var(--ink); border-left-color: var(--accent); }
+}
+main { min-width: 0; }
+h2 {
+  font-family: "Noto Serif SC", "Songti SC", serif; font-weight: 700; font-size: 24px; line-height: 1.3;
+  margin: 56px 0 16px; padding-top: 16px; border-top: 1px solid var(--rule-strong); text-wrap: balance;
+}
+h3 { font-size: 17px; font-weight: 700; margin: 32px 0 10px; }
+p { margin: 0 0 14px; max-width: 68ch; }
+strong { font-weight: 700; }
+blockquote { margin: 0 0 20px; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--surface); color: var(--muted); font-size: 14px; }
+blockquote p { margin: 0; max-width: none; }
+code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+ul, ol { margin: 0 0 16px; padding-left: 1.4em; max-width: 70ch; }
+li { margin: 4px 0; }
+li::marker { color: var(--muted); }
+.summary { background: var(--summary-bg); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 28px 20px; margin-bottom: 8px; }
+.summary h2 { border-top: 0; margin-top: 16px; padding-top: 0; }
+.summary p, .summary ol { max-width: none; }
+.table-wrap { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+th { font-weight: 700; font-size: 12.5px; letter-spacing: 0.04em; color: var(--muted); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 500; }
+footer { grid-column: 1 / -1; margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--rule-strong); color: var(--muted); font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+<div class="shell">
+  <header class="masthead">
+    <div class="eyebrow">研究报告 · 2026-09-01</div>
+    <h1>初一学习 App 方案</h1>
+    <div class="meta">给一位厦门家长：孩子今天开学上初一，目标是三年后中考效率优先、每天有时间做自己喜欢的事。所有建议标注依据；"判断"为经验推断，"待核实"为未找到官方来源。</div>
+  </header>
+  <nav class="toc" aria-label="目录"><div class="label">目录</div>
+<a class="toc-2" href="#一页结论">一页结论</a>
+<a class="toc-2" href="#一-时间放在刀刃上-数据说了什么">一、时间放在刀刃上：数据说了什么</a>
+<a class="toc-2" href="#二-学习方法-证据落到-30-分钟">二、学习方法：证据落到 30 分钟</a>
+<a class="toc-2" href="#三-习惯与家长边界">三、习惯与家长边界</a>
+<a class="toc-2" href="#四-产品设计">四、产品设计</a>
+<a class="toc-2" href="#五-功能优先级">五、功能优先级</a>
+<a class="toc-2" href="#六-技术与引擎">六、技术与引擎</a>
+<a class="toc-2" href="#七-工期-两周">七、工期（两周）</a>
+<a class="toc-2" href="#八-不做-app-行不行">八、不做 app 行不行？</a>
+<a class="toc-2" href="#九-待核实清单">九、待核实清单</a>
+<a class="toc-2" href="#十-需要你提供的三样东西">十、需要你提供的三样东西</a>
+<a class="toc-2" href="#十一-Codex-审阅结果与裁决">十一、Codex 审阅结果与裁决</a>
+<a class="toc-2" href="#十二-增补-家长此前整理的资料">十二、增补：家长此前整理的资料</a>
+  </nav>
+  <main>
+<blockquote><p>研究报告 · 2026-09-01 · 依据：5 份联网研究（<code>docs/research/01–05</code>）、4 年福建中考真题逐题统计（<code>docs/data/</code>）、双引擎识题实测（<code>docs/experiments/</code>）。所有建议标注来源；"判断"= 基于经验的推断，"待核实"= 未找到官方来源。</p></blockquote>
+<section class="summary"><h2 id="一页结论">一页结论</h2>
+<p><strong>做什么</strong>：在孩子的 Mac 上跑一个本地 Web app，每个工作日放学后 30 分钟完成一个固定闭环——勾选今天学到哪 → 做到期的复习卡 → 从当天已写完的作业里挑 3–5 题，遮住答案闭卷重做一遍（检索练习，不是新题）→ 三个点选式复盘问题 → 结束。错题与卡片来自家长每周 AirDrop 的作业/考卷照片：印刷体试卷的识题已实测可行，真实手写作业的自动成卡要等 20 张照片的评测集验证通过；在此之前家长需逐条确认，验证后才降为"只校对分歧项"。家长每周看一页周报：完成天数、掌握了多少张卡、一件可改进的事、一句可以对孩子说的话。</p>
+<p><strong>不做什么</strong>：不做题库刷题，不做积分徽章排行榜，不给孩子开放式问 AI 要答案，不显示逐题错误和每日时长给家长，不补课、不系统超前学（这是家长在多数家庭都在恶补的环境里做出的主动选择，报告 1.5 直说它的代价与对冲），不接付费 API。</p>
+<p><strong>为什么</strong>：</p>
+<ol><li>核心问题是习惯没建立，而习惯靠的是"固定触发 + 极小动作 + 即时反馈 + 低摩擦"，不是内容多（研究 02，习惯中位数 66 天，等级 B）。</li><li>学习科学里效应量最大且对中学生成立的是<strong>检索练习</strong>（g=0.50–0.83，等级 A）和<strong>间隔</strong>，"看讲解"和"重读"是低效的（研究 02）。</li><li>家长<strong>监控型</strong>介入对成绩是负或零效应，自主支持型为正（多项 meta，等级 A）——所以周报只给建议，不给监控数据（研究 02）。</li><li>厦门中考按 800 分投档：语数英 450 分全额计入（56%），地理生物折算后只各 30 分。初一的刀刃是语数英的<strong>能力与习惯</strong>，不是考点（研究 03 + 真题统计）。</li><li>用孩子电脑上已登录的 Codex CLI 做后台分析，零 API 费用，实测印刷体试卷单页识题 39 秒、与 Claude Code 结果一致（实验 2026-09-01）；手写作业与额度容量待实测。</li></ol>
+</section><h2 id="一-时间放在刀刃上-数据说了什么">一、时间放在刀刃上：数据说了什么</h2>
+<h3 id="1-1-厦门中考的真实权重-投档-800-分制">1.1 厦门中考的真实权重（投档 800 分制）</h3>
+<div class="table-wrap"><table><thead><tr><th>科目</th><th>卷面</th><th>折算</th><th>占 800</th><th>考试时间</th></tr></thead><tbody><tr><td>语文 / 数学 / 英语</td><td>150</td><td>×100% = 150</td><td>各 18.75%，合计 <strong>56.3%</strong></td><td>2029-06</td></tr><tr><td>物理</td><td>100</td><td>×90% = 90</td><td>11.3%</td><td>2029-06</td></tr><tr><td>化学</td><td>100</td><td>×60% = 60</td><td>7.5%</td><td>2029-06</td></tr><tr><td>道法 / 历史</td><td>100</td><td>×50% = 50</td><td>各 6.3%</td><td>2029-06</td></tr><tr><td>地理 / 生物</td><td>100</td><td>×30% = 30</td><td>各 3.75%，合计 <strong>7.5%</strong></td><td><strong>2028-06（八下）</strong></td></tr><tr><td>体育</td><td>—</td><td>40</td><td>5%</td><td>2029 春</td></tr></tbody></table></div>
+<p>来源：厦门市教育局方案（研究 03，已定；化学卷面 100、×60% 一行按 Codex 审阅时联网核对的 <a href="https://edu.xm.gov.cn/xxgk/zfxxgk/zfxxgkml/zcjd/bmzcwjjd/202403/t20240301_2826464.htm" target="_blank" rel="noopener">市教育局 2024 政策解读</a> 修正）。目标线：一中/双十 755（94.4%），定向生约 730；定向生占重点校 70% 计划、按片区校内竞争，<strong>校内位次比分数更重要</strong>（研究 03）。</p>
+<h3 id="1-2-七年级内容在中考-会考卷面中的占比-4-年真题逐题统计">1.2 七年级内容在中考/会考卷面中的占比（4 年真题逐题统计）</h3>
+<div class="table-wrap"><table><thead><tr><th>科目</th><th>七上</th><th>七年级合计</th><th>折算到 800 分后的七年级价值</th></tr></thead><tbody><tr><td>语文</td><td>1.0%</td><td>1.3%</td><td>≈ 2 分（仅默写）</td></tr><tr><td>英语</td><td>6.5%</td><td>11.3%</td><td>≈ 17 分（介词、看图写话等）</td></tr><tr><td>数学</td><td>10.0%</td><td>21.3%</td><td>≈ 32 分（科学记数法、有理数、整式、一元一次方程）</td></tr><tr><td>历史</td><td>12.0%</td><td>25.0%</td><td>≈ 12.5 分</td></tr><tr><td>道法</td><td>11.0%</td><td>14.5%</td><td>≈ 7 分</td></tr><tr><td>地理</td><td>26.8%</td><td>45.0%</td><td>≈ 13.5 分（2028-06 锁定）</td></tr><tr><td>生物</td><td>38.2%</td><td>60.5%</td><td>≈ 18 分（2028-06 锁定）</td></tr></tbody></table></div>
+<p>来源：<code>docs/data/exam_summary.md</code>，1155 题明细，每年每科分值合计与满分核对一致。<strong>精度说明</strong>：年级归属和非选择题的主考点为粗算（跨章节题取主背景）；数学 23 道解答题的小问分值、1 道题干缺失题和 1 道物理作图题待核对。敏感性：数学七上 10.0% 中含 2025 年第 24 题（12 分阅读题，归入科学记数法属判断），不计则为 8.0%。</p>
+<p><strong>读法</strong>：七年级课本知识直接对应的中考分值总共约 100 分（12.5%），其中数学最多。语数英三科 450 分里，绝大多数考的是八九年级内容和<strong>积累型能力</strong>（阅读、写作、听力、计算准确率）。所以初一这一年，语数英要练的是能力和习惯，地理生物要做的是"零成本保底"——用间隔记忆把课本清单存住，不做题不加时（研究 01）。</p>
+<h3 id="1-3-中考出题极稳定">1.3 中考出题极稳定</h3>
+<p>数学、英语、物理、历史、地理的题型分值结构<strong>四年一分不差</strong>；数学高频考点是圆（年均 16 分）、二次函数（14）、全等三角形（11.5）、数据分析（10）；英语 81.7% 是听读写能力型分值，单个语法点年均不到 2 分；语文写作 60 分占 40%。2024 起数学连续三年有代数推理型阅读题（<code>docs/data/exam_summary.md</code>）。</p>
+<h3 id="1-4-值得投入-不值得投入-七年级">1.4 值得投入 / 不值得投入（七年级）</h3>
+<div class="table-wrap"><table><thead><tr><th>值得投入（每日/每周固定）</th><th>依据</th><th>不值得投入</th><th>依据</th></tr></thead><tbody><tr><td>数学计算准确率：每日 5–10 题限时，按准确率晋级</td><td>初一丢分主因是计算（研究 01，教辅经验）；数学七年级占 21%</td><td>数学压轴题、竞赛题</td><td>初一考"细心"不考难题（研究 01，名师经验）</td></tr><tr><td>英语词汇间隔复习 10–15 词/日（三年覆盖课标 1600 词）+ 碎片时间听力</td><td>听读写占 82% 分值（统计）；间隔+检索 等级 A（研究 02）</td><td>英语语法专项刷题</td><td>单个语法点年均 &lt;2 分（统计）</td></tr><tr><td>错题只收三类：知识盲区、思路偏差、高频易错；跨 3 次间隔各答对 1 次才归档</td><td>研究 01（社区共识）+ 研究 02 第 3 条（等级 B）</td><td>逢错必抄的手抄错题本；抄正确解法</td><td>抄解法 ≈ 重读，低效（研究 02）</td></tr><tr><td>语文：默写进间隔复习 + 每周 1 条作文素材</td><td>语文七年级仅默写有分（统计）；写作 40%</td><td>语文阅读答题模板</td><td>延后到初二（研究 01）</td></tr><tr><td>历史知识清单进记忆库</td><td>七年级占 25%（统计）</td><td>道法深度刷题</td><td>折算仅 50 分，九年级冲刺即可（研究 03）</td></tr><tr><td>地理/生物课本清单进记忆库，每周 ≤10 分钟</td><td>2028-06 会考 + 等级门槛（研究 03）</td><td>地理/生物做题、买教辅</td><td>折算各 30 分（研究 03）</td></tr><tr><td>长跑、游泳（低频长期）</td><td>体育 40 分，1000 米 + 200 米游泳必考（研究 03，已定）</td><td>—</td><td>—</td></tr><tr><td>周日 30 分钟：只重做本周错题 + 记忆库抽查</td><td>研究 01</td><td>补习班、系统性超前学</td><td>家长的主动选择（见 1.5）；不是因为政策——政策之外，多数家庭仍在恶补与超前学</td></tr></tbody></table></div>
+<h3 id="1-5-不补课-不超前学的真实处境-必须直说">1.5 不补课、不超前学的真实处境（必须直说）</h3>
+<p><strong>环境现实</strong>：双减是纸面约束。厦门初中的实际情况是多数家庭在课外恶补，不少孩子小学阶段就学完了初一甚至初二的内容。本方案不补课、不系统超前，是家长的<strong>主动选择</strong>——目的是让孩子有时间做自己的事——而不是环境允许的默认选项。所以报告不能假装竞争不存在，要回答：<strong>不堆时间，会在哪里吃亏，怎么对冲</strong>。</p>
+<div class="table-wrap"><table><thead><tr><th>别人靠堆时间拿到的</th><th>不堆时间会不会吃亏</th><th>对冲方式（app 承担的部分）</th></tr></thead><tbody><tr><td><strong>初一开学时的领先</strong>：超前学过的孩子七上前几个月轻松</td><td>会——但这是暂时的。七年级内容在中考只占约 100/800 分（1.2 表），且初一考的是细心不是难题（研究 01）。真正的分水岭在初二（研究 01）</td><td>不追这个领先；把初一用来建立习惯和计算准确率，这两样超前学换不来</td></tr><tr><td><strong>初二数学难度跃升前的缓冲</strong>：提前学过的孩子初二不"蒙"</td><td>会——这是不超前学最大的真实风险（研究 01，名师经验，流传广）</td><td>初一下学期起对数学做<strong>轻量预习</strong>：每个新章节开学前一周，用"先尝试再讲解"（研究 02，中学正向 d=0.36）看 15 分钟教材例题；不是系统超前，是让第一次上课时不陌生</td></tr><tr><td><strong>题量带来的熟练度</strong>：刷得多，见过的题型多</td><td>部分会——但研究显示交错练习、检索练习的单位时间收益远高于题海（研究 02，等级 A）；题海的边际收益低而时间成本高</td><td>用当天作业的闭卷重做 + 错题变式 + 混排题型换熟练度；周五累积小测换"见过题型"</td></tr><tr><td><strong>英语语感与词汇量</strong>：补习班和外教课堆出来的</td><td>会——英语是三科里最靠积累的，听读写占 82% 分值</td><td>这不是 30 分钟能补的，要靠<strong>碎片时间</strong>：每天 10–15 词间隔复习 + 通勤/饭后 20 分钟听力素材（免费资源：教材配套音频、BBC Learning English）。这是本方案里最需要家长在 app 之外配合的一项</td></tr><tr><td><strong>语文作文</strong>：作文班教套路和素材</td><td>部分会——写作 60 分占 40%，但套路可以延后到初二</td><td>每周 1 条素材卡 + 期中期末各写 2 篇由 Codex 按中考评分标准给结构反馈（作答后讲解的一种）</td></tr><tr><td><strong>家长的安全感</strong></td><td>会——不补课的家长会在每次月考后动摇</td><td>周报要给家长看的不是"没吃亏"的保证，而是<strong>趋势</strong>：错题归档率、计算准确率、记忆库掌握数在涨。第一次月考成绩不理想时，先看这些指标再决定</td></tr></tbody></table></div>
+<p><strong>诚实的结论</strong>：证据支持"效率高的方法单位时间收益远高于题海"（等级 A），但<strong>没有证据说"每天 30 分钟高效学习 = 每天 2 小时补习"</strong>。本方案的赌注是：习惯 + 检索 + 间隔 + 把时间花在权重高的科目上，能在三年里追平并超过靠堆时间的孩子——因为堆时间的孩子到初二、初三普遍疲劳而效率下降（研究 01："80% 学生到初三才着急"）。这个赌注需要用数据验证：<strong>每次期中期末后对比校内位次的变化</strong>，位次是唯一能回答"有没有吃亏"的指标（第五节 MVP 第 6 项）。如果两个学期后位次明显下滑，要重新评估，包括有针对性地补某一科——这不违背初衷，初衷是不把时间全交出去，不是绝对不补。</p>
+<h2 id="二-学习方法-证据落到-30-分钟">二、学习方法：证据落到 30 分钟</h2>
+<h3 id="2-1-有证据的方法与设计决定-摘自研究-02">2.1 有证据的方法与设计决定（摘自研究 02）</h3>
+<div class="table-wrap"><table><thead><tr><th>方法</th><th>效应量 / 对象</th><th>等级</th><th>设计决定</th></tr></thead><tbody><tr><td>检索练习</td><td>中学生 g=0.83（Agarwal 2021）；课堂 g=0.50（Yang 2021）</td><td>A</td><td>30 分钟里"做题→即时反馈"≥15 分钟；不提供"看笔记"模式</td></tr><tr><td>间隔重复</td><td>Cepeda 2006（317 项）</td><td>A</td><td>卡片用 FSRS（ts-fsrs 5.4.1），目标记忆率 0.85–0.9，每日复习硬上限 10 分钟</td></tr><tr><td>交错练习</td><td>七年级 RCT d=0.83（Rohrer 2020）；词语材料为负</td><td>A（数学）</td><td>数学题默认混排前几周题型；单词、默写不交错；<strong>不让孩子选模式</strong></td></tr><tr><td>自我解释</td><td>g=0.55（Bisra 2018）</td><td>A</td><td>只在答错后触发，菜单式点选"哪一步错了"，≤1 分钟</td></tr><tr><td>即时反馈</td><td>d=0.48；含自我调节信息的反馈 d=0.99（Wisniewski 2020）</td><td>A</td><td>每题即时反馈，附"错在哪一步"</td></tr><tr><td>先尝试再讲解</td><td>中学正向 d=0.36（Sinha &amp; Kapur 2021）</td><td>B</td><td>仅用于新概念首次接触：3 分钟先试再看讲解</td></tr><tr><td>错题"毕业"</td><td>3 次分散重学一周保持 80% vs 单次 20%（Rawson &amp; Dunlosky）</td><td>B</td><td>跨 3 次间隔会话各答对 1 次才归档</td></tr></tbody></table></div>
+<p>低效但流行：重读、划线、大量抄写、集中突击（Dunlosky 2013）。注意：中国的<strong>默写/听写本身就是检索练习</strong>，保留。</p>
+<h3 id="2-2-30-分钟模板-分钟级">2.2 30 分钟模板（分钟级）</h3>
+<div class="table-wrap"><table><thead><tr><th>时间</th><th>内容</th><th>依据</th></tr></thead><tbody><tr><td>0–2</td><td>开屏显示孩子自己写的 if-then 语句 + 今日 3 项；直接开始，无选择</td><td>实施意图 g=0.31（青少年 meta）</td></tr><tr><td>2–12</td><td>FSRS 到期复习（错题重做、默写卡），即时反馈；上限 10 分钟</td><td>检索 + 间隔</td></tr><tr><td>12–24</td><td>当日作业转化：从今天已写完的作业里挑 3–5 题（优先没把握的、老师打 ✗ 的），遮住答案闭卷重做，做完对照并点选结果（对 / 错 / 猜对）；答错→菜单式自我解释；错的和猜对的进卡库。MVP 阶段由孩子自己挑，照片流水线上线后由 app 挑并混排题型</td><td>检索练习（重做 ≠ 重看）、交错、自我解释；材料来自当天作业，不新增题源</td></tr><tr><td>24–27</td><td>新概念（若有）：3 分钟先试再看讲解</td><td>生产性失败</td></tr><tr><td>27–30</td><td>三问复盘（点选）：今天最卡的一点？做对的题里哪道是猜的？明天第一题做什么？</td><td>计划-监控-评估</td></tr><tr><td>30–60（可选）</td><td>只允许到期卡溢出或周五累积小测；不新增内容；<strong>超过 30 分钟时在第 25 分钟处插入 3 分钟休息</strong></td><td>双减 ≤90 分钟作业 + 60 分钟硬上限；系统休息降低疲劳（Biwer 2023，B）</td></tr></tbody></table></div>
+<p>冷启动：头两周没有错题数据是正常的，闭环退化为"勾选章节 + 三问 + 计时"，≈5 分钟也算完成一天。</p>
+<h2 id="三-习惯与家长边界">三、习惯与家长边界</h2>
+<div class="table-wrap"><table><thead><tr><th>结论</th><th>证据</th><th>设计决定</th></tr></thead><tbody><tr><td>家长监控型介入负/零效应，自主支持型为正</td><td>作业介入 meta 2024；SDT meta k=238（研究 02，A）</td><td><strong>设计假设</strong>（证据支持"避免侵入式监督"，不直接规定数据粒度）：周报默认只给聚合信息，不显示逐题错误、每日时长、时间戳；孩子确认后可向家长展示更细数据；文案明确不用于奖惩；试用期观察家长是否做到自主支持</td></tr><tr><td>周报要有"可改进的一件事"，改进型信息效果远大于表扬型</td><td>Kraft &amp; Rogers 2015 RCT（B）</td><td>周报固定四项：完成天数 / 掌握卡片数 / 本周最薄弱的一个知识点 / 一句建议的家长行为（如"问他这道题怎么想的"）</td></tr><tr><td>断掉的 streak 反噬后续行为；可修复则减弱</td><td>Silverman &amp; Barasch 2023（成人，B）</td><td>显示"本周 3/5"，永不显示"0 天"；每周自动 1 次补做</td></tr><tr><td>习惯建立中位 66 天</td><td>Lally 2010；Singh 2024 meta（B）</td><td>新手期按 12 周设计；漏一天不重置</td></tr><tr><td>触发绑定日常事件优于时刻</td><td>Keller 2021 RCT（B）</td><td>提醒绑定"到家"事件，不绑定 17:30</td></tr><tr><td>厦门初中晚自习 ≤20:40，睡眠 9 小时红线</td><td>官方（研究 03）</td><td>家庭学习窗口约 21:00–22:00；60 分钟硬停</td></tr></tbody></table></div>
+<p><strong>开放通道问题</strong>（必须直说）：孩子电脑上有 Codex 且已登录 ChatGPT，他本来就能在终端绕过 app 直接问 AI。app 内的"先作答再讲解"门控管不到终端。三个选项由家长决定：(a) 接受现状，靠约定 + 周报可见性；(b) 把 <code>codex</code> 限制为只由 app 的 launchd 会话调用、终端不给孩子权限（部分缓解）；(c) 引擎放到家长控制的机器上（每周批处理时才需要）。研究 02 的证据倾向 (a)+(b)：控制越强，内在动机越低。</p>
+<h2 id="四-产品设计">四、产品设计</h2>
+<h3 id="4-1-每日闭环-一屏一事">4.1 每日闭环（一屏一事）</h3>
+<p>勾选今天学到的章节（教材目录预装）→ 到期卡片 → 作业转化练习 → 三问 → 今日结束页（今天 N 题，M 张卡明天到期；本周 x/5）。每步一个主按钮，无侧栏、无通知、无推荐。</p>
+<h3 id="4-2-界面原则-研究-05-10-条规范已写好可交给前端">4.2 界面原则（研究 05，10 条规范已写好可交给前端）</h3>
+<p>不做积分/徽章/排行榜（徽章与排行榜主要强化外在动机，对内在动机的长期效果不稳定——Hanus &amp; Fox 2015 纵向研究见下降，Sailer &amp; Homner 2020 meta 总体为正但内在动机不一致；本方案选择不采用）；单列 640px、8pt 栅格；PingFang SC + 等宽数字；≤6 个色彩 token、一个强调色；正计时只显示分钟；动效仅淡入与边框变色；反馈文案一句话无感叹号无表情；深浅主题跟随系统。验收：孩子用 5 分钟后，"这是给谁用的"答案不能是"小孩"，"有没有分神"要指不出东西。</p>
+<h3 id="4-3-LLM-的边界与门控">4.3 LLM 的边界与门控</h3>
+<ul><li><strong>后台分析师</strong>：识题、找老师的红笔批改标记、打知识点标签、按薄弱点从卡库挑题或生成变式、生成周报。孩子看到的是结果，不能直接问它。</li><li><strong>作答后讲解</strong>：孩子必须先写下答案或关键步骤，讲解才解锁；每日讲解次数上限（建议 5 次），用完转入"明天再看"。</li><li><strong>可靠性兜底</strong>：识题结果进"待确认"队列，家长每周校对；周报标注置信度；手写作答识别只作参考，错题以老师的 ✗ 为准（手写转录是 VLM 主要错误来源，87% 的批改错误来自转录，研究 04）；几何题保留原图不文字化。</li></ul>
+<h3 id="4-4-内容流水线与双模型校对">4.4 内容流水线与双模型校对</h3>
+<p>照片（家长 AirDrop → <code>~/StudyInbox/</code>）→ 透视校正裁剪 → Codex 识题（<code>--output-schema</code>）→ 知识点归一化（对照教材章节表）→ 待确认队列 → 家长确认 → 卡片。</p>
+<p>开发期与内容生产期用双模型校对（借鉴 xiaolai/cc-suite 机制，不装插件）：Claude 产出、Codex 独立复核；一致通过、分歧才给家长。<strong>目前的实证只有一页印刷体中考选择题（6 题在题号/分值/难度/册章上 100% 一致，知识点措辞需归一化表）</strong>，没有覆盖手写作答、老师红笔批改、几何大题、低光斜拍——而研究 04 指出手写转录正是主要错误来源。所以"自动成卡、家长只校对分歧"是<strong>待验证的目标</strong>，不是已证实的能力：在 ≥20 张真实作业/考卷的 golden 评测集通过之前，流水线以"家长逐条确认"模式运行。要补的洞：审阅门加轮数上限。</p>
+<p>家长投入（<strong>判断，待第一周实测</strong>，非测量值）：初始标注约 50 道题（估 2–3 小时）；每周确认/校对（估 30 分钟）；每周拍考卷（估 10 分钟）。第一周实验要记录真实的拍照、确认、改错、成卡耗时。</p>
+<h2 id="五-功能优先级">五、功能优先级</h2>
+<h3 id="MVP-两周-6-项-每日路径不依赖照片或-LLM">MVP（两周，≤6 项，每日路径不依赖照片或 LLM）</h3>
+<ol><li>每日闭环页：章节勾选 → 到期卡 → 三问（点选）→ 结束页；正计时；60 分钟硬停</li><li>教材章节目录预装（七上七科，从 PDF 目录页手工整理）+ 记忆库条目（先只做地理/生物/历史的章节级清单）</li><li>复习卡片 + FSRS 调度（第一周允许家长手工建卡）</li><li>收件箱：文件夹监听 → Codex 识题 → 待确认队列 → 确认后成卡</li><li>家长周报页：完成天数 / 掌握卡片 / 最薄弱知识点 / 一句建议</li><li>成绩与位次录入（每次考试的分数、班级/年级排名）——定向生规则决定校内位次是核心指标</li></ol>
+<h3 id="第一学期">第一学期</h3>
+<p>作答后讲解（门控 + 每日上限）；数学交错混排；老师批改标记识别；周五累积小测；if-then 提示 12 周淡出；三问第 9 周起改每周；golden 评测集与双模型比对上线。</p>
+<h3 id="三年里程碑">三年里程碑</h3>
+<p>2028-06 地理生物会考（会考前 8 周记忆库自动切为主训练）→ 2029 春体育 40 分 → 2029-06-21 至 23 主考七科。分值表做成可配置，2027 年初复查省教育厅公告（2029 届方案无官方变更发布，研究 03）。</p>
+<h2 id="六-技术与引擎">六、技术与引擎</h2>
+<div class="table-wrap"><table><thead><tr><th>层</th><th>选择</th><th>理由（研究 04）</th></tr></thead><tbody><tr><td>运行时 / 后端</td><td>Node 22 + Hono + better-sqlite3，单进程</td><td>同步 API 让 TDD 极简；一个进程同时服务 API 与前端</td></tr><tr><td>前端</td><td>Vite + React + TS + Tailwind + shadcn/ui</td><td>两周内做出 Things/Linear 质感最快；Radix 保证可达性</td></tr><tr><td>间隔复习</td><td>ts-fsrs 5.4.x（FSRS-6，零依赖；npm 当前 5.4.2，用 lockfile 固定）</td><td>几百张卡 FSRS vs SM-2 差别小，但零成本且可后期优化；少量卡片冷启动期用默认参数</td></tr><tr><td>引擎</td><td><code>codex exec -i &lt;img&gt; --sandbox read-only --json --output-schema … -o …</code>，stdin 接 /dev/null，硬 deadline；<code>engine/claude.ts</code> 同接口可插拔</td><td>本机实测 39 秒成功；cc-suite 骨架</td></tr><tr><td>监听 / 常驻</td><td>chokidar + launchd LaunchAgent</td><td>AirDrop 落盘即入库；开机自启</td></tr><tr><td>测试</td><td>Vitest + Playwright（两条端到端）</td><td>TDD；LLM 层用 golden 样本</td></tr></tbody></table></div>
+<p><strong>Codex 额度</strong>：OpenAI 官方确认 Codex 用量受账户的 5 小时窗口与周额度限制，部分 Plus/Pro 用户触顶后需等待重置或购买 credits（<a href="https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan/" target="_blank" rel="noopener">Using Codex with your ChatGPT plan</a>、<a href="https://help.openai.com/en/articles/20001507-paid-weekly-work-and-codex-rate-limit-resets" target="_blank" rel="noopener">rate limit resets</a>）；"2026-08-25 恢复 5 小时窗口"来自报道（研究 04）。具体数字不公开，所以<strong>必须做容量预算并压力测试一周</strong>后，才能承诺"不接付费 API"可持续。</p>
+<p>容量预算（判断，按每周 20 张照片、每张 6 题估）：</p>
+<div class="table-wrap"><table><thead><tr><th>任务</th><th>每周调用次数</th><th>推理档位</th><th>估计耗时</th></tr></thead><tbody><tr><td>识题 + 找批改标记</td><td>20 次（每张 1 次）</td><td>low</td><td>20 × 40 s ≈ 13 分钟</td></tr><tr><td>变式题生成</td><td>≤ 20 次（仅对确认的错题）</td><td>medium</td><td>≈ 15 分钟</td></tr><tr><td>作答后讲解</td><td>≤ 25 次（每日上限 5）</td><td>medium</td><td>分散在工作日</td></tr><tr><td>周报</td><td>1 次</td><td>high</td><td>≈ 2 分钟</td></tr></tbody></table></div>
+<p>合计每周 ≤ 66 次调用，集中在周日批处理 + 工作日零星讲解。设计：触顶进队列自动重试；批处理避开孩子晚上使用时段；若一周压力测试显示 Plus 额度不够，降级顺序为：变式题改为从真题库挑题 → 讲解上限降为 3 → 升级 Pro。</p>
+<p><strong>失败模式与兜底</strong>：额度用尽→排队；登录过期→家长页提示重登；单次调用 10–60 秒→全部异步，孩子端不等待；Codex 不可用→功能降级但每日闭环不受影响。</p>
+<p><strong>隐私</strong>：作业照片经 ChatGPT 账号发往 OpenAI；只上传裁剪后的题目区域，原图只存本地；ChatGPT 账号的训练数据退出设置对 Codex 是否同样生效——<strong>待核实</strong>。</p>
+<h2 id="七-工期-两周">七、工期（两周）</h2>
+<div class="table-wrap"><table><thead><tr><th>周</th><th>交付</th></tr></thead><tbody><tr><td>第 1 周</td><td><code>AGENTS.md</code>（验收标准 + 数据格式）→ 视觉系统 mockup（每日页 / 结束页 / 周报页，按 10 条规范审一遍）→ 骨架（Hono + SQLite）→ 每日闭环页 → 章节目录预装 → 周报页。调度与统计逻辑先写测试</td></tr><tr><td>第 2 周</td><td>收件箱监听 + 照片入库 → Codex 识题（异步、待确认队列）→ 卡片与 FSRS → 成绩录入 → <code>tools/dual_check/</code> 审阅模式接入提交流程</td></tr><tr><td>第 2 周末</td><td>装到孩子 Mac，跑通"孩子每天 30 分钟 + 家长周日 AirDrop + 周报"一整周</td></tr></tbody></table></div>
+<h2 id="八-不做-app-行不行">八、不做 app 行不行？</h2>
+<div class="table-wrap"><table><thead><tr><th>方案</th><th>能做到</th><th>做不到</th></tr></thead><tbody><tr><td>纸质计划本 + Anki</td><td>间隔复习、复盘</td><td>卡片要自己做（最费时的一步）；Anki 对 12 岁孩子界面不友好；没有"今天学了什么→该练什么"的闭环；没有家长周报</td></tr><tr><td>小猿/作业帮</td><td>拍照识题、题库</td><td>核心是给答案，与"先作答"冲突；广告与推荐分散注意力</td></tr><tr><td>本方案</td><td>闭环 + 照片成卡（印刷体已验证，手写待验证）+ 家长边界 + 零成本引擎</td><td>需要两周开发 + 每周约 40 分钟家长投入（判断，待实测）；孩子可能拒绝使用、Codex 额度可能不够——两者都要在第一周实验和压力测试中排除</td></tr></tbody></table></div>
+<p><strong>第一周小实验（不写代码）</strong>：这一周用纸跑闭环——孩子每天放学后 30 分钟：写下今天学到哪一章、从作业里挑 3 题遮住答案重做、回答三问（口头即可）。周末你只问一句"这周哪天最顺"。跑得通，app 值得做；跑不通，问题不在工具。</p>
+<h2 id="九-待核实清单">九、待核实清单</h2>
+<div class="table-wrap"><table><thead><tr><th>项</th><th>状态</th><th>怎么补</th></tr></thead><tbody><tr><td>Codex 非交互模式官方条款原文</td><td>待核实（文档页跳转未抓取）</td><td>读 learn.chatgpt.com/docs/non-interactive-mode</td></tr><tr><td>ChatGPT 训练数据退出是否覆盖 Codex</td><td>待核实</td><td>OpenAI 隐私设置页</td></tr><tr><td>厦门 2025 录取线、普高最低线</td><td>待核实</td><td>厦门网 2025-07 报道</td></tr><tr><td>厦门七年级各科教学进度表</td><td>待核实</td><td>问班主任</td></tr><tr><td>深色模式减少夜间疲劳</td><td>共识，非实证</td><td>不影响设计（跟随系统）</td></tr><tr><td>手写作业识别准确率</td><td>未实测</td><td>需真实作业照片 ≥20 张（这是"自动成卡"能否成立的决定性验证）</td></tr><tr><td>家长每周实际投入时间</td><td>判断，未测量</td><td>第一周实验记录拍照/确认/改错耗时</td></tr><tr><td>Codex Plus 额度是否够每周 ≤66 次调用</td><td>未测试</td><td>真实账户跑一周压力测试</td></tr><tr><td>FSRS 少量卡片冷启动</td><td>已知限制</td><td>前 4 周用默认参数，不做个性化优化</td></tr><tr><td>学习科学证据的中国本土对照实验</td><td>未检索到</td><td>按 B 级证据对待，用 app 自己的数据验证</td></tr></tbody></table></div>
+<h2 id="十-需要你提供的三样东西">十、需要你提供的三样东西</h2>
+<ol><li><strong>孩子的反馈</strong>：先跑一周纸上实验；mockup 出来后让他看 5 分钟。</li><li><strong>20 张真实作业/考卷照片</strong>（含手写作答和老师批改）：用于 golden 评测集与手写识别实测。</li><li><strong>孩子电脑上 Codex 登录的 ChatGPT 账号与档位</strong>（Plus/Pro，谁的账号）：决定额度与隐私设置。</li></ol>
+<h2 id="十一-Codex-审阅结果与裁决">十一、Codex 审阅结果与裁决</h2>
+<p>发布前由 Codex（GPT-5.5，<code>model_reasoning_effort=high</code>，只读沙箱，耗时 239 秒）以对抗式审阅者身份独立复核本报告及全部支撑材料，并自行联网核对了 3 处事实。审阅提示词含"产出者是竞争 AI，不要因此默认正确"的声明。原始 JSON 见 <code>docs/experiments/2026-09-01-report-review/</code>。</p>
+<p><strong>审阅判决：BLOCK</strong>（1 处事实错误 + 1 处核心外推过度）。以下为逐条裁决，修正已全部落实到上文。</p>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>严重度</th><th>维度</th><th>Codex 的发现</th><th>裁决</th><th>处理</th></tr></thead><tbody><tr><td>1</td><td>high</td><td>事实准确性</td><td>化学写成"卷面 75 ×80%"，真题统计与市教育局 2024 解读均为卷面 100 ×60%</td><td><strong>接受</strong></td><td>1.1 表已改，研究 03 同步修正</td></tr><tr><td>2</td><td>high</td><td>逻辑跳跃</td><td>用 6 道印刷体选择题的实测外推到"自动成卡、家长只校对分歧"，未覆盖手写/批改/几何</td><td><strong>接受</strong></td><td>一页结论与 4.4 改为"待 20 张评测集验证，之前逐条确认"</td></tr><tr><td>3</td><td>medium</td><td>过度断言</td><td>1155 题统计未披露粗算与待核对项</td><td><strong>接受</strong></td><td>1.2 补精度说明与敏感性（数学七上 10.0% → 8.0%）</td></tr><tr><td>4</td><td>medium</td><td>逻辑跳跃</td><td>从"监控型介入负效应"推出"不显示时长/逐题"过度</td><td><strong>部分接受</strong></td><td>降为设计假设；默认聚合，孩子确认后可展示细数据。保留默认值，因为对内在动机的风险是不对称的</td></tr><tr><td>5</td><td>medium</td><td>引用可溯源</td><td>家长投入时间无来源</td><td><strong>接受</strong></td><td>标为"判断，待第一周实测"</td></tr><tr><td>6</td><td>medium</td><td>遗漏反证</td><td>未做 Codex 额度容量估算</td><td><strong>接受</strong></td><td>第六节新增容量预算表、官方帮助页链接、降级顺序、一周压力测试</td></tr><tr><td>7</td><td>low</td><td>事实准确性</td><td>ts-fsrs 当前 5.4.2</td><td><strong>接受</strong></td><td>改为 5.4.x + lockfile</td></tr><tr><td>8</td><td>low</td><td>过度断言</td><td>徽章/排行榜"降低内在动机"写得过满</td><td><strong>接受</strong></td><td>4.2 改为"主要强化外在动机、长期效果不稳定"</td></tr><tr><td>9</td><td>low</td><td>内部一致性</td><td>60 分钟版缺 25 分钟处休息</td><td><strong>接受</strong></td><td>2.2 补上</td></tr></tbody></table></div>
+<p>Codex 认为最站得住的部分：800 分投档框架与目标线、七年级占比换算、明确列出的不确定项、检索/间隔/避免重读与控制家长监控强度的方向。Codex 指出的最大风险：自动成卡与家长低投入是成败关键但实证不足；Codex 额度、登录、隐私与孩子绕过 app 的问题可能让"零 API 成本"落不了地；孩子拒绝使用与家长投入做不到未被纳入决策门槛——这三条已分别落到 4.4、六、八与九。</p>
+<h2 id="十二-增补-家长此前整理的资料">十二、增补：家长此前整理的资料</h2>
+<p>家长在 8 月已整理过一批教材资料并做过一版实现。本报告完成后才对照它。决定：<strong>本方案的设计以本报告为准，不以既有实现为框架；其中好的东西增补进来</strong>——内容池（默写句对、词汇 + 真人录音、生物/地理/道法概念题、文言实词、数学预习）、OCR 与教材下载工具直接放入仓库；"内容入库前先算每日负荷""每条内容带出处逐字核对""默写卡接句/情境两种形态""两档评分四档推断""听写题隔离"作为规则加入设计，各自的依据是本报告的研究（见 <code>docs/增补清单.md</code>）。</p>
+<p>对本报告的两处修正：① MVP 第 1 周不需要"家长手工建卡"，内容池现成；② 新增规则——<strong>内容入库前必须先模拟每日分钟数</strong>：约 1100 条 FSRS 内容对应前 150 天中位约 14 分钟/天，再加 150 条就有四成天数超 20 分钟，这直接约束"30 分钟闭环"能装多少东西。</p>
+  </main>
+  <footer>依据文件：docs/research/01–05 · docs/data/exam_summary.md · docs/experiments/2026-09-01-dualrun · 由 Claude 撰写，Codex 独立审阅（见末节）。</footer>
+</div>
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) {
+        links.forEach(function(a){ a.classList.remove('active'); });
+        var a = map[e.target.id]; if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  document.querySelectorAll('main h2[id]').forEach(function(h){ obs.observe(h); });
+})();
+</script>

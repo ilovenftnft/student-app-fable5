@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["page_summary", "questions"],
+  "properties": {
+    "page_summary": {"type": "string"},
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["number", "type", "score", "stem", "options", "knowledge_points", "grade_chapter", "difficulty", "confidence", "needs_figure"],
+        "properties": {
+          "number": {"type": "string"},
+          "type": {"type": "string", "enum": ["选择", "填空", "解答", "其他"]},
+          "score": {"type": "number"},
+          "stem": {"type": "string"},
+          "options": {"type": "array", "items": {"type": "string"}},
+          "knowledge_points": {"type": "array", "items": {"type": "string"}},
+          "grade_chapter": {"type": "string"},
+          "difficulty": {"type": "string", "enum": ["基础", "中档", "较难"]},
+          "confidence": {"type": "number"},
+          "needs_figure": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

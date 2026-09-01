@@ -1,0 +1,97 @@
+# 项目指令（AGENTS.md）
+
+> 本文件是 Claude Code 与 Codex CLI 共同读取的唯一项目指令。只写事实性约定：什么算正确、数据长什么样、哪些事不做。不写"交给谁做"的路由。上限 32 KiB（Codex 超过即静默截断）。
+
+## 一句话
+
+给一个 2026-09 在厦门上初一、2029-06 中考的孩子做的本地学习 app：每个工作日放学后 30 分钟完成一个固定闭环，把"什么时候复习什么"交给算法，把省下的时间还给孩子。
+
+依据：`docs/研究报告-app方案.md`（含 Codex 审阅）、`docs/research/01–05`、`docs/data/exam_summary.md`、`docs/计划.md`。内容池 `content/pools/` 是家长此前整理的教材资料，增补进本项目（`docs/增补清单.md`）。
+
+## 硬约束（违反即为 bug）
+
+1. **每日路径不依赖照片和 LLM**：孩子每天的闭环在没有网络、没有 Codex 的情况下必须完整可用。
+2. **孩子端没有开放式 AI 入口**。LLM 只做两件事：家长侧的后台分析（识题、标签、周报），以及**作答后**才解锁的讲解（每日上限，默认 5 次）。
+3. **只用订阅号**：LLM 通过本机已登录的 `codex exec`（主）/ `claude -p`（可选）子进程调用，不接 API key，不把 OAuth token 交给任何 SDK。
+4. **不做游戏化**：没有积分、徽章、排行榜、连击、抽卡。允许的反馈只有与行为一一对应的数量（本周 3/5、已掌握 N 张）。
+5. **家长端默认只给聚合信息**：不显示逐题对错、每日时长、时间戳。孩子确认后可开更细数据。
+6. **60 分钟硬停**：单日学习会话到 60 分钟自动进入结束页；30 分钟后提示"可以结束了"；超过 30 分钟时在第 25 分钟插 3 分钟休息。
+7. **每条内容有出处**：入库的每个题目/卡片带 `source_quote`（教材原句）与 `source_ref`（册/章/页），入库脚本对 OCR 文本逐字核对，核不上不入库。
+8. **内容入库前先算负荷**：新内容文件写完 → 跑负荷模拟（`npm run sim`）→ 加入后前 150 天每日复习分钟数中位 ≤ 12、超 20 分钟的天数 ≤ 10%，否则只装一部分。
+9. **不显示正确率作为主指标**（交错练习会让练习时正确率下降而学习效果更好）。
+10. **不推荐补习班**：app 文案与周报里不出现"报班"。
+
+## MVP 六项与验收标准（草案，待家长确认后生效）
+
+| # | 功能 | 一句话验收标准 |
+|---|---|---|
+| 1 | 每日闭环页 | 孩子从打开到结束页全程只按主按钮就能走完：章节勾选 → 到期卡 → 三问（点选）→ 结束页；无照片、无 LLM 时全程可用；正计时只显示分钟；60 分钟硬停 |
+| 2 | 教材章节目录 + 记忆库 | 七上七科的章节树可勾选"今天学到这"；地理/生物/历史/道法的章节级条目进入间隔复习，每周到期量 ≤ 10 分钟 |
+| 3 | 复习卡片 + FSRS | 卡片正面/背面分离；孩子只点"会 / 不会"，FSRS 四档由耗时推断；错题卡跨 3 次间隔会话各答对 1 次才归档；每日到期上限 10 分钟，超出顺延 |
+| 4 | 收件箱 | `~/StudyInbox/` 出现新照片 → 30 秒内入库并排队 → Codex 识题产出 JSON → 进"待确认"队列 → 家长确认后成卡；Codex 不可用时照片仍入库、队列显示"稍后重试" |
+| 5 | 家长周报页 | 一页四项：本周完成天数 / 已掌握卡片数 / 本周最薄弱的一个知识点 / 一句建议的家长行为；不含逐题、时长、时间戳 |
+| 6 | 成绩与位次录入 | 家长录入每次考试的科目、分数、班级/年级排名；周报能显示位次趋势 |
+
+## 数据
+
+### 内容池（`content/pools/*.json`，格式固定）
+
+- 默写：`篇目[] → {标题, 作者, 池, 课标序号, 教材位置, 句对[[上句, 下句, 情境, 全句?]]}`。生成两种卡：**接句卡**（默认，"上句，______"）和**情境卡**（接句卡归档后出现，题面为情境描述）。
+- 概念：`概念[] → {编号, 池: standard|textbook, 重要概念, 课标原文, 教材位置, 题[[题面, 答案, 教材原句]]}`。一题一空一术语。
+- 词汇：`词[] → {词, 释义, 音标, 组, 课标重点, 单元, 教材页}`；音标/拼读/录音在 `英语-音标与拼读.json` + `content/audio/*.ogg`（录音不入 git）。听写卡只对有真人录音的词开。
+- 池的含义：`standard` = 课标次位概念/中考范围；`textbook` = 教材有课标未列，校内会考。
+
+### 数据库（`node:sqlite`，单文件，路径由 `DATA_DIR` 决定，默认 `./data/app.db`）
+
+核心表（详见 `src/server/db/schema.sql`）：`subject`、`chapter`、`item`（内容项，含 `kind: recitation|concept|vocab|listen|wrong|prestudy`、`source_quote`、`source_ref`、`pool`）、`card_state`（ts-fsrs 状态）、`review`（每次作答：item、评分、耗时 ms、时间）、`session`（每日会话：开始/结束/分钟数）、`checkin`（当天勾选的章节）、`reflection`（三问的点选结果）、`inbox_photo`、`problem`（识别出的题目，含 `status: pending|confirmed|rejected`）、`exam_score`。
+
+规则：所有路径相对 `DATA_DIR` 存；备份 = `sqlite3 app.db "vacuum into 'backup.db'"` + 拷 `photos/`；WAL 模式下不要直接复制 db 文件。
+
+## 技术栈与约定
+
+- Node 26（系统自带）· `node:sqlite` · Hono（API + 静态托管，单进程）· Vite + React + TypeScript + Tailwind + shadcn/ui · `ts-fsrs` 5.4.x（lockfile 固定）· chokidar · Vitest · Playwright
+- 运行时依赖尽量少；孩子电脑上不需要 poppler、不需要编译原生模块。
+- **TDD**：纯逻辑（调度、任务生成、门控、负荷模拟、周报统计、JSON 比对）先写测试；LLM 层用 golden 样本（`tests/golden/`）；UI 只对两条端到端（提交照片→待确认；作答→讲解解锁）写 Playwright。
+- **测试冲突的裁决源**：本文件的验收标准。Claude 与 Codex 各写的测试冲突时以此裁决，裁不了的进 `docs/待裁决.md`。
+- **双模型审阅**：每个功能完成后 `npm run review`（`tools/dual_check/`，Codex 只读审阅 diff，首行 `ALLOW:`/`BLOCK:`，未知格式按 BLOCK；最多 3 轮）。
+- **提交**：只走 `npm run deploy`（停 → build → 起 → 探测），不单独 `npm run build` 换掉运行中的产物。
+
+## LLM 调用约定
+
+```
+codex exec -i <img> --sandbox read-only --skip-git-repo-check --json \
+  -c model_reasoning_effort=<low|medium|high> --output-schema <schema.json> -o <out.json> "<prompt>" < /dev/null
+```
+
+- stdin 必须接 `/dev/null`；`detached` 进程组；硬 deadline（识题 3 分钟、讲解 2 分钟、周报 5 分钟）；结果只从 `-o` 文件读；stdout JSONL 用于抓 `thread_id` 和错误事件；stderr 的 `Reading additional input from stdin...` 是噪音。
+- 推理档位：识题/标签 `low`，讲解 `medium`，周报 `high`。
+- 额度触顶：任务留在队列，读取事件里的重置时间后自动重试；孩子端不报错。
+- 每周调用预算 ≤ 66 次（识题 20 + 变式 ≤ 20 + 讲解 ≤ 25 + 周报 1）。
+- 识题只信印刷体题干；手写作答识别只作参考；错题以老师的 ✗ 标记为准；几何题保留原图裁剪，`needs_figure=true`。
+
+## 界面规范（研究 05 的 10 条，前端实现照此）
+
+1. 单列，最大 640px 居中，8pt 栅格；学习页任一时刻只渲染当前步骤，其余不渲染。
+2. 字体：`-apple-system, "PingFang SC", "Noto Sans CJK SC", sans-serif`；数字与计时 `ui-monospace` + `tabular-nums`。字号三档：20/28、16/24、13/18。
+3. 色彩 ≤ 6 个 token：`bg`（浅 #FAFAF9 / 深 #111113）、`surface`、`text`、`text-muted`、`accent`（靛蓝 #4F5BD5，仅主按钮与进度）、语义三色 `ok / due / weak`（低饱和，只用于状态标签）。禁止渐变与装饰性色彩。
+4. 每屏最多一个主按钮；次要操作用文字按钮；输入框只有单行；卡片圆角 12px、1px 边框、无或极淡阴影。
+5. 进度：4px 静态进度条 + "3 / 7"；周视图（本周 3/5）只在结束页与家长页。
+6. 计时：正计时、只显示分钟、无声音；30 分钟时进度条变 accent 色 + 一行"可以结束了，也可以继续"；60 分钟自动结束。
+7. 动效仅两种：页面切换 150ms 淡入、对错反馈 200ms 边框变色；`prefers-reduced-motion` 时全部关闭。
+8. 反馈文案一句话、陈述式、无感叹号、无表情：正确"对了。"，错误"再看一眼第 2 步。"，结束"今天 7 题，2 张卡明天到期。"
+9. 家长页同一视觉系统，信息密度可更高（表格 + 一张折线图），不显示逐题与时长。
+10. 空状态也是一屏一事：头两周无错题时显示"今天只有一件事：勾选学到哪了"，不放插画。
+
+验收：孩子用 5 分钟后，"这是给谁用的"答案不能是"小孩"；"有没有分神"要指不出东西。
+
+## 目录
+
+```
+AGENTS.md            本文件（CLAUDE.md 只含 @AGENTS.md）
+content/pools/       内容池 JSON（家长整理的教材资料）
+content/audio/       真人录音（不入 git）
+docs/                报告、研究、计划、数据、实验
+tools/               md2html / build_report / ocr.swift / fetch-textbooks / dual_check
+src/                 app 源码（server/ client/ shared/）
+tests/               Vitest + Playwright + golden
+```

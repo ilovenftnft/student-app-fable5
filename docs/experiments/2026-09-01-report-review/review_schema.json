@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verdict", "summary", "findings", "strongest_aspects", "top_risks"],
+  "properties": {
+    "verdict": {"type": "string", "enum": ["ALLOW", "BLOCK"]},
+    "summary": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "dimension", "location", "claim", "problem", "recommendation", "confidence"],
+        "properties": {
+          "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+          "dimension": {"type": "string", "enum": ["事实准确性", "引用可溯源", "逻辑跳跃", "过度断言", "遗漏反证", "内部一致性"]},
+          "location": {"type": "string"},
+          "claim": {"type": "string"},
+          "problem": {"type": "string"},
+          "recommendation": {"type": "string"},
+          "confidence": {"type": "number"}
+        }
+      }
+    },
+    "strongest_aspects": {"type": "array", "items": {"type": "string"}},
+    "top_risks": {"type": "array", "items": {"type": "string"}}
+  }
+}
