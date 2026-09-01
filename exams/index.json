@@ -1,0 +1,526 @@
+{
+ "2023_其余七科": {
+  "pdf": "2023_其余七科.pdf",
+  "txt": "txt/2023_其余七科.txt",
+  "total_pages": 80,
+  "parts": [
+   {
+    "part": "语文",
+    "pdf_from": 2,
+    "pdf_to": 8,
+    "pages": 7
+   },
+   {
+    "part": "语文·答案",
+    "pdf_from": 9,
+    "pdf_to": 10,
+    "pages": 2
+   },
+   {
+    "part": "数学",
+    "pdf_from": 11,
+    "pdf_to": 15,
+    "pages": 5
+   },
+   {
+    "part": "数学·答案",
+    "pdf_from": 16,
+    "pdf_to": 22,
+    "pages": 7
+   },
+   {
+    "part": "英语",
+    "pdf_from": 23,
+    "pdf_to": 35,
+    "pages": 13
+   },
+   {
+    "part": "英语·答案",
+    "pdf_from": 36,
+    "pdf_to": 37,
+    "pages": 2
+   },
+   {
+    "part": "物理",
+    "pdf_from": 38,
+    "pdf_to": 46,
+    "pages": 9
+   },
+   {
+    "part": "物理·答案",
+    "pdf_from": 47,
+    "pdf_to": 49,
+    "pages": 3
+   },
+   {
+    "part": "化学",
+    "pdf_from": 50,
+    "pdf_to": 55,
+    "pages": 6
+   },
+   {
+    "part": "化学·答案",
+    "pdf_from": 56,
+    "pdf_to": 57,
+    "pages": 2
+   },
+   {
+    "part": "历史",
+    "pdf_from": 58,
+    "pdf_to": 66,
+    "pages": 9
+   },
+   {
+    "part": "历史·答案",
+    "pdf_from": 67,
+    "pdf_to": 69,
+    "pages": 3
+   },
+   {
+    "part": "道法",
+    "pdf_from": 70,
+    "pdf_to": 76,
+    "pages": 7
+   },
+   {
+    "part": "道法·答案",
+    "pdf_from": 77,
+    "pdf_to": 78,
+    "pages": 2
+   },
+   {
+    "part": "体育",
+    "pdf_from": 79,
+    "pdf_to": 79,
+    "pages": 1
+   },
+   {
+    "part": "体育·答案",
+    "pdf_from": 80,
+    "pdf_to": 80,
+    "pages": 1
+   }
+  ]
+ },
+ "2023_地理生物": {
+  "pdf": "2023_地理生物.pdf",
+  "txt": "txt/2023_地理生物.txt",
+  "total_pages": 21,
+  "parts": [
+   {
+    "part": "地理",
+    "pdf_from": 2,
+    "pdf_to": 10,
+    "pages": 9
+   },
+   {
+    "part": "地理·答案",
+    "pdf_from": 11,
+    "pdf_to": 12,
+    "pages": 2
+   },
+   {
+    "part": "生物",
+    "pdf_from": 13,
+    "pdf_to": 19,
+    "pages": 7
+   },
+   {
+    "part": "生物·答案",
+    "pdf_from": 20,
+    "pdf_to": 21,
+    "pages": 2
+   }
+  ]
+ },
+ "2024_其余七科": {
+  "pdf": "2024_其余七科.pdf",
+  "txt": "txt/2024_其余七科.txt",
+  "total_pages": 81,
+  "parts": [
+   {
+    "part": "语文",
+    "pdf_from": 2,
+    "pdf_to": 8,
+    "pages": 7
+   },
+   {
+    "part": "语文·答案",
+    "pdf_from": 9,
+    "pdf_to": 10,
+    "pages": 2
+   },
+   {
+    "part": "数学",
+    "pdf_from": 11,
+    "pdf_to": 17,
+    "pages": 7
+   },
+   {
+    "part": "数学·答案",
+    "pdf_from": 18,
+    "pdf_to": 23,
+    "pages": 6
+   },
+   {
+    "part": "英语",
+    "pdf_from": 24,
+    "pdf_to": 37,
+    "pages": 14
+   },
+   {
+    "part": "英语·答案",
+    "pdf_from": 38,
+    "pdf_to": 38,
+    "pages": 1
+   },
+   {
+    "part": "物理",
+    "pdf_from": 39,
+    "pdf_to": 47,
+    "pages": 9
+   },
+   {
+    "part": "物理·答案",
+    "pdf_from": 48,
+    "pdf_to": 49,
+    "pages": 2
+   },
+   {
+    "part": "化学",
+    "pdf_from": 50,
+    "pdf_to": 56,
+    "pages": 7
+   },
+   {
+    "part": "化学·答案",
+    "pdf_from": 57,
+    "pdf_to": 59,
+    "pages": 3
+   },
+   {
+    "part": "历史",
+    "pdf_from": 60,
+    "pdf_to": 68,
+    "pages": 9
+   },
+   {
+    "part": "历史·答案",
+    "pdf_from": 69,
+    "pdf_to": 69,
+    "pages": 1
+   },
+   {
+    "part": "道法",
+    "pdf_from": 70,
+    "pdf_to": 77,
+    "pages": 8
+   },
+   {
+    "part": "道法·答案",
+    "pdf_from": 78,
+    "pdf_to": 79,
+    "pages": 2
+   },
+   {
+    "part": "体育",
+    "pdf_from": 80,
+    "pdf_to": 80,
+    "pages": 1
+   },
+   {
+    "part": "体育·答案",
+    "pdf_from": 81,
+    "pdf_to": 81,
+    "pages": 1
+   }
+  ]
+ },
+ "2024_地理生物": {
+  "pdf": "2024_地理生物.pdf",
+  "txt": "txt/2024_地理生物.txt",
+  "total_pages": 21,
+  "parts": [
+   {
+    "part": "地理",
+    "pdf_from": 2,
+    "pdf_to": 9,
+    "pages": 8
+   },
+   {
+    "part": "地理·答案",
+    "pdf_from": 10,
+    "pdf_to": 11,
+    "pages": 2
+   },
+   {
+    "part": "生物",
+    "pdf_from": 12,
+    "pdf_to": 19,
+    "pages": 8
+   },
+   {
+    "part": "生物·答案",
+    "pdf_from": 20,
+    "pdf_to": 21,
+    "pages": 2
+   }
+  ]
+ },
+ "2025_其余七科": {
+  "pdf": "2025_其余七科.pdf",
+  "txt": "txt/2025_其余七科.txt",
+  "total_pages": 83,
+  "parts": [
+   {
+    "part": "语文",
+    "pdf_from": 2,
+    "pdf_to": 9,
+    "pages": 8
+   },
+   {
+    "part": "语文·答案",
+    "pdf_from": 10,
+    "pdf_to": 11,
+    "pages": 2
+   },
+   {
+    "part": "数学",
+    "pdf_from": 12,
+    "pdf_to": 17,
+    "pages": 6
+   },
+   {
+    "part": "数学·答案",
+    "pdf_from": 18,
+    "pdf_to": 24,
+    "pages": 7
+   },
+   {
+    "part": "英语",
+    "pdf_from": 25,
+    "pdf_to": 36,
+    "pages": 12
+   },
+   {
+    "part": "英语·答案",
+    "pdf_from": 37,
+    "pdf_to": 38,
+    "pages": 2
+   },
+   {
+    "part": "物理",
+    "pdf_from": 39,
+    "pdf_to": 46,
+    "pages": 8
+   },
+   {
+    "part": "物理·答案",
+    "pdf_from": 47,
+    "pdf_to": 51,
+    "pages": 5
+   },
+   {
+    "part": "化学",
+    "pdf_from": 52,
+    "pdf_to": 57,
+    "pages": 6
+   },
+   {
+    "part": "化学·答案",
+    "pdf_from": 58,
+    "pdf_to": 59,
+    "pages": 2
+   },
+   {
+    "part": "历史",
+    "pdf_from": 60,
+    "pdf_to": 68,
+    "pages": 9
+   },
+   {
+    "part": "历史·答案",
+    "pdf_from": 69,
+    "pdf_to": 70,
+    "pages": 2
+   },
+   {
+    "part": "道法",
+    "pdf_from": 71,
+    "pdf_to": 78,
+    "pages": 8
+   },
+   {
+    "part": "道法·答案",
+    "pdf_from": 79,
+    "pdf_to": 80,
+    "pages": 2
+   },
+   {
+    "part": "体育",
+    "pdf_from": 81,
+    "pdf_to": 82,
+    "pages": 2
+   },
+   {
+    "part": "体育·答案",
+    "pdf_from": 83,
+    "pdf_to": 83,
+    "pages": 1
+   }
+  ]
+ },
+ "2025_地理生物": {
+  "pdf": "2025_地理生物.pdf",
+  "txt": "txt/2025_地理生物.txt",
+  "total_pages": 22,
+  "parts": [
+   {
+    "part": "地理",
+    "pdf_from": 2,
+    "pdf_to": 10,
+    "pages": 9
+   },
+   {
+    "part": "地理·答案",
+    "pdf_from": 11,
+    "pdf_to": 11,
+    "pages": 1
+   },
+   {
+    "part": "生物",
+    "pdf_from": 12,
+    "pdf_to": 19,
+    "pages": 8
+   },
+   {
+    "part": "生物·答案",
+    "pdf_from": 20,
+    "pdf_to": 22,
+    "pages": 3
+   }
+  ]
+ },
+ "2026_其余七科": {
+  "pdf": "2026_其余七科.pdf",
+  "txt": "txt/2026_其余七科.txt",
+  "total_pages": 82,
+  "parts": [
+   {
+    "part": "语文",
+    "pdf_from": 2,
+    "pdf_to": 8,
+    "pages": 7
+   },
+   {
+    "part": "语文·答案",
+    "pdf_from": 9,
+    "pdf_to": 10,
+    "pages": 2
+   },
+   {
+    "part": "数学",
+    "pdf_from": 11,
+    "pdf_to": 15,
+    "pages": 5
+   },
+   {
+    "part": "数学·答案",
+    "pdf_from": 16,
+    "pdf_to": 22,
+    "pages": 7
+   },
+   {
+    "part": "英语",
+    "pdf_from": 23,
+    "pdf_to": 35,
+    "pages": 13
+   },
+   {
+    "part": "英语·答案",
+    "pdf_from": 36,
+    "pdf_to": 37,
+    "pages": 2
+   },
+   {
+    "part": "物理",
+    "pdf_from": 38,
+    "pdf_to": 46,
+    "pages": 9
+   },
+   {
+    "part": "物理·答案",
+    "pdf_from": 47,
+    "pdf_to": 50,
+    "pages": 4
+   },
+   {
+    "part": "化学",
+    "pdf_from": 51,
+    "pdf_to": 57,
+    "pages": 7
+   },
+   {
+    "part": "化学·答案",
+    "pdf_from": 58,
+    "pdf_to": 59,
+    "pages": 2
+   },
+   {
+    "part": "历史",
+    "pdf_from": 60,
+    "pdf_to": 69,
+    "pages": 10
+   },
+   {
+    "part": "历史·答案",
+    "pdf_from": 70,
+    "pdf_to": 70,
+    "pages": 1
+   },
+   {
+    "part": "道法",
+    "pdf_from": 71,
+    "pdf_to": 79,
+    "pages": 9
+   },
+   {
+    "part": "道法·答案",
+    "pdf_from": 80,
+    "pdf_to": 82,
+    "pages": 3
+   }
+  ]
+ },
+ "2026_地理生物": {
+  "pdf": "2026_地理生物.pdf",
+  "txt": "txt/2026_地理生物.txt",
+  "total_pages": 22,
+  "parts": [
+   {
+    "part": "地理",
+    "pdf_from": 2,
+    "pdf_to": 10,
+    "pages": 9
+   },
+   {
+    "part": "地理·答案",
+    "pdf_from": 11,
+    "pdf_to": 12,
+    "pages": 2
+   },
+   {
+    "part": "生物",
+    "pdf_from": 13,
+    "pdf_to": 20,
+    "pages": 8
+   },
+   {
+    "part": "生物·答案",
+    "pdf_from": 21,
+    "pdf_to": 22,
+    "pages": 2
+   }
+  ]
+ }
+}

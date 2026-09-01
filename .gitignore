@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# 教材 / 试卷 / 课标 原始资料（体积大且有版权，只保留本地，不进仓库）
+# 提取出的文本索引（*.txt / *.md / *.json）仍会纳入版本库
+exams/*.pdf
+standards/*.pdf
+textbook/*.pdf
+textbook/*.jpg
+textbook/*.png
+
+# 依赖 / 构建产物
+node_modules/
+dist/
+build/
+.next/
+.expo/
+*.log
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+
+# 编辑器
+.vscode/
+.idea/
