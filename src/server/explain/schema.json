@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["explanation", "key_step", "common_mistake"],
+  "properties": {
+    "explanation": { "type": "string" },
+    "key_step": { "type": "string" },
+    "common_mistake": { "type": "string" }
+  }
+}

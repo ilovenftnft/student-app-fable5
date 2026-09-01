@@ -34,6 +34,13 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
     if (n === 0) { await expect(page.getByRole("button", { name: "会", exact: true })).toBeVisible(); await page.screenshot({ path: shot("5-review-back") }); }
     await page.getByRole("button", { name: n % 5 === 4 ? "不会" : "会", exact: true }).click();
     await expect(page.getByText(/^(对了。|再看一眼)/)).toBeVisible();
+    if (n === 1) {
+      // 作答后才解锁讲解（硬约束 2）
+      await page.getByRole("button", { name: /讲解（今天还有 5 次）/ }).click();
+      await expect(page.getByText(/测试讲解/)).toBeVisible({ timeout: 10_000 });
+      await page.screenshot({ path: shot("5b-explain") });
+    }
+    await page.getByRole("button", { name: "下一题" }).click();
   }
   expect(n).toBeGreaterThan(3);
 
@@ -73,4 +80,17 @@ test("家长页：录入两次成绩后出现位次趋势", async ({ page, reque
   await expect(page.getByRole("img", { name: "总分 班级位次趋势" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "期中" })).toBeVisible();
   await page.screenshot({ path: "docs/screenshots/9-parent-exams.png", fullPage: true });
+});
+
+test("讲解只在作答后出现，且每日上限", async ({ page, request }) => {
+  await request.post("/api/checkin", { data: { chapterIds: [] } });
+  const card = await (await request.get("/api/card/next")).json() as { itemId: string } | null;
+  test.skip(!card, "今天没有到期卡");
+  const gate = await (await request.get(`/api/explain/gate/${encodeURIComponent(card!.itemId)}`)).json() as { allowed: boolean; reason: string };
+  expect(gate).toMatchObject({ allowed: false, reason: "not_answered" });
+  const r = await request.post("/api/explain", { data: { itemId: card!.itemId } });
+  expect(r.status()).toBe(403);
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "看答案" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /讲解/ })).toHaveCount(0);
 });

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type Answer, type CardFront } from "../api.ts";
+import { Explain } from "./Explain.tsx";
 
 /** 到期卡：正面 → 孩子主动看答案 → 点"会 / 不会"。反馈一句话，200ms 边框变色。 */
 export function Review({ remaining, onDone }: { remaining: number; onDone: () => void }) {
@@ -23,8 +24,10 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
     catch { setFeedback({ text: "没记上，再点一次。", ok: false }); setTimeout(() => setFeedback(null), 1500); return; }
     setFeedback({ text: r.feedback, ok: r.rating > 1 });
     setN((x) => x + 1);
-    setTimeout(() => { if (r.next) { setCard(r.next); setAnswer(null); setFeedback(null); shownAt.current = Date.now(); } else onDone(); }, 600);
+    nextRef.current = r.next;
   };
+  const nextRef = useRef<CardFront | null>(null);
+  const advance = () => { const nx = nextRef.current; if (nx) { setCard(nx); setAnswer(null); setFeedback(null); shownAt.current = Date.now(); } else onDone(); };
 
   if (!card) return null;
   const total = remaining;
@@ -44,6 +47,7 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
           </div>
         )}
         {feedback && <p style={{ margin: "16px 0 0" }}>{feedback.text}</p>}
+        {feedback && <Explain itemId={card.itemId} />}
       </div>
       <div style={{ marginTop: 24 }}>
         {!answer ? (
@@ -53,7 +57,9 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
             <button className="choice" style={{ width: 160, textAlign: "center" }} onClick={() => void submit(false)}>不会</button>
             <button className="btn-primary" style={{ margin: 0, width: 160 }} onClick={() => void submit(true)}>会</button>
           </div>
-        ) : null}
+        ) : (
+          <button className="btn-primary" onClick={advance}>下一题</button>
+        )}
       </div>
     </section>
   );

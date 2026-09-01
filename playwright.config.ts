@@ -8,5 +8,5 @@ export default defineConfig({
   globalSetup: "./tests/e2e/setup.ts",
   use: { baseURL: "http://127.0.0.1:8799", viewport: { width: 480, height: 860 }, launchOptions: { args: ["--no-proxy-server"] } },
   projects: [{ name: "chromium", use: { browserName: "chromium", channel: "chromium" } }],
-  webServer: { command: "node src/server/index.ts", port: 8799, env: { PORT: "8799", DATA_DIR: TMP, NO_PROXY: "127.0.0.1" }, reuseExistingServer: false },
+  webServer: { command: "node src/server/index.ts", port: 8799, env: { PORT: "8799", DATA_DIR: TMP, NO_PROXY: "127.0.0.1", EXPLAIN: "fake", INBOX: "off" }, reuseExistingServer: false },
 });

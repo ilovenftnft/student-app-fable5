@@ -20,7 +20,8 @@
     "start": "node src/server/index.ts",
     "test:e2e": "playwright test",
     "deploy": "bash scripts/deploy.sh",
-    "stop": "bash scripts/deploy.sh stop"
+    "stop": "bash scripts/deploy.sh stop",
+    "review": "node tools/dual_check/review.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

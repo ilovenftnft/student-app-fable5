@@ -1,0 +1,12 @@
+import { openDb } from "../../src/server/db/open.ts";
+import { codexRecognizer, ingest, processNext } from "../../src/server/inbox/service.ts";
+import * as store from "../../src/server/inbox/store.ts";
+const dataDir = process.env.DD!;
+const db = openDb(dataDir + "/app.db");
+const { photo, duplicate } = ingest(db, "exams/pages/2026数学-12.png", dataDir);
+console.log("ingested", photo.id, duplicate);
+const t0 = Date.now();
+await processNext(db, codexRecognizer, new Date(), dataDir);
+console.log("elapsed s", Math.round((Date.now() - t0) / 1000));
+console.log(JSON.stringify(store.photos(db)[0]));
+for (const p of store.problems(db, "pending")) console.log(p.id, p.subject_id, p.teacher_mark, p.confidence, p.needs_figure, JSON.stringify(p.tags), p.stem.slice(0, 60).replace(/\n/g, " "));

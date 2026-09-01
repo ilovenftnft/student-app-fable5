@@ -9,7 +9,8 @@ import { DATA_DIR } from "./db/open.ts";
 import { startInbox } from "./inbox/watcher.ts";
 
 const db = openDb();
-const app = createApp(db);
+// EXPLAIN=fake：端到端测试用的假讲解，不调用 Codex
+const app = createApp(db, undefined, process.env.EXPLAIN === "fake" ? { explainer: async () => ({ ok: true, elapsedMs: 0, json: { explanation: "（测试讲解）先看题目问什么，再回到教材原句。", key_step: "对照原句", common_mistake: "看错题目要求" } }) } : {});
 process.chdir(ROOT); // serveStatic 的 root 相对 cwd
 app.use("/audio/*", serveStatic({ root: "./content" }));
 app.use("/photos/*", serveStatic({ root: DATA_DIR.startsWith("/") ? DATA_DIR : `./${DATA_DIR}` }));

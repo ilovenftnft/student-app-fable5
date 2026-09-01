@@ -138,6 +138,20 @@ CREATE TABLE IF NOT EXISTS problem (
   raw          TEXT NOT NULL            -- 引擎原始 JSON
 );
 
+-- 作答后解锁的讲解（硬约束 2：每日上限，默认 5；只对今天答过的题）
+CREATE TABLE IF NOT EXISTS explanation (
+  id           INTEGER PRIMARY KEY,
+  item_id      TEXT NOT NULL REFERENCES item(id),
+  session_id   INTEGER REFERENCES session(id),
+  date         TEXT NOT NULL,             -- YYYY-MM-DD，每日计数用
+  status       TEXT NOT NULL CHECK (status IN ('queued','running','done','failed')) DEFAULT 'queued',
+  text         TEXT,
+  thread_id    TEXT,
+  error        TEXT,
+  requested_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS explanation_date ON explanation(date);
+
 CREATE TABLE IF NOT EXISTS exam_score (
   id         INTEGER PRIMARY KEY,
   date       TEXT NOT NULL,

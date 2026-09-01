@@ -8,8 +8,12 @@ import { dayBounds } from "./scheduler/day.ts";
 import * as inbox from "./inbox/store.ts";
 import { confirmProblem, rejectProblem } from "./inbox/service.ts";
 import { sortForReview } from "./inbox/recognize.ts";
+import * as explain from "./explain/service.ts";
 
-export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()): Hono {
+export interface AppOptions { explainer?: explain.Explainer }
+
+export function createApp(db: DatabaseSync, clock: () => Date = () => new Date(), opts: AppOptions = {}): Hono {
+  const explainer = opts.explainer ?? explain.codexExplainer;
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ ok: true, items: repo.items(db).length }));
@@ -49,6 +53,22 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
     const s = repo.sessionOn(db, dayBounds(clock()).date);
     return c.json(s ? repo.itemsInSession(db, s.id) : []);
   });
+  // ---- 作答后讲解（门控 + 每日上限）。孩子端不报错：失败只显示"稍后再看" ----
+  app.get("/api/explain/gate/:itemId", (c) => {
+    const g = explain.gate(db, clock(), c.req.param("itemId"));
+    return c.json({ allowed: g.allowed, reason: g.reason ?? null, remaining: g.remaining, existingId: g.existing?.id ?? null });
+  });
+  app.post("/api/explain", async (c) => {
+    const b = await c.req.json<{ itemId: string }>();
+    const r = explain.request(db, clock(), String(b.itemId), explainer);
+    return c.json(r, r.ok ? 200 : 403);
+  });
+  app.get("/api/explain/:id", (c) => {
+    const e = explain.explanation(db, Number(c.req.param("id")));
+    if (!e) return c.json({ error: "not found" }, 404);
+    return c.json({ id: e.id, status: e.status, text: e.status === "done" ? e.text : null, message: e.status === "failed" ? "这道题的讲解稍后再看。" : e.status === "done" ? null : "讲解准备中。" });
+  });
+
   app.post("/api/reflect", async (c) => {
     const b = await c.req.json<{ hardest?: string; guessed?: string; tomorrow?: string }>();
     svc.reflect(db, clock(), { hardest: b.hardest ?? null, guessed: b.guessed ?? null, tomorrow: b.tomorrow ?? null });
