@@ -13,7 +13,11 @@
     "sim": "node src/server/content/sim-cli.ts",
     "load": "node src/server/content/load-cli.ts",
     "verify": "node src/server/content/load-cli.ts --dry-run",
-    "load:chapters": "node src/server/content/chapters-cli.ts"
+    "load:chapters": "node src/server/content/chapters-cli.ts",
+    "dev": "node --watch src/server/index.ts",
+    "dev:client": "vite",
+    "build": "vite build",
+    "start": "node src/server/index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

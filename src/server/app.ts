@@ -42,6 +42,10 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
     return c.json({ ...r, next: svc.nextCard(db, clock()) });
   });
 
+  app.get("/api/today/items", (c) => {
+    const s = repo.sessionOn(db, dayBounds(clock()).date);
+    return c.json(s ? repo.itemsInSession(db, s.id) : []);
+  });
   app.post("/api/reflect", async (c) => {
     const b = await c.req.json<{ hardest?: string; guessed?: string; tomorrow?: string }>();
     svc.reflect(db, clock(), { hardest: b.hardest ?? null, guessed: b.guessed ?? null, tomorrow: b.tomorrow ?? null });

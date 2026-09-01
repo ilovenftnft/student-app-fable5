@@ -118,6 +118,9 @@ export function recordReview(db: DatabaseSync, itemId: string, sessionId: number
 export function recentElapsed(db: DatabaseSync, itemId: string, n = 5): number[] {
   return (db.prepare("SELECT elapsed_ms FROM review WHERE item_id = ? AND knew = 1 ORDER BY id DESC LIMIT ?").all(itemId, n) as { elapsed_ms: number }[]).map((r) => r.elapsed_ms);
 }
+export function itemsInSession(db: DatabaseSync, sessionId: number): { itemId: string; front: string }[] {
+  return (db.prepare("SELECT DISTINCT r.item_id, i.front FROM review r JOIN item i ON i.id = r.item_id WHERE r.session_id = ? ORDER BY r.id").all(sessionId) as { item_id: string; front: string }[]).map((r) => ({ itemId: r.item_id, front: r.front }));
+}
 export function reviewsInSession(db: DatabaseSync, sessionId: number): number {
   return (db.prepare("SELECT COUNT(*) AS n FROM review WHERE session_id = ?").get(sessionId) as { n: number }).n;
 }
