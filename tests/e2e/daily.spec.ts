@@ -58,3 +58,19 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
   const body = await page.textContent("body");
   expect(body).not.toMatch(/分钟|报班/);
 });
+
+test("家长页：录入两次成绩后出现位次趋势", async ({ page, request }) => {
+  await request.post("/api/parent/exams", { data: { date: "2026-10-09", name: "月考", subject: "总分", score: 580, fullScore: 700, classRank: 12, classSize: 45 } });
+  await page.goto("/parent");
+  await page.getByLabel("日期").fill("2026-11-10");
+  await page.getByLabel("考试名称（期中 / 期末 / 月考）").fill("期中");
+  await page.getByLabel("分数").fill("612");
+  await page.getByLabel("满分").fill("700");
+  await page.getByLabel("班级排名").fill("8");
+  await page.getByLabel("班级人数").fill("45");
+  await page.getByRole("button", { name: "记录这次考试" }).click();
+  await expect(page.getByText("已记录。")).toBeVisible();
+  await expect(page.getByRole("img", { name: "总分 班级位次趋势" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "期中" })).toBeVisible();
+  await page.screenshot({ path: "docs/screenshots/9-parent-exams.png", fullPage: true });
+});

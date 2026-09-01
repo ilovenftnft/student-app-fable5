@@ -110,3 +110,17 @@ describe("每日闭环端到端（API）", () => {
     expect(Object.keys(w).sort()).toEqual(["daysDone", "daysTotal", "masteredCards", "suggestion", "weakest", "week"]);
   });
 });
+
+describe("成绩与位次录入（API）", () => {
+  it("增删查，校验必填", async () => {
+    let r = await app.request("/api/parent/exams", { method: "POST", body: JSON.stringify({ date: "2026-11-10", name: "期中", subject: "总分", score: 612, fullScore: 700, classRank: 8, classSize: 45, gradeRank: 60, gradeSize: 520 }), headers: { "content-type": "application/json" } });
+    expect(r.status).toBe(200);
+    r = await app.request("/api/parent/exams", { method: "POST", body: JSON.stringify({ date: "2026-11-10", name: "期中", subject: "数学", score: 95 }), headers: { "content-type": "application/json" } });
+    expect(r.status).toBe(400);
+    const list = await j("/api/parent/exams");
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ subject_id: "总分", score: 612, class_rank: 8, grade_size: 520 });
+    await app.request(`/api/parent/exams/${list[0].id}`, { method: "DELETE" });
+    expect(await j("/api/parent/exams")).toEqual([]);
+  });
+});

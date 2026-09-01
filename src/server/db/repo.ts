@@ -148,3 +148,20 @@ export function saveReflection(db: DatabaseSync, r: ReflectionRow): void {
 export function dueTomorrowCount(db: DatabaseSync, tomorrowEndIso: string, todayEndIso: string): number {
   return (db.prepare("SELECT COUNT(*) AS n FROM card_state WHERE archived = 0 AND due > ? AND due <= ?").get(todayEndIso, tomorrowEndIso) as { n: number }).n;
 }
+
+// ---------- exam_score（MVP #6） ----------
+export interface ExamScore {
+  id: number; date: string; name: string; subject_id: string; score: number; full_score: number;
+  class_rank: number | null; class_size: number | null; grade_rank: number | null; grade_size: number | null;
+}
+export function examScores(db: DatabaseSync): ExamScore[] {
+  return db.prepare("SELECT * FROM exam_score ORDER BY date, subject_id").all() as unknown as ExamScore[];
+}
+export function addExamScore(db: DatabaseSync, e: Omit<ExamScore, "id">): number {
+  const r = db.prepare("INSERT INTO exam_score (date, name, subject_id, score, full_score, class_rank, class_size, grade_rank, grade_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .run(e.date, e.name, e.subject_id, e.score, e.full_score, e.class_rank, e.class_size, e.grade_rank, e.grade_size);
+  return Number(r.lastInsertRowid);
+}
+export function deleteExamScore(db: DatabaseSync, id: number): void {
+  db.prepare("DELETE FROM exam_score WHERE id = ?").run(id);
+}

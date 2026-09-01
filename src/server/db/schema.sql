@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS subject (
 );
 INSERT OR IGNORE INTO subject (id, name, sort) VALUES
   ('语文','语文',1),('数学','数学',2),('英语','英语',3),('历史','历史',4),
-  ('地理','地理',5),('生物','生物',6),('道法','道德与法治',7);
+  ('地理','地理',5),('生物','生物',6),('道法','道德与法治',7),('总分','总分',99);
 
 -- 键值设置：content_start（内容启用日 YYYY-MM-DD，intro_day 的第 0 天）、explain_daily_limit 等
 CREATE TABLE IF NOT EXISTS setting (

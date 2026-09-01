@@ -15,9 +15,17 @@ export interface Answer { back: string; answerPoints?: string[]; sourceQuote: st
 export interface Weekly { week: { from: string; to: string }; daysDone: number; daysTotal: number; masteredCards: number; weakest: { subject: string; topic: string } | null; suggestion: string }
 export interface TodayItem { itemId: string; front: string }
 
-async function req<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(path, body === undefined ? undefined : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`${path} ${res.status}`);
+export const SUBJECTS = ["语文", "数学", "英语", "历史", "地理", "生物", "道法"];
+export interface ExamScore { id: number; date: string; name: string; subject_id: string; score: number; full_score: number; class_rank: number | null; class_size: number | null; grade_rank: number | null; grade_size: number | null }
+export interface ExamInput { date: string; name: string; subject: string; score: string; fullScore: string; classRank: string; classSize: string; gradeRank: string; gradeSize: string }
+
+async function req<T>(path: string, body?: unknown, method = "POST"): Promise<T> {
+  const res = await fetch(path, body === undefined ? undefined : { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    let msg = `${path} ${res.status}`;
+    try { const j = await res.json() as { error?: string }; if (j.error) msg = j.error; } catch { /* 非 JSON */ }
+    throw new Error(msg);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -34,6 +42,9 @@ export const api = {
   reflect: (r: { hardest: string | null; guessed: string | null; tomorrow: string | null }) => req<Today>("/api/reflect", r),
   end: () => req<Today>("/api/session/end", {}),
   weekly: () => req<Weekly>("/api/parent/weekly"),
+  exams: () => req<ExamScore[]>("/api/parent/exams"),
+  addExam: (e: ExamInput) => req<{ id: number }>("/api/parent/exams", e),
+  deleteExam: (id: number) => req<{ ok: true }>(`/api/parent/exams/${id}`, {}, "DELETE"),
 };
+export const EXAM_SUBJECTS = ["总分", ...SUBJECTS];
 
-export const SUBJECTS = ["语文", "数学", "英语", "历史", "地理", "生物", "道法"];

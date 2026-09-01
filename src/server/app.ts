@@ -69,5 +69,18 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
     return c.json({ week: { from: monday, to: sunday }, ...weeklyReport(sessions, cards, reviews) });
   });
 
+  // ---- 成绩与位次（MVP #6） ----
+  app.get("/api/parent/exams", (c) => c.json(repo.examScores(db)));
+  app.post("/api/parent/exams", async (c) => {
+    const b = await c.req.json<Record<string, unknown>>();
+    const num = (v: unknown) => (v === null || v === undefined || v === "" ? null : Number(v));
+    const date = String(b.date ?? ""), name = String(b.name ?? "").trim(), subject = String(b.subject ?? "");
+    const score = num(b.score), full = num(b.fullScore);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !name || !subject || score === null || full === null || !(full > 0)) return c.json({ error: "日期、名称、科目、分数、满分都要填" }, 400);
+    const id = repo.addExamScore(db, { date, name, subject_id: subject, score, full_score: full, class_rank: num(b.classRank), class_size: num(b.classSize), grade_rank: num(b.gradeRank), grade_size: num(b.gradeSize) });
+    return c.json({ id });
+  });
+  app.delete("/api/parent/exams/:id", (c) => { repo.deleteExamScore(db, Number(c.req.param("id"))); return c.json({ ok: true }); });
+
   return app;
 }
