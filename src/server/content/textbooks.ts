@@ -10,8 +10,9 @@ export const POOLS_DIR = join(ROOT, "content/pools");
 export const AUDIO_DIR = join(ROOT, "content/audio");
 export const TEXT_DIR = join(ROOT, "textbook/txt");
 
-const TEXT_FILE: Record<Subject, string> = {
-  语文: "语文七上.txt",
+/** 一科可有多份文本（PDF 文字层 + OCR），核对时取并集：文字层分栏会把注释拆散，OCR 按版面读行。 */
+const TEXT_FILE: Record<Subject, string | string[]> = {
+  语文: ["语文七上.txt", "语文七上-ocr.txt"],
   数学: "数学七上.txt",
   英语: "英语七上.txt",
   历史: "历史七上.txt",
@@ -24,9 +25,13 @@ const cache = new Map<Subject, TextbookText>();
 export function textbookOf(subject: Subject): TextbookText {
   let t = cache.get(subject);
   if (!t) {
-    const p = join(TEXT_DIR, TEXT_FILE[subject]);
-    if (!existsSync(p)) throw new Error(`缺教材文本：${p}（用 tools/ocr.swift 或 pdftotext 生成）`);
-    t = new TextbookText(readFileSync(p, "utf8"));
+    const files = [TEXT_FILE[subject]].flat().map((f) => join(TEXT_DIR, f));
+    const present = files.filter((f) => existsSync(f));
+    if (present.length === 0) throw new Error(`缺教材文本：${files[0]}（用 tools/ocr.swift 或 pdftotext 生成）`);
+    t = new TextbookText(present.map((f) => readFileSync(f, "utf8")).join("\n"), {
+      stripNoteMarks: subject === "语文",
+      dropPageRefs: subject === "英语",
+    });
     cache.set(subject, t);
   }
   return t;

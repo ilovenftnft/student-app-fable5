@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { introDayOf, parsePool, subjectOf } from "../../src/server/content/pools.ts";
+import { applyFilter, filterFromArgs, positional } from "../../src/server/content/pipeline.ts";
 
 const recitation = {
   name: "语文-七上-默写",
@@ -95,5 +96,24 @@ describe("文件分类", () => {
   it("科目从文件名取", () => {
     expect(subjectOf("道法-七上")).toBe("道法");
     expect(() => subjectOf("物理-x")).toThrow();
+  });
+});
+
+describe("装载范围", () => {
+  const vocab = parsePool({
+    name: "英语-七上-词汇",
+    json: { 词: [
+      { 词: "ability", 释义: "n. 能力", 组: "本册新词", 课标重点: true, 教材页: 122 },
+      { 词: "smart", 释义: "adj. 聪明的", 组: "小学段", 课标重点: false, 教材页: 130 },
+    ] },
+    audioWords: new Set(["smart", "ability"]),
+  });
+  it("默认只装本册新词，含其听写卡", () => {
+    expect(applyFilter(vocab).map((i) => i.id)).toEqual(["vocab:ability", "listen:ability"]);
+  });
+  it("--vocab all --no-listen", () => {
+    const f = filterFromArgs(["--vocab", "all", "--no-listen"]);
+    expect(applyFilter(vocab, f).map((i) => i.id)).toEqual(["vocab:ability", "vocab:smart"]);
+    expect(positional(["a", "--vocab", "all", "--no-listen", "b", "--days", "10"])).toEqual(["a", "b"]);
   });
 });
