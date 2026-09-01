@@ -14,6 +14,7 @@
 import { createEmptyCard, fsrs, generatorParameters, Rating, State, type Card } from "ts-fsrs";
 import type { Item } from "../../shared/types.ts";
 import { FSRS_KINDS } from "../../shared/types.ts";
+import { ARCHIVE_INTERVAL_DAYS, REQUEST_RETENTION, SECONDS_PER, secondsFor as policySeconds } from "../scheduler/policy.ts";
 
 export interface SimConfig {
   days: number;
@@ -38,19 +39,14 @@ export interface SimConfig {
 export const DEFAULT_SIM: SimConfig = {
   days: 150,
   seed: 1,
-  // 假设值（秒）。依据：默写接句要回忆整句 ~20s；概念填空一个术语 ~15s；答题模板要点多 ~40s；
-  // 文言注释短 ~12s；单词认读 ~8s；听写 ~10s；错题重做 ~90s。
-  secondsPer: {
-    "recitation:fill": 20, "recitation:context": 25,
-    "concept:fill": 15, "concept:answer_template": 40, "concept:gloss": 12,
-    "vocab:word": 8, "listen:word": 10,
-    wrong: 90,
-  },
+  // 与真实调度共用 scheduler/policy.ts 的那张表（假设值：默写接句 ~20s、概念填空 ~15s、答题模板 ~40s、
+  // 文言注释 ~12s、单词 ~8s、听写 ~10s、错题重做 ~90s；上线后用实测中位替换）
+  secondsPer: SECONDS_PER,
   newMultiplier: 1.5,
   againMultiplier: 1.3,
   pNewGood: 0.5,
-  requestRetention: 0.9,
-  archiveIntervalDays: 30,
+  requestRetention: REQUEST_RETENTION,
+  archiveIntervalDays: ARCHIVE_INTERVAL_DAYS,
   maxSameDayReviews: 4,
   sessionMinutes: 60,
   medianMax: 12,
@@ -85,7 +81,7 @@ export function rng(seed: number): () => number {
 }
 
 export function secondsFor(item: Item, cfg: SimConfig): number {
-  return cfg.secondsPer[`${item.kind}:${item.subtype}`] ?? cfg.secondsPer[item.kind] ?? 20;
+  return policySeconds(item, cfg.secondsPer);
 }
 
 interface Slot { item: Item; card: Card; introduced: boolean; mature: boolean; today: number }

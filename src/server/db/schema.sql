@@ -11,6 +11,12 @@ INSERT OR IGNORE INTO subject (id, name, sort) VALUES
   ('语文','语文',1),('数学','数学',2),('英语','英语',3),('历史','历史',4),
   ('地理','地理',5),('生物','生物',6),('道法','道德与法治',7);
 
+-- 键值设置：content_start（内容启用日 YYYY-MM-DD，intro_day 的第 0 天）、explain_daily_limit 等
+CREATE TABLE IF NOT EXISTS setting (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 -- 教材章节树（MVP #2）。parent_id 为空 = 册级
 CREATE TABLE IF NOT EXISTS chapter (
   id         TEXT PRIMARY KEY,
@@ -56,7 +62,8 @@ CREATE TABLE IF NOT EXISTS card_state (
   state          INTEGER NOT NULL,      -- 0 New 1 Learning 2 Review 3 Relearning
   last_review    TEXT,
   archived       INTEGER NOT NULL DEFAULT 0,
-  pass_streak    INTEGER NOT NULL DEFAULT 0 -- 错题卡：跨会话连续答对次数
+  pass_streak    INTEGER NOT NULL DEFAULT 0, -- 错题卡：跨会话连续答对次数
+  last_pass_session INTEGER REFERENCES session(id) -- 错题卡：最近一次计入答对的会话
 );
 CREATE INDEX IF NOT EXISTS card_state_due ON card_state(archived, due);
 
