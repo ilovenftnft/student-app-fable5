@@ -5,11 +5,15 @@ import { existsSync } from "node:fs";
 import { openDb } from "./db/open.ts";
 import { createApp } from "./app.ts";
 import { ROOT } from "./content/textbooks.ts";
+import { DATA_DIR } from "./db/open.ts";
+import { startInbox } from "./inbox/watcher.ts";
 
 const db = openDb();
 const app = createApp(db);
 process.chdir(ROOT); // serveStatic 的 root 相对 cwd
 app.use("/audio/*", serveStatic({ root: "./content" }));
+app.use("/photos/*", serveStatic({ root: DATA_DIR.startsWith("/") ? DATA_DIR : `./${DATA_DIR}` }));
+if (process.env.INBOX !== "off") startInbox(db);
 if (existsSync("dist/client")) {
   app.use("/*", serveStatic({ root: "./dist/client" }));
   app.get("*", serveStatic({ root: "./dist/client", path: "index.html" }));

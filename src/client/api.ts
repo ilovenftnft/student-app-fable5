@@ -46,5 +46,13 @@ export const api = {
   addExam: (e: ExamInput) => req<{ id: number }>("/api/parent/exams", e),
   deleteExam: (id: number) => req<{ ok: true }>(`/api/parent/exams/${id}`, {}, "DELETE"),
 };
+export interface InboxPhoto { id: number; path: string; status: string; attempts: number; retryAt: string | null; error: string | null; createdAt: string }
+export interface Problem { id: number; photoPath: string; subject: string | null; stem: string; answer: string | null; tags: string[]; needsFigure: boolean; crop: number[] | null; teacherMark: "✗" | "✓" | null; confidence: number; status: string }
+export const inboxApi = {
+  photos: () => req<InboxPhoto[]>("/api/parent/inbox"),
+  pending: () => req<Problem[]>("/api/parent/problems?status=pending"),
+  confirm: (id: number, edit: { subject?: string; stem?: string; answer?: string }) => req<unknown>(`/api/parent/problems/${id}/confirm`, edit),
+  reject: (id: number) => req<unknown>(`/api/parent/problems/${id}/reject`, {}),
+};
 export const EXAM_SUBJECTS = ["总分", ...SUBJECTS];
 

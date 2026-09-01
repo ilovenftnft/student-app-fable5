@@ -5,6 +5,9 @@ import * as svc from "./loop/service.ts";
 import * as repo from "./db/repo.ts";
 import { weeklyReport } from "./report/weekly.ts";
 import { dayBounds } from "./scheduler/day.ts";
+import * as inbox from "./inbox/store.ts";
+import { confirmProblem, rejectProblem } from "./inbox/service.ts";
+import { sortForReview } from "./inbox/recognize.ts";
 
 export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()): Hono {
   const app = new Hono();
@@ -81,6 +84,22 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
     return c.json({ id });
   });
   app.delete("/api/parent/exams/:id", (c) => { repo.deleteExamScore(db, Number(c.req.param("id"))); return c.json({ ok: true }); });
+
+  // ---- 收件箱（MVP #4，家长侧） ----
+  app.get("/api/parent/inbox", (c) => c.json(inbox.photos(db).map((p) => ({ id: p.id, path: p.path, status: p.status, attempts: p.attempts, retryAt: p.retry_at, error: p.error, createdAt: p.created_at }))));
+  app.get("/api/parent/problems", (c) => {
+    const rows = inbox.problems(db, c.req.query("status") ?? "pending").map((p) => ({
+      id: p.id, photoPath: p.photo_path, subject: p.subject_id, stem: p.stem, answer: p.answer, tags: JSON.parse(p.tags) as string[],
+      needsFigure: !!p.needs_figure, crop: p.crop ? (JSON.parse(p.crop) as number[]) : null, teacherMark: p.teacher_mark as "✗" | "✓" | null, confidence: p.confidence ?? 0, status: p.status,
+    }));
+    return c.json(sortForReview(rows));
+  });
+  app.post("/api/parent/problems/:id/confirm", async (c) => {
+    const b = (await c.req.json<{ subject?: string; stem?: string; answer?: string; tags?: string[] }>().catch(() => ({}))) as { subject?: string; stem?: string; answer?: string; tags?: string[] };
+    try { return c.json(confirmProblem(db, Number(c.req.param("id")), b)); }
+    catch (e) { return c.json({ error: String((e as Error).message) }, 400); }
+  });
+  app.post("/api/parent/problems/:id/reject", (c) => { rejectProblem(db, Number(c.req.param("id"))); return c.json({ ok: true }); });
 
   return app;
 }

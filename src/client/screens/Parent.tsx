@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, EXAM_SUBJECTS, type ExamInput, type ExamScore, type Weekly } from "../api.ts";
+import { api, inboxApi, EXAM_SUBJECTS, SUBJECTS, type ExamInput, type ExamScore, type InboxPhoto, type Problem, type Weekly } from "../api.ts";
 
 /** 家长页：周报四项 + 成绩与位次录入 + 位次趋势。同一视觉系统，信息密度可更高；不显示逐题与时长。 */
 export function Parent() {
@@ -18,6 +18,8 @@ export function Parent() {
         <Row label="最薄弱的一点" value={w.weakest ? `${w.weakest.subject} · ${w.weakest.topic}` : "还没有数据"} />
       </div>
       <p style={{ marginTop: 24 }}>{w.suggestion}</p>
+
+      <Inbox />
 
       <h2 className="t-title" style={{ margin: "40px 0 16px" }}>成绩与位次</h2>
       <RankChart exams={exams} />
@@ -126,5 +128,59 @@ function ExamForm({ onAdded }: { onAdded: () => void }) {
         {msg && <p className="t-small muted" style={{ textAlign: "center", marginTop: 8 }}>{msg}</p>}
       </div>
     </form>
+  );
+}
+
+/** 待确认队列：照片 → 识出的题 → 家长确认成卡 / 不要。Codex 不可用时显示"稍后重试"。 */
+function Inbox() {
+  const [photos, setPhotos] = useState<InboxPhoto[]>([]);
+  const [pending, setPending] = useState<Problem[]>([]);
+  const reload = () => Promise.all([inboxApi.photos().then(setPhotos), inboxApi.pending().then(setPending)]);
+  useEffect(() => { void reload(); const t = setInterval(() => void reload(), 20_000); return () => clearInterval(t); }, []);
+  const label: Record<string, string> = { queued: "排队中", running: "识别中", done: "已识别", failed: "失败", retry_later: "稍后重试" };
+  const waiting = photos.filter((p) => p.status !== "done");
+  return (
+    <section>
+      <h2 className="t-title" style={{ margin: "40px 0 16px" }}>待确认</h2>
+      {waiting.length > 0 && (
+        <ul className="t-small muted" style={{ paddingLeft: 16, margin: "0 0 16px" }}>
+          {waiting.map((p) => <li key={p.id}>{p.path.split("/").pop()} · {label[p.status] ?? p.status}{p.error ? ` · ${p.error}` : ""}</li>)}
+        </ul>
+      )}
+      {pending.length === 0 && waiting.length === 0 && <p className="muted t-small">把作业或试卷照片放进 ~/StudyInbox，识别出的题会出现在这里。</p>}
+      {pending.map((p) => <ProblemCard key={p.id} p={p} onDone={reload} />)}
+    </section>
+  );
+}
+
+function ProblemCard({ p, onDone }: { p: Problem; onDone: () => void }) {
+  const [subject, setSubject] = useState(p.subject ?? "");
+  const [answer, setAnswer] = useState(p.answer ?? "");
+  const [msg, setMsg] = useState<string | null>(null);
+  const act = async (fn: () => Promise<unknown>) => { try { await fn(); onDone(); } catch (e) { setMsg(String((e as Error).message)); } };
+  return (
+    <div className="card" style={{ padding: 16, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 12 }}>
+        <img src={`/${p.photoPath}`} alt="" style={{ width: 96, height: 96, objectFit: "cover", borderRadius: 8, border: "1px solid var(--border)" }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="t-small muted" style={{ margin: "0 0 4px" }}>
+            {p.teacherMark === "✗" ? "老师打了 ✗ · " : p.teacherMark === "✓" ? "老师打了 ✓ · " : ""}置信度 {Math.round(p.confidence * 100)}%{p.needsFigure ? " · 带图" : ""}
+          </p>
+          <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{p.stem}</p>
+          {p.tags.length > 0 && <p className="t-small muted" style={{ margin: "8px 0 0" }}>{p.tags.join(" · ")}</p>}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 8, marginTop: 12 }}>
+        <select value={subject} onChange={(e) => setSubject(e.target.value)} style={{ padding: 10, borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 16 }}>
+          <option value="">科目</option>{SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <input type="text" placeholder="正确答案" value={answer} onChange={(e) => setAnswer(e.target.value)} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12, alignItems: "center" }}>
+        {msg && <span className="t-small muted">{msg}</span>}
+        <button className="btn-text" onClick={() => void act(() => inboxApi.reject(p.id))}>不要</button>
+        <button className="btn-primary" style={{ margin: 0, width: 120 }} onClick={() => void act(() => inboxApi.confirm(p.id, { subject: subject || undefined, answer: answer || undefined }))}>成卡</button>
+      </div>
+    </div>
   );
 }

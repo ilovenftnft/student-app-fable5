@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["subject", "page_summary", "questions"],
+  "properties": {
+    "subject": { "type": "string", "enum": ["语文", "数学", "英语", "历史", "地理", "生物", "道法", "其他"] },
+    "page_summary": { "type": "string" },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["number", "type", "stem", "options", "student_answer", "teacher_mark", "reference_answer", "knowledge_points", "grade_chapter", "difficulty", "confidence", "needs_figure", "bbox"],
+        "properties": {
+          "number": { "type": "string" },
+          "type": { "type": "string", "enum": ["选择", "填空", "解答", "其他"] },
+          "stem": { "type": "string" },
+          "options": { "type": "array", "items": { "type": "string" } },
+          "student_answer": { "type": "string" },
+          "teacher_mark": { "type": "string", "enum": ["wrong", "right", "none"] },
+          "reference_answer": { "type": "string" },
+          "knowledge_points": { "type": "array", "items": { "type": "string" } },
+          "grade_chapter": { "type": "string" },
+          "difficulty": { "type": "string", "enum": ["基础", "中档", "较难"] },
+          "confidence": { "type": "number" },
+          "needs_figure": { "type": "boolean" },
+          "bbox": { "type": "array", "items": { "type": "number" } }
+        }
+      }
+    }
+  }
+}

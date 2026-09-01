@@ -38,5 +38,6 @@ body {
 @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
 .flash-ok { border-color: var(--ok); transition: border-color 200ms; }
 .flash-weak { border-color: var(--weak); transition: border-color 200ms; }
-input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 16px; }
+label > input, label > select { display: block; }
+input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 16px; }
 @media (prefers-reduced-motion: reduce) { .fade { animation: none } .progress > div, .flash-ok, .flash-weak { transition: none } }
