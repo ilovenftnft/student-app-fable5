@@ -72,7 +72,9 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   app.get("/api/explain/:id", (c) => {
     const e = explain.explanation(db, Number(c.req.param("id")));
     if (!e) return c.json({ error: "not found" }, 404);
-    return c.json({ id: e.id, status: e.status, text: e.status === "done" ? e.text : null, message: e.status === "failed" ? "这道题的讲解稍后再看。" : e.status === "done" ? null : "讲解准备中。" });
+    // queued + retry_at = 额度触顶在等重置：孩子端只说"稍后再看"，不报错
+    const waiting = e.status === "failed" || (e.status === "queued" && e.retry_at);
+    return c.json({ id: e.id, status: waiting ? "failed" : e.status, text: e.status === "done" ? e.text : null, message: waiting ? "这道题的讲解稍后再看。" : e.status === "done" ? null : "讲解准备中。" });
   });
 
   app.post("/api/reflect", async (c) => {

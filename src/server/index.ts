@@ -7,6 +7,7 @@ import { createApp } from "./app.ts";
 import { ROOT } from "./content/textbooks.ts";
 import { DATA_DIR } from "./db/open.ts";
 import { startInbox } from "./inbox/watcher.ts";
+import { codexExplainer, retryDue } from "./explain/service.ts";
 
 const db = openDb();
 // EXPLAIN=fake：端到端测试用的假讲解，不调用 Codex
@@ -15,6 +16,7 @@ process.chdir(ROOT); // serveStatic 的 root 相对 cwd
 app.use("/audio/*", serveStatic({ root: "./content" }));
 app.use("/photos/*", serveStatic({ root: DATA_DIR.startsWith("/") ? DATA_DIR : `./${DATA_DIR}` }));
 if (process.env.INBOX !== "off") startInbox(db);
+if (process.env.EXPLAIN !== "fake") setInterval(() => void retryDue(db, new Date(), codexExplainer).catch((e) => console.error(`[explain] ${String(e)}`)), 60_000);
 if (existsSync("dist/client")) {
   app.use("/*", serveStatic({ root: "./dist/client" }));
   app.get("*", serveStatic({ root: "./dist/client", path: "index.html" }));

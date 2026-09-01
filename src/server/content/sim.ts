@@ -9,12 +9,12 @@
  *   - 每次耗时 = 该种类基准秒数 ×（新卡 1.5）×（答错 1.3）。基准秒数是假设值，
  *     上线后用 review.elapsed_ms 的实测中位替换（见 DEFAULT_SIM.secondsPer 注释）。
  *   - 不设每日上限：这里算的是"需求"，运行时的 10 分钟上限是另一回事。
- *     同日学习步骤（1m/10m）落在会话窗口内的算当天，否则顺延到次日。
+ *     FSRS 参数与真实调度共用（policy.FSRS_PARAMS：无同日学习步骤，到期按天）。
  */
-import { createEmptyCard, fsrs, generatorParameters, Rating, State, type Card } from "ts-fsrs";
+import { createEmptyCard, fsrs, Rating, State, type Card } from "ts-fsrs";
 import type { Item } from "../../shared/types.ts";
 import { FSRS_KINDS } from "../../shared/types.ts";
-import { ARCHIVE_INTERVAL_DAYS, REQUEST_RETENTION, SECONDS_PER, secondsFor as policySeconds } from "../scheduler/policy.ts";
+import { ARCHIVE_INTERVAL_DAYS, FSRS_PARAMS, REQUEST_RETENTION, SECONDS_PER, secondsFor as policySeconds } from "../scheduler/policy.ts";
 
 export interface SimConfig {
   days: number;
@@ -92,7 +92,7 @@ export function simulate(input: Item[], partial: Partial<SimConfig> = {}): SimRe
   const cfg = { ...DEFAULT_SIM, ...partial };
   const items = input.filter((i) => FSRS_KINDS.has(i.kind));
   const random = rng(cfg.seed);
-  const f = fsrs(generatorParameters({ request_retention: cfg.requestRetention, enable_fuzz: false }));
+  const f = fsrs({ ...FSRS_PARAMS, request_retention: cfg.requestRetention });
   const base = Date.UTC(2026, 8, 1, 9, 0, 0); // 每天 17:00（Asia/Shanghai）开始
   const slots = new Map<string, Slot>();
   for (const item of items) slots.set(item.id, { item, card: createEmptyCard(new Date(base)), introduced: false, mature: false, today: 0 });

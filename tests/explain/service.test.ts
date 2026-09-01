@@ -3,7 +3,7 @@ import { openDb } from "../../src/server/db/open.ts";
 import { upsertItems } from "../../src/server/content/store.ts";
 import { createApp } from "../../src/server/app.ts";
 import * as repo from "../../src/server/db/repo.ts";
-import { prompt, type Explainer } from "../../src/server/explain/service.ts";
+import { prompt, retryDue, type Explainer } from "../../src/server/explain/service.ts";
 import type { Item } from "../../src/shared/types.ts";
 import type { DatabaseSync } from "node:sqlite";
 import type { Hono } from "hono";
@@ -60,6 +60,22 @@ describe("作答后讲解", () => {
     const e = await (await failing.request(`/api/explain/${id}`)).json() as { status: string; message: string; text: null };
     expect(e).toMatchObject({ status: "failed", message: "这道题的讲解稍后再看。", text: null });
     expect((await j("/api/explain/gate/c1")).body.remaining).toBe(5);
+  });
+  it("额度触顶：留在队列，重置时间后自动重试；孩子端只看到稍后再看", async () => {
+    await j("/api/checkin", { chapterIds: [] });
+    await j("/api/review", { itemId: "c0", knew: false, elapsedMs: 5000 });
+    const quota = createApp(db, () => now, { explainer: async () => ({ ok: false, error: "usage limit", quotaResetAt: new Date("2026-09-07T10:00:00Z"), elapsedMs: 1 }) });
+    const res = await quota.request("/api/explain", { method: "POST", body: JSON.stringify({ itemId: "c0" }), headers: { "content-type": "application/json" } });
+    const { id } = await res.json() as { id: number };
+    await tick();
+    const e = await (await quota.request(`/api/explain/${id}`)).json() as { status: string; message: string };
+    expect(e.message).toBe("这道题的讲解稍后再看。");
+    expect(db.prepare("SELECT status, retry_at FROM explanation WHERE id = ?").get(id)).toEqual({ status: "queued", retry_at: "2026-09-07T10:00:00.000Z" });
+    expect(await retryDue(db, new Date("2026-09-07T09:30:00Z"), fake)).toBe(0);
+    expect(await retryDue(db, new Date("2026-09-07T10:00:01Z"), fake)).toBe(1);
+    const done = await (await quota.request(`/api/explain/${id}`)).json() as { status: string; text: string };
+    expect(done.status).toBe("done");
+    expect(done.text).toContain("讲 c0");
   });
   it("上限可配置（setting.explain_daily_limit）", async () => {
     repo.setSetting(db, "explain_daily_limit", "2");

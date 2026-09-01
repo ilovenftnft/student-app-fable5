@@ -6,9 +6,9 @@
 
 ```bash
 npm install                 # Node 26
-npm run load                # 内容池 → data/app.db（逐条核对出处；--vocab 本册新词 只装本册）
+npm run sim                 # 负荷模拟（--days 150 --seed 1 --vocab …）：中位 ≤ 12 分钟、超 20 分钟天数 ≤ 10% 才能装
+npm run load                # 内容池 → data/app.db：逐条核对出处，写库前再跑一遍模拟，不通过拒绝写入（--force 强行）
 npm run load:chapters       # 章节树 + 每节要点 → chapter 表
-npm run sim                 # 负荷模拟（内容入库前必跑；--days 150 --seed 1）
 npm run deploy              # 停 → build → 起 → 探测；http://127.0.0.1:8787（家长页 /parent）
 npm run stop
 ```

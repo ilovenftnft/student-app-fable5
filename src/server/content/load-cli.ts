@@ -4,8 +4,10 @@
  *   npm run verify          只核对不写库（= --dry-run）
  *   npm run load -- 生物-七上第一单元 地理-七上第三章
  *   --vocab 本册新词|小学段|all（默认 all）  --no-listen
+ * 硬约束 8：写库前先跑负荷模拟，不通过就拒绝写入；--force 只在家长明确决定时用。
  */
 import { applyFilter, collect, filterFromArgs, positional, printReport } from "./pipeline.ts";
+import { DEFAULT_SIM, simulate } from "./sim.ts";
 import { openDb } from "../db/open.ts";
 import { upsertItems } from "./store.ts";
 
@@ -18,6 +20,12 @@ printReport(files);
 const filter = filterFromArgs(args);
 const selected = applyFilter(accepted, filter);
 console.log(`装载范围：词汇=${filter.vocab}，听写=${filter.listen ? "开" : "关"} → ${selected.length} 条`);
+const r = simulate(selected);
+console.log(`负荷模拟：${r.days.length} 天中位 ${r.medianMinutes.toFixed(1)} 分钟，超 20 分钟 ${r.over20Days} 天（${(r.over20Ratio * 100).toFixed(0)}%）→ ${r.pass ? "通过" : "不通过"}（标准：中位 ≤ ${DEFAULT_SIM.medianMax}，超 20 分钟天数 ≤ ${DEFAULT_SIM.over20RatioMax * 100}%）`);
+if (!r.pass && !args.includes("--force")) {
+  console.log("不写库。缩小装载范围（--vocab 本册新词 / --no-listen / 少选几个池），或家长决定后加 --force。");
+  process.exit(1);
+}
 if (!dryRun) {
   const db = openDb();
   const n = upsertItems(db, selected);

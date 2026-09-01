@@ -13,6 +13,7 @@ const schemaPath = join(dirname(new URL(import.meta.url).pathname), "schema.sql"
 const ADDED_COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: "card_state", column: "last_pass_session", ddl: "INTEGER REFERENCES session(id)" },
   { table: "chapter", column: "points", ddl: "TEXT NOT NULL DEFAULT '[]'" },
+  { table: "explanation", column: "retry_at", ddl: "TEXT" },
 ];
 
 export function migrate(db: DatabaseSync): string[] {

@@ -1,8 +1,8 @@
 /** ts-fsrs 封装 + card_state 行的来回转换。 */
-import { createEmptyCard, fsrs, generatorParameters, State, type Card, type Grade } from "ts-fsrs";
-import { REQUEST_RETENTION } from "./policy.ts";
+import { createEmptyCard, fsrs, State, type Card, type Grade } from "ts-fsrs";
+import { FSRS_PARAMS } from "./policy.ts";
 
-export const scheduler = fsrs(generatorParameters({ request_retention: REQUEST_RETENTION, enable_fuzz: false }));
+export const scheduler = fsrs(FSRS_PARAMS);
 
 export interface CardStateRow {
   item_id: string;

@@ -44,7 +44,7 @@
 - 概念：`概念[] → {编号, 池: standard|textbook, 重要概念, 课标原文, 教材位置, 题[[题面, 答案, 教材原句]]}`。一题一空一术语。
 - 词汇：`词[] → {词, 释义, 音标, 组, 课标重点, 单元, 教材页}`；音标/拼读/录音在 `英语-音标与拼读.json` + `content/audio/*.ogg`（录音不入 git）。听写卡只对有真人录音的词开。
 - 池的含义：`standard` = 课标次位概念/中考范围；`textbook` = 教材有课标未列，校内会考。
-- 装载范围（2026-09-01 模拟，家长决定）：全部装，但英语**小学段 349 词按 365 天铺开引入**（`pools.ts` `VOCAB_SPAN_BY_GROUP`），本册新词随学期 150 天。模拟：150 天中位 11.3、p90 14.8、最大 18.7，无超 20 分钟天，通过（若小学段也按 150 天铺，中位 14.1 不通过）。`npm run load --vocab 本册新词` 可只装本册。
+- 装载范围（2026-09-01 模拟，家长决定）：全部装，但英语**小学段 349 词按 365 天铺开引入**（`pools.ts` `VOCAB_SPAN_BY_GROUP`），本册新词随学期 150 天。模拟（FSRS 无同日学习步骤，`policy.FSRS_PARAMS`）：150 天中位 8.6、p90 11.5、最大 14.1，无超 20 分钟天，通过。`npm run load` 写库前会再跑一遍模拟，不通过拒绝写入。`--vocab 本册新词` 可只装本册。
 - 出处核对分三级（整句 / 分段 / 词组，每级逐字，见 `verify.ts` 头注），核对结果按级计数；内容池 `出处例外` 只用于人工核过原页的 OCR 错误。
 - **错题卡（`kind = wrong`）的出处是孩子自己的作业照片**：`source_quote` = 家长确认后的题干，`source_ref` = `照片 <文件名> 第 N 题`，不经教材核对（它不是教材内容）。硬约束 7 的"逐字核对"只针对教材内容池与章节要点。
 
@@ -59,6 +59,7 @@
 - Node 26（系统自带）· `node:sqlite` · Hono（API + 静态托管，单进程）· Vite + React + TypeScript + Tailwind + shadcn/ui · `ts-fsrs` 5.4.x（lockfile 固定）· chokidar · Vitest · Playwright
 - 运行时依赖尽量少；孩子电脑上不需要 poppler、不需要编译原生模块。
 - **TDD**：纯逻辑（调度、任务生成、门控、负荷模拟、周报统计、JSON 比对）先写测试；LLM 层用 golden 样本（`tests/golden/`）；UI 只对两条端到端（提交照片→待确认；作答→讲解解锁）写 Playwright。
+- **FSRS 不用同日学习步骤**（`scheduler/policy.ts` `FSRS_PARAMS`：`learning_steps: []`）：到期按天，答错次日再来；改它必须同步影响模拟（两者共用这一份参数）。
 - **测试冲突的裁决源**：本文件的验收标准。Claude 与 Codex 各写的测试冲突时以此裁决，裁不了的进 `docs/待裁决.md`。
 - **双模型审阅**：每个功能完成后 `npm run review`（`tools/dual_check/`，Codex 只读审阅 diff，首行 `ALLOW:`/`BLOCK:`，未知格式按 BLOCK；最多 3 轮）。
 - **提交**：只走 `npm run deploy`（停 → build → 起 → 探测），不单独 `npm run build` 换掉运行中的产物。

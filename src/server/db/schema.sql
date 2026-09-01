@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS explanation (
   text         TEXT,
   thread_id    TEXT,
   error        TEXT,
+  retry_at     TEXT,                     -- 额度触顶：重置时间后重试
   requested_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS explanation_date ON explanation(date);

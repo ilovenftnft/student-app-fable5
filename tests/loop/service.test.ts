@@ -63,13 +63,12 @@ describe("每日闭环端到端（API）", () => {
     for (let i = 0; i < 6; i++) { const c = await j("/api/card/next"); if (!c) break; await j("/api/review", { itemId: c.itemId, knew: true, elapsedMs: 10000 }); }
 
     t = await j("/api/today");
-    // 答错的那张同日学习步骤在会话窗口内会再来一次，最终队列清空
     while (t.step === "review") { const c = await j("/api/card/next"); await j("/api/review", { itemId: c.itemId, knew: true, elapsedMs: 10000 }); t = await j("/api/today"); }
     expect(t.step).toBe("reflect");
 
     t = await j("/api/reflect", { hardest: "concept:生物:t:1", guessed: null, tomorrow: "concept:生物:t:1" });
     expect(t.step).toBe("done");
-    expect(t.summary.reviews).toBeGreaterThanOrEqual(6);
+    expect(t.summary.reviews).toBe(5); // 5 张卡各答一次；答错的次日再来，不在当天重复
     t = await j("/api/session/end", {});
     expect(t.session.ended).toBe(true);
     expect(t.step).toBe("done");

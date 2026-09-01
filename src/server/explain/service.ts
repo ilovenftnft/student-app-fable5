@@ -16,7 +16,7 @@ export const DEFAULT_DAILY_LIMIT = 5;
 export interface ExplanationJson { explanation: string; key_step: string; common_mistake: string }
 export type Explainer = (item: Item, knew: boolean) => Promise<EngineResult<ExplanationJson>>;
 
-export interface ExplanationRow { id: number; item_id: string; session_id: number | null; date: string; status: string; text: string | null; thread_id: string | null; error: string | null; requested_at: string }
+export interface ExplanationRow { id: number; item_id: string; session_id: number | null; date: string; status: string; text: string | null; thread_id: string | null; error: string | null; retry_at: string | null; requested_at: string }
 
 export function dailyLimit(db: DatabaseSync): number {
   return Number(repo.getSetting(db, "explain_daily_limit", String(DEFAULT_DAILY_LIMIT))) || DEFAULT_DAILY_LIMIT;
@@ -86,10 +86,28 @@ async function run(db: DatabaseSync, id: number, item: Item, knew: boolean, expl
     if (r.ok && r.json) {
       const text = [r.json.explanation.trim(), r.json.key_step ? `关键一步：${r.json.key_step.trim()}` : "", r.json.common_mistake ? `常见错因：${r.json.common_mistake.trim()}` : ""].filter(Boolean).join("\n\n");
       db.prepare("UPDATE explanation SET status = 'done', text = ?, thread_id = ? WHERE id = ?").run(text, r.threadId ?? null, id);
+    } else if (r.quotaResetAt) {
+      // 额度触顶：留在队列，重置时间后由 retryDue 自动重试（LLM 调用约定）
+      db.prepare("UPDATE explanation SET status = 'queued', error = ?, retry_at = ?, thread_id = ? WHERE id = ?").run(r.error ?? "额度用尽", r.quotaResetAt.toISOString(), r.threadId ?? null, id);
     } else {
       db.prepare("UPDATE explanation SET status = 'failed', error = ?, thread_id = ? WHERE id = ?").run(r.error ?? "未知错误", r.threadId ?? null, id);
     }
   } catch (e) {
     db.prepare("UPDATE explanation SET status = 'failed', error = ? WHERE id = ?").run(String(e), id);
   }
+}
+
+/** 后台：把到了重试时间的讲解重新跑一遍。index.ts 每分钟调一次。 */
+export async function retryDue(db: DatabaseSync, now: Date, explainer: Explainer): Promise<number> {
+  const rows = db.prepare("SELECT * FROM explanation WHERE status = 'queued' AND retry_at IS NOT NULL AND retry_at <= ?").all(now.toISOString()) as unknown as ExplanationRow[];
+  let n = 0;
+  for (const e of rows) {
+    const item = repo.items(db).find((i) => i.id === e.item_id);
+    if (!item) { db.prepare("UPDATE explanation SET status = 'failed', error = '内容不存在' WHERE id = ?").run(e.id); continue; }
+    const knew = e.session_id ? (answeredToday(db, e.item_id, e.session_id)?.knew ?? false) : false;
+    db.prepare("UPDATE explanation SET retry_at = NULL WHERE id = ?").run(e.id);
+    await run(db, e.id, item, knew, explainer);
+    n++;
+  }
+  return n;
 }

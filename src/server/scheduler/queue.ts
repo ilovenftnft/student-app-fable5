@@ -75,9 +75,6 @@ export function buildQueue(q: QueueInput): Queue {
     if (est + sec > budget) { newWaiting++; continue; }
     freshEntries.push({ item, isNew: true, estSeconds: sec }); est += sec;
   }
-  // 顺序：现在已到期 → 新卡 → 今天稍后才到期（同日学习步骤，刚答过的不立刻再出现）
-  const nowMs = q.now.getTime();
-  const dueNow = picked.filter((e) => q.states.get(e.item.id)!.card.due.getTime() <= nowMs);
-  const dueLater = picked.filter((e) => q.states.get(e.item.id)!.card.due.getTime() > nowMs);
-  return { entries: [...dueNow, ...freshEntries, ...dueLater], deferred, newWaiting, estSeconds: est };
+  // 顺序：到期卡 → 新卡。FSRS 无同日学习步骤（policy.FSRS_PARAMS），到期按天，不会有"今天稍后才到期"的卡
+  return { entries: [...picked, ...freshEntries], deferred, newWaiting, estSeconds: est };
 }

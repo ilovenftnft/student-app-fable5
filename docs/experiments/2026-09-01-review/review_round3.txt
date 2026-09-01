@@ -1,0 +1,9 @@
+BLOCK: 发现 1 个 high 级问题：内容入库没有强制先通过负荷模拟，且 README 给出的顺序也是先 load 后 sim，违反 AGENTS.md 硬约束 8。另有两个中等风险点。
+- [high] src/server/content/load-cli.ts: 内容入库可以绕过负荷模拟直接写库。
+    AGENTS.md 硬约束 8 要求新内容文件写完后先跑负荷模拟，且前 150 天中位 ≤ 12、超 20 分钟天数 ≤ 10% 才能加入，否则只能装一部分。但 load-cli 只做出处核对和筛选，随后直接 upsertItems 写入；README 还把 npm run load 放在 npm run sim 之前。这使任何新增内容都能在未验证负荷或模拟失败时入库，硬约束无法被程序或流程守住。
+- [medium] src/server/explain/service.ts: 讲解任务遇到额度触顶不会保留队列并自动重试。
+    AGENTS.md 的 LLM 调用约定要求额度触顶时任务留在队列，读取重置时间后自动重试。inbox 识题实现了 retry_later，但 explain 的 run() 对所有非 ok 结果都直接标记 failed，丢弃 quotaResetAt，也没有 retry_at/worker 机制；测试还固化了失败即 failed 的行为。
+- [medium] src/server/scheduler/queue.ts: 队列会派发今天稍后才到期的卡，实际可能提前复习。
+    buildQueue 把 due > now 但 <= dayEnd 的 dueLater 放进 entries，nextCard 会直接返回这些卡。这样学习步骤或复习卡还没到 FSRS due 时间就会被前端立即展示，和“到期卡”语义及 FSRS 间隔调度不一致，尤其是答错后的同日学习步骤可能被立刻再次派发。
+(codex 121s, thread 01a05d81-4324-7fe3-9ef1-4b3bdb880818)
+EXIT 1

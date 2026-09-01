@@ -1,7 +1,7 @@
 /**
  * 调度策略常量——模拟器（content/sim.ts）与真实调度共用这一份，改这里两边同时变。
  */
-import { State, type Card } from "ts-fsrs";
+import { generatorParameters, State, type Card } from "ts-fsrs";
 import type { Item } from "../../shared/types.ts";
 
 /** 每次作答的基准秒数（假设值；上线后用 review.elapsed_ms 的实测中位替换）。键 `${kind}:${subtype}` 或 `${kind}`。 */
@@ -31,3 +31,9 @@ export const WRONG_PASSES_TO_ARCHIVE = 3;
 
 /** FSRS 目标保持率。 */
 export const REQUEST_RETENTION = 0.9;
+
+/**
+ * FSRS 参数（调度与模拟共用）。**关掉同日学习步骤**（默认 1m/10m）：到期一律按天算，
+ * 答错的卡次日再来——"到期卡"语义清楚，队列里不会出现"今天稍后才到期"的卡（Codex 审阅第三轮）。
+ */
+export const FSRS_PARAMS = generatorParameters({ request_retention: REQUEST_RETENTION, enable_fuzz: false, enable_short_term: false, learning_steps: [], relearning_steps: [] });
