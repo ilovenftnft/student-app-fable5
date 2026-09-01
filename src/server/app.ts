@@ -17,6 +17,12 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ ok: true, items: repo.items(db).length }));
+  // 会话已结束（含 60 分钟硬停）时所有写入返回 409 + 当前状态，前端据此跳到结束页
+  app.onError((err, c) => {
+    if (err instanceof svc.SessionClosed) return c.json({ error: err.message, today: svc.today(db, clock()) }, 409);
+    console.error(err);
+    return c.json({ error: "服务出错" }, 500);
+  });
 
   // ---- 每日闭环 ----
   app.get("/api/today", (c) => c.json(svc.today(db, clock())));

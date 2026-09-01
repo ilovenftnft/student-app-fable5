@@ -83,8 +83,21 @@ export function today(db: DatabaseSync, now: Date): TodayView {
   };
 }
 
+export class SessionClosed extends Error {
+  constructor() { super("今天的会话已结束"); }
+}
+
+/**
+ * 写接口共用：取今天的会话；已到 60 分钟就先落库硬停并拒绝写入（硬约束 6 对写操作同样成立，不能只靠前端轮询）。
+ */
 export function start(db: DatabaseSync, now: Date): repo.SessionRow {
-  return repo.startSession(db, dayBounds(now).date, now);
+  const s = repo.startSession(db, dayBounds(now).date, now);
+  if (s.ended_at) throw new SessionClosed();
+  if (timerView(new Date(s.started_at), now, true).phase === "hard_stop") {
+    repo.endSession(db, s.id, now, "hard_stop");
+    throw new SessionClosed();
+  }
+  return s;
 }
 
 export function end(db: DatabaseSync, now: Date): void {

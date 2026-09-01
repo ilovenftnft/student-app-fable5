@@ -21,6 +21,7 @@ export interface ExamInput { date: string; name: string; subject: string; score:
 
 async function req<T>(path: string, body?: unknown, method = "POST"): Promise<T> {
   const res = await fetch(path, body === undefined ? undefined : { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  if (res.status === 409) { location.reload(); }
   if (!res.ok) {
     let msg = `${path} ${res.status}`;
     try { const j = await res.json() as { error?: string }; if (j.error) msg = j.error; } catch { /* 非 JSON */ }

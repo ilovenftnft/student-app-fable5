@@ -1,0 +1,7 @@
+BLOCK: 发现 2 个确定问题，其中一个违反 60 分钟硬停，需要阻止合入。
+- [high] src/server/loop/service.ts: 60 分钟硬停没有在会话写操作上强制执行，超时后仍可提交复习。
+    `today()` 读取时才检查并结束会话；但 `submitReview()`、`recall()`、`reflect()` 等写接口会继续使用当天 session 写入。前端也只每 30 秒轮询一次 `/api/today`，所以 60 分钟后仍可能记录作答，违反 AGENTS.md 硬约束 6。现有测试只覆盖读取 `/api/today` 会落库，没有覆盖超时后写接口。
+- [medium] src/server/inbox/service.ts: 家长确认照片题目成卡时，`source_quote` 和 `source_ref` 不符合项目出处约定，也没有逐字核对。
+    `confirmProblem()` 把识别题干写成 `sourceQuote`，把照片题号写成 `sourceRef`。AGENTS.md 规定 `item.source_quote` 是教材原句，`source_ref` 是册/章/页，且入库脚本逐字核对；这里的错题卡进入同一 `item` 表和 FSRS 队列，但没有教材出处或核对流程。
+(codex 124s, thread 01a05d7b-3251-7563-81a0-b821d15fe61e)
+EXIT 1

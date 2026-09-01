@@ -89,6 +89,22 @@ describe("每日闭环端到端（API）", () => {
     expect(await j("/api/recall/carry")).toEqual([{ chapterId: "生物:第一章/第一节", title: "第一节", points: [{ text: "A", quote: "a" }] }]);
   });
 
+  it("60 分钟硬停对写接口同样成立：超时后作答/回想/三问都被拒绝并落库硬停", async () => {
+    await j("/api/checkin", { chapterIds: ["生物:第一章/第一节"] });
+    const c = await j("/api/card/next");
+    now = new Date("2026-09-07T10:00:30Z"); // 60.5 分钟，前端还没轮询到
+    let res = await app.request("/api/review", { method: "POST", body: JSON.stringify({ itemId: c.itemId, knew: true, elapsedMs: 1000 }), headers: { "content-type": "application/json" } });
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as any).today.step).toBe("done");
+    expect(repo.sessionOn(db, "2026-09-07")!.ended_by).toBe("hard_stop");
+    expect(repo.reviewsInSession(db, repo.sessionOn(db, "2026-09-07")!.id)).toBe(0);
+    for (const [p, b] of [["/api/recall", { chapterId: "生物:第一章/第一节", thinkMs: 1, missed: [] }], ["/api/reflect", { hardest: null }], ["/api/checkin", { chapterIds: [] }]] as const) {
+      res = await app.request(p, { method: "POST", body: JSON.stringify(b), headers: { "content-type": "application/json" } });
+      expect(res.status).toBe(409);
+    }
+    expect(db.prepare("SELECT COUNT(*) AS n FROM recall").get()).toEqual({ n: 0 });
+  });
+
   it("60 分钟硬停：读取 today 时落库", async () => {
     await j("/api/checkin", { chapterIds: [] });
     now = new Date("2026-09-07T10:01:00Z");
