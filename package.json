@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=26" },
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "sim": "node src/server/content/sim-cli.ts",
     "load": "node src/server/content/load-cli.ts",
-    "verify": "node src/server/content/load-cli.ts --dry-run"
+    "verify": "node src/server/content/load-cli.ts --dry-run",
+    "load:chapters": "node src/server/content/chapters-cli.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

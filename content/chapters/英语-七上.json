@@ -1,0 +1,93 @@
+{
+ "科目": "英语",
+ "教材版本": "人教版（2024 秋新版）",
+ "说明": "单元 → Section A/B；要点待定（英语的回想对照物更适合是本单元词汇/句型，见 docs/待确认.md）。",
+ "节点": [
+  {
+   "标题": "Starter Unit 1 Hello!"
+  },
+  {
+   "标题": "Starter Unit 2 Keep Tidy!"
+  },
+  {
+   "标题": "Starter Unit 3 Welcome!"
+  },
+  {
+   "标题": "Unit 1 You and Me",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 2 We’re Family!",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 3 My School",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 4 My Favourite Subject",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 5 Fun Clubs",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 6 A Day in the Life",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  },
+  {
+   "标题": "Unit 7 Happy Birthday!",
+   "子": [
+    {
+     "标题": "Section A"
+    },
+    {
+     "标题": "Section B"
+    }
+   ]
+  }
+ ]
+}
