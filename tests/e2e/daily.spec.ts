@@ -31,7 +31,7 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
     await expect(look.or(reflect)).toBeVisible({ timeout: 10_000 });
     if (await reflect.isVisible()) break;
     await look.click();
-    if (n === 0) await page.screenshot({ path: shot("5-review-back") });
+    if (n === 0) { await expect(page.getByRole("button", { name: "会", exact: true })).toBeVisible(); await page.screenshot({ path: shot("5-review-back") }); }
     await page.getByRole("button", { name: n % 5 === 4 ? "不会" : "会", exact: true }).click();
     await expect(page.getByText(/^(对了。|再看一眼)/)).toBeVisible();
   }

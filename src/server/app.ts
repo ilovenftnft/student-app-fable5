@@ -64,7 +64,7 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
     const cards = [...repo.cardStates(db).values()].map((s) => s.card);
     const reviews = repo.reviewsBetween(db, monday, sunday).map((r) => {
       const meta = JSON.parse(r.meta) as Record<string, unknown>;
-      return { itemId: r.item_id, rating: r.rating, subject: r.subject_id, topic: String(meta.重要概念 ?? meta.标题 ?? meta.组 ?? "") };
+      return { itemId: r.item_id, rating: r.rating, subject: r.subject_id, topic: String(meta.重要概念 ?? meta.标题 ?? meta.词 ?? "") };
     });
     return c.json({ week: { from: monday, to: sunday }, ...weeklyReport(sessions, cards, reviews) });
   });

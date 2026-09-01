@@ -18,7 +18,9 @@
     "dev:client": "vite",
     "build": "vite build",
     "start": "node src/server/index.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "deploy": "bash scripts/deploy.sh",
+    "stop": "bash scripts/deploy.sh stop"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",

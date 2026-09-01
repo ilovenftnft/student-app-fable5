@@ -36,3 +36,4 @@ data/
 tests/e2e/.tmp/
 test-results/
 playwright-report/
+data/run/
