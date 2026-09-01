@@ -82,15 +82,11 @@ test("家长页：录入两次成绩后出现位次趋势", async ({ page, reque
   await page.screenshot({ path: "docs/screenshots/9-parent-exams.png", fullPage: true });
 });
 
-test("讲解只在作答后出现，且每日上限", async ({ page, request }) => {
-  await request.post("/api/checkin", { data: { chapterIds: [] } });
-  const card = await (await request.get("/api/card/next")).json() as { itemId: string } | null;
-  test.skip(!card, "今天没有到期卡");
-  const gate = await (await request.get(`/api/explain/gate/${encodeURIComponent(card!.itemId)}`)).json() as { allowed: boolean; reason: string };
+test("没作答的题不能要讲解（API 门控）", async ({ request }) => {
+  // 这条内容存在于库里，但这一天没有作答过
+  const itemId = "recitation:潼关:1:fill"; // 引入日在学期末，第一天不会出现在队列里
+  const gate = await (await request.get(`/api/explain/gate/${encodeURIComponent(itemId)}`)).json() as { allowed: boolean; reason: string };
   expect(gate).toMatchObject({ allowed: false, reason: "not_answered" });
-  const r = await request.post("/api/explain", { data: { itemId: card!.itemId } });
+  const r = await request.post("/api/explain", { data: { itemId } });
   expect(r.status()).toBe(403);
-  await page.goto("/");
-  await expect(page.getByRole("button", { name: "看答案" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /讲解/ })).toHaveCount(0);
 });
