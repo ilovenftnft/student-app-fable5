@@ -1,5 +1,6 @@
 /**
  * 回想要点里的概念词加粗换色（家长 2026-09-02 定）："可以写成分数形式的数称为有理数"里的"有理数"。
+ * 只对数学开（家长 09-02 试用后定：其他科目的要点是整句摘要或词本身，标了没意义）。
  * 纯规则，不接 LLM：
  *  1. 要点的 `text` 是短术语（≤ 8 字、不是问句、顿号可分几个）且在原句里出现 → 高亮它；
  *  2. 原句里"叫作 / 叫做 / 称为 / 统称为 / 合称 / 史称 / 又称 / 记作 / 叫 …"后面的被定义词（到标点为止，≤ 12 字）。
@@ -8,6 +9,12 @@
  * 同一个词在句里出现多次：有紧跟在定义词后面的位置就只标那一处（"正整数、0、负整数统称为整数"只标最后一个），没有才全标。
  */
 export type Segment = { s: string; term: boolean };
+
+/** 哪些科目的要点标概念词 */
+export const EMPHASIS_SUBJECTS: ReadonlySet<string> = new Set(["数学"]);
+export function emphasizeFor(subject: string, text: string, quote: string): Segment[] {
+  return EMPHASIS_SUBJECTS.has(subject) ? emphasize(text, quote) : [{ s: quote, term: false }];
+}
 
 const DEFINER_WORDS = "统称为|合称为|称之为|合称|称作|称为|叫作|叫做|简称|史称|又称|也称|或称|记作|叫";
 const DEFINER = new RegExp(`(?:${DEFINER_WORDS})\\s*[“"]?([^，。；：、！？“”"（）()\\s]{1,12})`, "g");

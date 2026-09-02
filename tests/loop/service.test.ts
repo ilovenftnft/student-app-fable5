@@ -12,6 +12,11 @@ const items: Item[] = Array.from({ length: 5 }, (_, i) => ({
   id: `concept:生物:t:${i}`, subject: "生物", kind: "concept", subtype: "fill", front: `问 ${i}`, back: `答 ${i}`,
   sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 0, meta: { 重要概念: "细胞" },
 }));
+const vocab: Item[] = [
+  { id: "vocab:Apple", subject: "英语", kind: "vocab", subtype: "word", front: "Apple", back: "n. 苹果", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "Apple", 音标: "ˈæpl" } },
+  { id: "listen:Apple", subject: "英语", kind: "listen", subtype: "word", front: "audio:Apple", back: "Apple", parentId: "vocab:Apple", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "Apple", 音标: "ˈæpl" } },
+  { id: "vocab:pear", subject: "英语", kind: "vocab", subtype: "word", front: "pear", back: "n. 梨", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "pear", 音标: "per" } },
+];
 const chapters = flattenChapters({ 科目: "生物", 节点: [{ 标题: "第一章", 子: [
   { 标题: "第一节", pdf页: 4, 要点: [{ 文: "A", 出处: "a" }, { 文: "B", 出处: "b" }] },
   { 标题: "第二节", pdf页: 8 },
@@ -26,7 +31,7 @@ const j = async (path: string, body?: unknown) => {
 beforeEach(() => {
   db = openDb(":memory:");
   repo.invalidateItems();
-  upsertItems(db, items);
+  upsertItems(db, [...items, ...vocab]);
   upsertChapters(db, chapters);
   repo.setSetting(db, "content_start", "2026-09-07");
   now = new Date("2026-09-07T09:00:00Z");
@@ -89,6 +94,10 @@ describe("每日闭环端到端（API）", () => {
     await j("/api/session/start", { subjectFirst: null, extra: false });
     t = await j("/api/checkin", { chapterIds: [] });
     expect(t.step).toBe("reflect");
+  });
+
+  it("读音表：词小写为键，带音标；只有有 listen 项的词才有录音地址", async () => {
+    expect(await j("/api/pronunciation")).toEqual({ apple: { ipa: "ˈæpl", audio: "/audio/Apple.ogg" }, pear: { ipa: "per", audio: null } });
   });
 
   it("昨天没想起来的要点，第二天进 carry", async () => {

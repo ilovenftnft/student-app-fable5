@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type Today } from "../api.ts";
-import { emphasize } from "../../shared/emphasis.ts";
+import { emphasizeFor } from "../../shared/emphasis.ts";
+import { pronOf, Speaker, usePronunciation } from "../Speaker.tsx";
 
-/** 一条要点：教材原句，概念词加粗换 accent 色（家长 09-02 定），规则见 shared/emphasis.ts。 */
-export function Point({ p }: { p: { text: string; quote: string } }) {
-  return <>{emphasize(p.text, p.quote || p.text).map((seg, i) => (seg.term ? <b key={i} className="term">{seg.s}</b> : <span key={i}>{seg.s}</span>))}</>;
+/** 一条要点：教材原句；只有数学把概念词加粗换红（weak 色，家长 09-02 定），规则见 shared/emphasis.ts。 */
+export function Point({ subject, p, ipa }: { subject: string; p: { text: string; quote: string }; ipa?: string }) {
+  return <>{emphasizeFor(subject, p.text, p.quote || p.text).map((seg, i) => (seg.term ? <b key={i} className="term">{seg.s}</b> : <span key={i}>{seg.s}</span>))}{ipa && <span className="mono muted" style={{ marginLeft: 10 }}>/{ipa}/</span>}</>;
+}
+/** 英语要点（单词或句型）：音标 + 喇叭（家长 09-02 加）。 */
+export function englishPron(prons: Record<string, { ipa: string; audio: string | null }>, subject: string, quote: string) {
+  if (subject !== "英语") return null;
+  const p = pronOf(prons, quote);
+  return { ipa: p?.ipa || undefined, audio: p?.audio ?? null };
 }
 
 /** 引导式回想：先想 1 分钟（正计时，不锁按钮）→ 展开要点 → 勾没想起来的。 */
@@ -26,11 +33,12 @@ export function recallCopy(subject: string) {
 export function Recall({ pending, onDone }: { pending: { chapterId: string; subject: string; parentTitle: string; title: string; points: { text: string; quote: string }[] }; onDone: (t: Today) => void }) {
   const [phase, setPhase] = useState<"think" | "compare">("think");
   const [missed, setMissed] = useState<Set<number>>(new Set());
-  const [carry, setCarry] = useState<{ title: string; points: { text: string; quote: string }[] }[]>([]);
+  const [carry, setCarry] = useState<{ chapterId: string; title: string; points: { text: string; quote: string }[] }[]>([]);
   const started = useRef(Date.now());
   const [minutes, setMinutes] = useState(0);
   useEffect(() => { const t = setInterval(() => setMinutes(Math.floor((Date.now() - started.current) / 60_000)), 5_000); return () => clearInterval(t); }, []);
   useEffect(() => { void api.recallCarry().then(setCarry); }, []);
+  const prons = usePronunciation();
   const c = recallCopy(pending.subject);
 
   if (phase === "think") {
@@ -39,7 +47,7 @@ export function Recall({ pending, onDone }: { pending: { chapterId: string; subj
         {carry.length > 0 && (
           <div className="card" style={{ padding: 16, marginTop: 24 }}>
             <p className="t-tag" style={{ margin: "0 0 8px" }}>昨天没想起来的，先看一眼</p>
-            {carry.map((c) => c.points.map((p, i) => <p key={c.title + i} style={{ margin: "4px 0" }}><Point p={p} /></p>))}
+            {carry.map((c) => c.points.map((p, i) => { const s = c.chapterId.split(":")[0] ?? ""; const e = englishPron(prons, s, p.quote); return <p key={c.title + i} className="point-row" style={{ margin: "4px 0" }}><span style={{ flex: 1 }}><Point subject={s} p={p} ipa={e?.ipa} /></span>{e && <Speaker text={p.quote} audio={e.audio} />}</p>; }))}
           </div>
         )}
         <p className="t-tag" style={{ margin: "40px 0 0" }}>{recallTitle(pending)}</p>
@@ -56,9 +64,12 @@ export function Recall({ pending, onDone }: { pending: { chapterId: string; subj
       <h1 className="t-title" style={{ margin: "12px 0 4px" }}>{c.pick}</h1>
       <p className="muted" style={{ margin: "0 0 24px" }}>{c.pickSub}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {pending.points.map((p, i) => (
-          <button key={i} className="choice" aria-pressed={missed.has(i)} onClick={() => setMissed((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n; })}><Point p={p} /></button>
-        ))}
+        {pending.points.map((p, i) => { const e = englishPron(prons, pending.subject, p.quote); return (
+          <div key={i} className="point-row">
+            <button className="choice point" aria-pressed={missed.has(i)} onClick={() => setMissed((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n; })}><Point subject={pending.subject} p={p} ipa={e?.ipa} /></button>
+            {e && <Speaker text={p.quote} audio={e.audio} />}
+          </div>
+        ); })}
       </div>
       <div style={{ marginTop: 24 }}>
         <button className="btn-primary" onClick={() => void api.recall(pending.chapterId, Date.now() - started.current, [...missed]).then(onDone)}>

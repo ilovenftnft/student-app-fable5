@@ -39,6 +39,7 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   app.post("/api/session/end", (c) => { svc.end(db, clock()); return c.json(svc.today(db, clock())); });
 
   app.get("/api/chapters", (c) => c.json(repo.chapterTrees(db)));
+  app.get("/api/pronunciation", (c) => c.json(repo.pronunciations(db)));
   app.post("/api/checkin", async (c) => {
     const body = await c.req.json<{ chapterIds: string[] }>();
     svc.checkin(db, clock(), Array.isArray(body.chapterIds) ? body.chapterIds.map(String) : []);

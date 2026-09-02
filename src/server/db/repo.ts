@@ -79,6 +79,18 @@ export function chapterTrees(db: DatabaseSync): Record<string, ChapterNode[]> {
   }
   return out;
 }
+/** 英语单词的读音表：词（小写）→ 音标 + 录音地址（只有带 listen 项的词才有录音）。前端单词卡与回想要点用。 */
+export function pronunciations(db: DatabaseSync): Record<string, { ipa: string; audio: string | null }> {
+  const rows = db.prepare("SELECT front, meta FROM item WHERE kind = 'vocab' AND subject_id = '英语'").all() as unknown as { front: string; meta: string }[];
+  const listen = new Set((db.prepare("SELECT back FROM item WHERE kind = 'listen'").all() as unknown as { back: string }[]).map((r) => r.back.trim().toLowerCase()));
+  const out: Record<string, { ipa: string; audio: string | null }> = {};
+  for (const r of rows) {
+    const w = r.front.trim().toLowerCase();
+    const ipa = (JSON.parse(r.meta) as { 音标?: string | null }).音标 ?? "";
+    out[w] = { ipa, audio: listen.has(w) ? `/audio/${r.front}.ogg` : null };
+  }
+  return out;
+}
 export function chapter(db: DatabaseSync, id: string): ChapterRow | undefined {
   return db.prepare("SELECT * FROM chapter WHERE id = ?").get(id) as ChapterRow | undefined;
 }

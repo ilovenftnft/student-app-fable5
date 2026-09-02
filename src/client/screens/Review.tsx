@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, type Answer, type CardFront } from "../api.ts";
 import { useExplain, ExplainMark, ExplainView } from "./Explain.tsx";
+import { pronOf, Speaker, usePronunciation } from "../Speaker.tsx";
 
 /** 题面里的空：答案能一一对应填进空里就直接填（一个空 = 整个答案；多个空 = 按"、"拆，段数须等于空数，每段 ≤ 12 字），否则答案另起一块。 */
 function inlineFills(front: string, answer: Answer | null): string[] | null {
@@ -11,18 +12,27 @@ function inlineFills(front: string, answer: Answer | null): string[] | null {
   return pieces.length === blanks && pieces.every((x) => x.length <= 12) ? pieces : null;
 }
 
+/** 题面里的空：填进去的答案、紧跟的标点、✓/✗ 绑成一个不换行的整体，免得句号被单独挤到下一行（家长 09-02 指出）。 */
 function Front({ front, fills, mark }: { front: string; fills: string[] | null; mark: React.ReactNode }) {
   const parts = front.split(/_{2,}/);
   const blanks = parts.length - 1;
   return (
     <h1 className="t-title" style={{ margin: 0, fontSize: 32, lineHeight: "48px", whiteSpace: "pre-wrap", textAlign: "center" }}>
-      {parts.map((p, i) => (
-        <span key={i}>
-          {p}
-          {i < blanks && (fills ? <span className="fill">{fills[i]}</span> : <span className="blank">&nbsp;</span>)}
-          {i === blanks - 1 && fills && mark}
-        </span>
-      ))}
+      {parts.map((p, i) => {
+        const [, punct = "", rest = p] = i > 0 ? (/^([，。；：、！？”’）〕】》]*)([\s\S]*)$/.exec(p) ?? []) : [];
+        return (
+          <span key={i}>
+            {i > 0 && (
+              <span style={{ whiteSpace: "nowrap" }}>
+                {fills ? <span className="fill">{fills[i - 1]}</span> : <span className="blank">&nbsp;</span>}
+                {punct}
+                {i === blanks && fills && mark}
+              </span>
+            )}
+            {i > 0 ? rest : p}
+          </span>
+        );
+      })}
     </h1>
   );
 }
@@ -56,7 +66,11 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
   const advance = () => { const nx = nextRef.current; if (nx) show(nx); else onDone(); };
 
   const explain = useExplain(card?.itemId ?? "", feedback !== null);
+  const prons = usePronunciation();
   if (!card) return null;
+  // 英语单词卡：题面下给音标和喇叭（家长 09-02 加）；听写卡不给，音标会泄露拼写
+  const pron = card.subject === "英语" && card.kind === "vocab" ? pronOf(prons, card.front) : undefined;
+  const speakable = card.subject === "英语" && card.kind === "vocab";
   const total = remaining;
   const fills = inlineFills(card.front, answer);
   const inlineAnswer = fills !== null;
@@ -69,6 +83,12 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
       </div>
       <div className="gap" />
       {card.kind === "listen" ? <audio controls autoPlay src={card.audio} style={{ width: "100%" }} /> : <Front front={card.front} fills={fills} mark={feedback ? <Mark ok={feedback.ok} text={feedback.text} /> : null} />}
+      {speakable && (
+        <div className="pron">
+          {pron?.ipa && <span className="mono">/{pron.ipa}/</span>}
+          <Speaker text={card.front} audio={pron?.audio ?? null} />
+        </div>
+      )}
       {answer && (!inlineAnswer || (feedback && explain.view)) && (
         <>
           <div className="gap" />

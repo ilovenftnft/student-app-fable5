@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emphasize, terms } from "../../src/shared/emphasis.ts";
+import { emphasize, emphasizeFor, terms } from "../../src/shared/emphasis.ts";
 
 describe("回想要点的概念词", () => {
   it("text 是短术语且在原句里 → 高亮它", () => {
@@ -45,5 +45,10 @@ describe("回想要点的概念词", () => {
   it("text 带空格也能对上原句", () => {
     expect(terms("科学记数法", "把一个大于10的数表示成a×10n的形式，使用的是科学记数法")).toEqual(["科学记数法"]);
     expect(terms("0 的相反数", "0的相反数是0")).toEqual(["0的相反数"]);
+  });
+  it("只有数学标；其他科目原样返回", () => {
+    expect(emphasizeFor("数学", "有理数", "可以写成分数形式的数称为有理数").some((x) => x.term)).toBe(true);
+    expect(emphasizeFor("生物", "细胞质", "细胞膜以内、细胞核以外的部分叫细胞质")).toEqual([{ s: "细胞膜以内、细胞核以外的部分叫细胞质", term: false }]);
+    expect(emphasizeFor("地理", "经纬网", "由经线与纬线相互交织所构成的网络，叫作经纬网。")).toEqual([{ s: "由经线与纬线相互交织所构成的网络，叫作经纬网。", term: false }]);
   });
 });

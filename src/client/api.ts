@@ -41,6 +41,7 @@ export const api = {
   checkin: (chapterIds: string[]) => req<Today>("/api/checkin", { chapterIds }),
   recallCarry: () => req<{ chapterId: string; title: string; points: { text: string; quote: string }[] }[]>("/api/recall/carry"),
   recall: (chapterId: string, thinkMs: number, missed: number[]) => req<Today>("/api/recall", { chapterId, thinkMs, missed }),
+  pronunciation: () => req<Record<string, { ipa: string; audio: string | null }>>("/api/pronunciation"),
   nextCard: () => req<CardFront | null>("/api/card/next"),
   answer: (id: string) => req<Answer>(`/api/card/${encodeURIComponent(id)}/answer`),
   review: (itemId: string, knew: boolean, elapsedMs: number) => req<{ rating: number; feedback: string; next: CardFront | null }>("/api/review", { itemId, knew, elapsedMs }),

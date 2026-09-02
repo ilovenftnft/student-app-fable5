@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, SUBJECTS, type ChapterNode, type Today } from "../api.ts";
-import { Point, recallCopy, recallTitle } from "./Recall.tsx";
+import { englishPron, Point, recallCopy, recallTitle } from "./Recall.tsx";
+import { Speaker, usePronunciation } from "../Speaker.tsx";
 
 type Leaf = { id: string; subject: string; title: string; parentTitle: string; path: string; points: { text: string; quote: string }[] };
 type Pick = { leaf: Leaf; phase: "think" | "compare" | "done"; missed: Set<number>; startedAt: number; missedCount: number };
@@ -15,8 +16,9 @@ export function Checkin({ today, onDone }: { today: Today; onDone: (t: Today) =>
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<string | null>(null);
   const [picks, setPicks] = useState<Record<string, Pick>>({});
-  const [carry, setCarry] = useState<{ title: string; points: { text: string; quote: string }[] }[]>([]);
+  const [carry, setCarry] = useState<{ chapterId: string; title: string; points: { text: string; quote: string }[] }[]>([]);
   const [, tick] = useState(0);
+  const prons = usePronunciation();
   useEffect(() => {
     api.chapters().then(setTrees).catch((e) => setError(String(e)));
     api.recallCarry().then(setCarry).catch(() => {});
@@ -109,9 +111,12 @@ export function Checkin({ today, onDone }: { today: Today; onDone: (t: Today) =>
           <h2 className="t-h" style={{ margin: "8px 0 4px" }}>{c.pick}</h2>
           <p className="muted" style={{ margin: "0 0 16px" }}>{c.pickSub}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {p.leaf.points.map((pt, i) => (
-              <button key={i} className="choice" aria-pressed={p.missed.has(i)} onClick={() => setPick(subject, { ...p, missed: new Set(p.missed.has(i) ? [...p.missed].filter((x) => x !== i) : [...p.missed, i]) })}><Point p={pt} /></button>
-            ))}
+            {p.leaf.points.map((pt, i) => { const e = englishPron(prons, subject, pt.quote); return (
+              <div key={i} className="point-row">
+                <button className="choice point" aria-pressed={p.missed.has(i)} onClick={() => setPick(subject, { ...p, missed: new Set(p.missed.has(i) ? [...p.missed].filter((x) => x !== i) : [...p.missed, i]) })}><Point subject={subject} p={pt} ipa={e?.ipa} /></button>
+                {e && <Speaker text={pt.quote} audio={e.audio} />}
+              </div>
+            ); })}
           </div>
           <div style={{ marginTop: 20 }}><button className="btn-primary" onClick={() => finish(p)}>{p.missed.size ? `${p.missed.size} ${c.unit}明天再看` : c.allOk}</button></div>
         </div>
@@ -125,7 +130,7 @@ export function Checkin({ today, onDone }: { today: Today; onDone: (t: Today) =>
       {carry.length > 0 && (
         <div className="card" style={{ padding: 16, marginTop: 24 }}>
           <p className="t-tag" style={{ margin: "0 0 8px" }}>昨天没想起来的，先看一眼</p>
-          {carry.map((c) => c.points.map((pt, i) => <p key={c.title + i} style={{ margin: "4px 0" }}><Point p={pt} /></p>))}
+          {carry.map((c) => c.points.map((pt, i) => { const s = c.chapterId.split(":")[0] ?? ""; const e = englishPron(prons, s, pt.quote); return <p key={c.title + i} className="point-row" style={{ margin: "4px 0" }}><span style={{ flex: 1 }}><Point subject={s} p={pt} ipa={e?.ipa} /></span>{e && <Speaker text={pt.quote} audio={e.audio} />}</p>; }))}
         </div>
       )}
       <h1 className="t-title" style={{ margin: "40px 0 4px" }}>今天学到哪了</h1>
