@@ -8,7 +8,7 @@ import { dayBounds, daysBetween, weekBounds } from "../scheduler/day.ts";
 import { buildQueue, bySubject, type Queue } from "../scheduler/queue.ts";
 import { newCardState, review as fsrsReview } from "../scheduler/fsrs.ts";
 import { nextPreview, type NextPreview } from "../scheduler/preview.ts";
-import { doneLines, startLines } from "./lines.ts";
+import { doneLines, previewLines, startLines } from "./lines.ts";
 import { baselineMs, inferRating } from "../scheduler/rating.ts";
 import { updateWrongProgress } from "../scheduler/wrong.ts";
 import { currentStep, progress, type LoopState, type Step } from "./steps.ts";
@@ -38,6 +38,7 @@ export interface TodayView {
   start: { bySubject: { subject: Subject; count: number; estSeconds: number; wrong: number }[]; count: number; minutes: number; lines: string[]; choices: StartChoices | null };
   /** 结束页的句子（第一句固定格式） */
   doneLines: string[];
+  previewLines: string[];
 }
 
 export function startChoices(db: DatabaseSync, sessionId: number): StartChoices | null {
@@ -131,7 +132,33 @@ export function today(db: DatabaseSync, now: Date): TodayView {
     weekDone: wd,
     start: { bySubject: subjects, count: q.entries.length, minutes: startCtx.minutes, lines: startLines(startCtx), choices: session ? startChoices(db, session.id) : null },
     doneLines: doneLines({ date, reviews, dueTomorrow, deferred: q.deferred, wrongPassed, allRightSubject, weekDone: wd, minutes }),
+    previewLines: previewLines({ date, next: nextSections(db, state.checkins) }),
   };
+}
+
+/** 今天勾选的每一节，在本科目录里的下一叶（下次上课大概到这）。英语、道法一律带单元名；其他科目跨章时带章名。到了最后一节就没有。 */
+export function nextSections(db: DatabaseSync, checkins: string[]): { subject: string; title: string }[] {
+  if (checkins.length === 0) return [];
+  const trees = repo.chapterTrees(db);
+  const out: { subject: string; title: string }[] = [];
+  for (const [subject, roots] of Object.entries(trees)) {
+    const leaves: { id: string; title: string; parent: string }[] = [];
+    const walk = (nodes: typeof roots, parent: string) => {
+      for (const n of nodes) {
+        if (n.children.length) walk(n.children, n.title);
+        else leaves.push({ id: n.id, title: n.title, parent });
+      }
+    };
+    walk(roots, "");
+    for (const id of checkins) {
+      const i = leaves.findIndex((l) => l.id === id);
+      const cur = i >= 0 ? leaves[i] : undefined, nx = i >= 0 ? leaves[i + 1] : undefined;
+      if (!cur || !nx || out.some((o) => o.subject === subject)) continue;
+      const withParent = nx.parent && (subject === "英语" || subject === "道法" || nx.parent !== cur.parent);
+      out.push({ subject, title: withParent ? `${nx.parent} · ${nx.title}` : nx.title });
+    }
+  }
+  return out;
 }
 
 /** 开场页：记下"先做哪科 / 再多 5 张"，会话从这里开始。 */

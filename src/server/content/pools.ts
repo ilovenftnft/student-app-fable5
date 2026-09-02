@@ -11,6 +11,18 @@ export interface PoolFile {
   json: Record<string, unknown>;
   /** 有真人录音的词（小写）。只对这些词开听写卡。 */
   audioWords?: ReadonlySet<string>;
+  /** 自然拼读拆分（词小写 → 音块、规律说法），来自附属文件 英语-音标与拼读。 */
+  phonics?: ReadonlyMap<string, Phonics>;
+}
+export interface Phonics { 音块: string[]; 拼读规律说法?: string }
+
+/** 从附属文件 英语-音标与拼读 的 词表 取拆分表。 */
+export function phonicsOf(json: Record<string, unknown>): Map<string, Phonics> {
+  const m = new Map<string, Phonics>();
+  for (const w of (json.词表 as { 词: string; 音块?: string[]; 拼读规律说法?: string }[] | undefined) ?? []) {
+    if (w.音块?.length) m.set(w.词.toLowerCase(), { 音块: w.音块, ...(w.拼读规律说法 ? { 拼读规律说法: w.拼读规律说法 } : {}) });
+  }
+  return m;
 }
 
 /** 文件级引入计划：从起点天开始，把条目均匀铺到跨度天内。 */
@@ -191,7 +203,8 @@ function parseVocab(file: PoolFile): Item[] {
     const plan = { start: filePlan.start, span: VOCAB_SPAN_BY_GROUP[group] ?? filePlan.span };
     ws.forEach((w, i) => {
       const introDay = introDayOf(plan, i, ws.length);
-    const meta = { 词: w.词, 释义: w.释义, 音标: w.音标, 组: w.组, 课标重点: w.课标重点 ?? false, 单元: w.单元 };
+    const ph = file.phonics?.get(w.词.toLowerCase());
+    const meta = { 词: w.词, 释义: w.释义, 音标: w.音标, 组: w.组, 课标重点: w.课标重点 ?? false, 单元: w.单元, ...(ph ? { 音块: ph.音块, 拼读规律说法: ph.拼读规律说法 } : {}) };
     const common = {
       subject,
       // 课标重点词进 standard 池；其余教材词进 textbook 池

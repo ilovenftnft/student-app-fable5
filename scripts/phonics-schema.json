@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items"],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["word", "chunks", "rule"],
+        "properties": {
+          "word": { "type": "string", "description": "原词，逐字照抄" },
+          "chunks": { "type": "array", "items": { "type": "string" }, "description": "自然拼读音块，按顺序拼接必须逐字等于原词" },
+          "rule": { "type": ["string", "null"], "description": "最能代表这个词读法的一条规律的 key（只能从给定规律表里选）；没有合适的填 null" }
+        }
+      }
+    }
+  }
+}

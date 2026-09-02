@@ -37,6 +37,12 @@ function Front({ front, fills, mark }: { front: string; fills: string[] | null; 
   );
 }
 
+/** 规律说法开头是字母组合（"ar 发 /ɑːr/…"、"tion 发…"），这个音块含它就加粗；"短元音:辅+元+辅"这类没有字母组合的不加。 */
+function ruleHits(chunk: string, rule: string | undefined): boolean {
+  const g = /^([a-z]+)\s/.exec(rule ?? "")?.[1];
+  return !!g && chunk.toLowerCase().includes(g);
+}
+
 /** 对错反馈用符号，和答案排在同一行（家长 09-02 定）：✓ 强调色、✗ 错题色；句子只留给读屏。 */
 function Mark({ ok, text }: { ok: boolean; text: string }) {
   return <span className="mark fade" role="img" aria-label={text} title={text} style={{ color: ok ? "var(--accent)" : "var(--weak)" }}>{ok ? "✓" : "✗"}</span>;
@@ -84,10 +90,19 @@ export function Review({ remaining, onDone }: { remaining: number; onDone: () =>
       <div className="gap" />
       {card.kind === "listen" ? <audio controls autoPlay src={card.audio} style={{ width: "100%" }} /> : <Front front={card.front} fills={fills} mark={feedback ? <Mark ok={feedback.ok} text={feedback.text} /> : null} />}
       {speakable && (
-        <div className="pron">
-          {pron?.ipa && <span className="mono">/{pron.ipa}/</span>}
-          <Speaker text={card.front} audio={pron?.audio ?? null} />
-        </div>
+        <>
+          <div className="pron">
+            {pron?.ipa && <span className="mono">/{pron.ipa}/</span>}
+            <Speaker text={card.front} audio={pron?.audio ?? null} />
+          </div>
+          {/* 自然拼读拆分（家长 09-02 加，参考 vocabulary-building）：音块用 · 隔开，规律里的字母组合加粗；规律说法一行小字 */}
+          {pron?.chunks && (
+            <div className="chunks">
+              <p className="mono" style={{ margin: 0 }}>{pron.chunks.map((c, i) => <span key={i}>{i > 0 && <span className="muted"> · </span>}<span className={ruleHits(c, pron.rule) ? "chunk-key" : undefined}>{c}</span></span>)}</p>
+              {pron.rule && <p className="t-small muted" style={{ margin: "4px 0 0" }}>{pron.rule}</p>}
+            </div>
+          )}
+        </>
       )}
       {answer && (!inlineAnswer || (feedback && explain.view)) && (
         <>

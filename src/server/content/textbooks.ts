@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import type { Subject } from "../../shared/types.ts";
 import { TextbookText } from "./verify.ts";
-import type { PoolFile } from "./pools.ts";
+import { phonicsOf, type PoolFile } from "./pools.ts";
 
 export const ROOT = new URL("../../../", import.meta.url).pathname;
 export const POOLS_DIR = join(ROOT, "content/pools");
@@ -46,9 +46,12 @@ export function audioWords(): Set<string> {
 export function readPools(names?: string[]): PoolFile[] {
   const audio = audioWords();
   const files = names ?? readdirSync(POOLS_DIR).filter((f) => f.endsWith(".json")).map((f) => basename(f, ".json")).sort();
+  const aux = join(POOLS_DIR, "英语-音标与拼读.json");
+  const phonics = existsSync(aux) ? phonicsOf(JSON.parse(readFileSync(aux, "utf8"))) : new Map();
   return files.map((name) => ({
     name: basename(name, ".json"),
     json: JSON.parse(readFileSync(join(POOLS_DIR, `${basename(name, ".json")}.json`), "utf8")),
     audioWords: audio,
+    phonics,
   }));
 }

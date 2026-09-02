@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { introDayOf, parsePool, subjectOf } from "../../src/server/content/pools.ts";
+import { introDayOf, parsePool, subjectOf, phonicsOf } from "../../src/server/content/pools.ts";
 import { applyFilter, filterFromArgs, positional } from "../../src/server/content/pipeline.ts";
 
 const recitation = {
@@ -85,6 +85,12 @@ describe("词汇池", () => {
     expect(items.map((i) => i.id)).toEqual(["vocab:ability", "vocab:smart", "listen:smart"]);
     expect(items[0]).toMatchObject({ kind: "vocab", pool: "standard", front: "ability", back: "n. 能力；才能", sourceRef: "英语七上 本册新词 PDF p122" });
     expect(items[2]).toMatchObject({ kind: "listen", pool: "textbook", front: "audio:smart", back: "smart", parentId: "vocab:smart" });
+  });
+  it("附属文件的拼读拆分并进 meta；没有的不加字段", () => {
+    const phonics = phonicsOf({ 词表: [{ 词: "Smart", 音标: "smɑːrt", 音块: ["sm", "ar", "t"], 拼读规律说法: "ar 发 /ɑːr/(farm·hard·far)" }, { 词: "x", 音标: "x" }] });
+    const items = parsePool({ ...vocab, phonics });
+    expect(items[1]!.meta).toMatchObject({ 音块: ["sm", "ar", "t"], 拼读规律说法: "ar 发 /ɑːr/(farm·hard·far)" });
+    expect(items[0]!.meta).not.toHaveProperty("音块");
   });
 });
 

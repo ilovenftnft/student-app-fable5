@@ -13,7 +13,7 @@ const items: Item[] = Array.from({ length: 5 }, (_, i) => ({
   sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 0, meta: { 重要概念: "细胞" },
 }));
 const vocab: Item[] = [
-  { id: "vocab:Apple", subject: "英语", kind: "vocab", subtype: "word", front: "Apple", back: "n. 苹果", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "Apple", 音标: "ˈæpl" } },
+  { id: "vocab:Apple", subject: "英语", kind: "vocab", subtype: "word", front: "Apple", back: "n. 苹果", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "Apple", 音标: "ˈæpl", 音块: ["a", "pp", "le"], 拼读规律说法: "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)" } },
   { id: "listen:Apple", subject: "英语", kind: "listen", subtype: "word", front: "audio:Apple", back: "Apple", parentId: "vocab:Apple", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "Apple", 音标: "ˈæpl" } },
   { id: "vocab:pear", subject: "英语", kind: "vocab", subtype: "word", front: "pear", back: "n. 梨", sourceQuote: "x", sourceRef: "y", pool: "standard", introDay: 400, meta: { 词: "pear", 音标: "per" } },
 ];
@@ -96,8 +96,22 @@ describe("每日闭环端到端（API）", () => {
     expect(t.step).toBe("reflect");
   });
 
+  it("结束页“下次上课”一块：勾了第一节就点名第二节", async () => {
+    expect((await j("/api/today")).previewLines).toHaveLength(1);
+    await j("/api/checkin", { chapterIds: ["生物:第一章/第一节"] });
+    expect((await j("/api/today")).previewLines.slice(1)).toEqual(["生物 · 第二节"]);
+  });
+  it("结束页“下次上课”一块：跨章时带章名", async () => {
+    upsertChapters(db, flattenChapters({ 科目: "生物", 节点: [
+      { 标题: "第一章", 子: [{ 标题: "第一节", pdf页: 4 }, { 标题: "第二节", pdf页: 8 }] },
+      { 标题: "第二章", 子: [{ 标题: "第一节", pdf页: 20 }] },
+    ] }).rows); // 同科目整棵重写
+    await j("/api/checkin", { chapterIds: ["生物:第一章/第二节"] });
+    expect((await j("/api/today")).previewLines.slice(1)).toEqual(["生物 · 第二章 · 第一节"]);
+  });
+
   it("读音表：词小写为键，带音标；只有有 listen 项的词才有录音地址", async () => {
-    expect(await j("/api/pronunciation")).toEqual({ apple: { ipa: "ˈæpl", audio: "/audio/Apple.ogg" }, pear: { ipa: "per", audio: null } });
+    expect(await j("/api/pronunciation")).toEqual({ apple: { ipa: "ˈæpl", audio: "/audio/Apple.ogg", chunks: ["a", "pp", "le"], rule: "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)" }, pear: { ipa: "per", audio: null } });
   });
 
   it("昨天没想起来的要点，第二天进 carry", async () => {

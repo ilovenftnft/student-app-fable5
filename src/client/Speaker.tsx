@@ -6,7 +6,7 @@ import { api } from "./api.ts";
  * 有真人录音（content/audio，维基词典母语者）放录音；没有就用系统本机语音合成，不用网络（硬约束 1）。
  * 词组和整句只走语音合成。点一下读一遍，不自动播。
  */
-export type Pron = { ipa: string; audio: string | null };
+export type Pron = { ipa: string; audio: string | null; chunks?: string[]; rule?: string };
 let cache: Promise<Record<string, Pron>> | null = null;
 export function usePronunciation(): Record<string, Pron> {
   const [m, setM] = useState<Record<string, Pron>>({});

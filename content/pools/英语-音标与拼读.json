@@ -1,94 +1,309 @@
 {
- "说明": "英语单词的音标 / 自然拼读拆分 / 有没有真人录音。由 scripts/build-vocab-extra.ts 从 english-vocabulary-building 抽取，勿手改。",
+ "说明": "英语单词的音标 / 自然拼读拆分 / 有没有真人录音。由 scripts/build-vocab-extra.ts 从 english-vocabulary-building 抽取，拆分缺口由 scripts/fill-phonics.ts 补，勿手改。",
  "音标风格": "牛津美式一族（e 表 DRESS、长音符 ɑː/ɔː/iː/uː/ɜːr、r 不写 ɹ），符号表照抄对方 tools/ipa_gen.py",
  "音标来源": "card = 对方人工核实过的词卡；cmudict = 由 CMU 发音词典现算",
- "拼读拆分的缺口": "只有对方词卡覆盖到的词才有音块和规律。没有的不生成——错的拼读规律比没有更糟",
+ "拼读拆分": "音块与规律：抄自对方词卡的标 拆分来源 card；对方没覆盖的词由 scripts/fill-phonics.ts 用本机 codex exec 生成（家长 2026-09-02 定），程序核对：音块拼回去等于原词、规律在下面的规律表里、规律的字母组合真的出现在词里，核不上的不写；标 拆分来源 codex。缩写、字母词、专有名词可以没有规律。",
+ "拼读规律表": {
+  "ear": "ear 发 /ɪr/(fear·hear·year)",
+  "ir": "ir 发 /ɜːr/(first·girl·bird)",
+  "ch": "ch 发 /tʃ/(change·cheat)",
+  "oo": "oo 长音 /uː/(room·food)",
+  "oo-x": "oo 例外发 /ʌ/(blood·flood)",
+  "oo-u": "oo 短音 /ʊ/(foot·good)",
+  "CVC": "短元音:辅+元+辅(fox·kid·win)",
+  "ou": "ou 发 /aʊ/(proud·announce)",
+  "ou-x": "ou 例外发 /ʌ/(young·touch·enough)",
+  "o": "开音节 o 发 /oʊ/(ago·moment)",
+  "or": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+  "magic-e": "神奇e:元音变字母音(nine·home·face)",
+  "ey": "ey 发 /eɪ/(prey·they)",
+  "ey-i": "ey 词尾发 /i/(honey·money)",
+  "are": "are 发 /er/(scare·declare)",
+  "er": "er 轻音 /ər/(officer·killer)",
+  "er-s": "er 重读发 /ɜːr/(her·verb)",
+  "or-er": "词尾 or 非重读发 /ər/(doctor·actor)",
+  "le": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+  "i": "短音 i /ɪ/(limit·criminal)",
+  "ur": "ur 发 /ɜːr/(urge·return)",
+  "ai": "ai 发 /eɪ/(fail·maim)",
+  "au": "au 发 /ɔː/(astronaut·maul)",
+  "ea-e": "ea 短音 /e/(dead·death·instead)",
+  "ea": "ea 长音 /iː/(dream·eat·peace)",
+  "ea-a": "ea 例外 /eɪ/(great·break)",
+  "ee": "ee 发 /iː/(seed·street·teeth)",
+  "ay": "ay 发 /eɪ/(way·mayor·play)",
+  "ar": "ar 发 /ɑːr/(farm·hard·far)",
+  "y": "y 词尾发 /i/(bunny·city·happy)",
+  "y-i": "y 词尾发 /aɪ/(try·cry·fly)",
+  "y-i2": "y 在词中发 /ɪ/(system)",
+  "age": "age 词尾 /ɪdʒ/(package·savage)",
+  "tion": "tion 发 /ʃn/(exemption·congratulations)",
+  "sion": "sion 发 /ʒn·ʃn/(profession·inclusion)",
+  "cious": "cious 发 /ʃəs/(vicious)",
+  "cy": "cy 词尾 /si/(complacency)",
+  "ck": "ck 发 /k/(kick·snack·ticket)",
+  "gu": "gu 里 u 不发音(guess)",
+  "al": "al 里 l 常不发音(talk·walk)",
+  "ind": "ind 发 /aɪnd/(mind·kindly)",
+  "st": "st 连读 /st/(stand·instinct)",
+  "st-t": "t 不发音(listen)",
+  "x": "x 发 /ks/(next·express)",
+  "qu": "qu 发 /kw/(quit)",
+  "igh": "igh 发 /aɪ/(right·night·fight)",
+  "tch": "tch 发 /tʃ/(twitch·watch)",
+  "mb": "词尾 mb 的 b 不发音(dumb)",
+  "ff": "词尾双写 ff 只读一个 /f/(fluff)",
+  "zz": "双写 zz 只读一个 /z/(fuzzy)",
+  "all": "all 发 /ɔːl/(fall·wall·small)",
+  "wh": "wh 里 w 或 h 不发音(whole)",
+  "uy": "uy 发 /aɪ/(guy·buy)",
+  "dge": "dge 发 /dʒ/(badge)",
+  "ign": "ign 里 g 不发音(assign·sign)",
+  "que": "que 发 /k/(unique)",
+  "pre": "前缀 pre 发 /priː·prɪ/(precinct)",
+  "e": "短音 e /e/(cadet·repellant)",
+  "u": "短音 u(pull·full 发 /ʊ/)",
+  "u-l": "开音节 u 发长音 /uː/(stupid·super)",
+  "ied": "ied 发 /aɪd/(terrified)",
+  "ie": "ie 发 /iː/(believe)",
+  "ie-e": "ie 发 /e/(friend)",
+  "o-u": "o 发 /ʊ/(wolf)",
+  "o-u2": "o 发 /ʌ/(love·become)",
+  "aw": "aw 发 /ɔː/(awesome)",
+  "ear-ar": "ear 例外 /ɑːr/(heart)",
+  "ear-air": "ear 例外 /er/(bear·wear)",
+  "th": "th 发 /θ·ð/(teeth·brother)",
+  "sh": "sh 发 /ʃ/(sheep)",
+  "oi": "oi 发 /ɔɪ/(join·soil·point)",
+  "ly": "副词尾 ly 发 /li/(actually·kindly)",
+  "tia": "tia 发 /ʃə/(initiative)",
+  "cial": "cial 发 /ʃl/(officially)",
+  "ow-o": "ow 词尾发 /oʊ/(tomorrow)",
+  "ow": "ow 发 /aʊ/(cower·now)",
+  "eigh": "eigh 发 /eɪ/(neighbor·eight·weigh)",
+  "o-oo": "o…e 例外发 /uː/(lose·move·prove)",
+  "old": "old 发 /oʊld/(fold·hold·cold)",
+  "ph": "ph 发 /f/(elephant·photo)",
+  "ui": "ui 发 /uː/(recruit·fruit·juice)",
+  "g-j": "g 遇 e/i/y 常发 /dʒ/(giant·magic)",
+  "ar-er": "词尾 ar 非重读发 /ər/(polar·dollar)",
+  "i-l": "开音节 i 发 /aɪ/(item·tiger)",
+  "wr": "wr 里 w 不发音,读 /r/(write·wrong)",
+  "h-x": "h 不发音(hour·honest)",
+  "oa": "oa 发 /oʊ/(road·coat·boat)",
+  "our": "our 发 /ɔːr/(course·four)",
+  "war": "w 后的 ar 发 /ɔːr/(warning·warm)",
+  "olk": "olk 发 /oʊk/,l 不发音(folk·yolk)",
+  "gh-f": "词尾 gh 发 /f/(enough·laugh·tough)",
+  "i-e-x": "i…e 例外发短音 /ɪ/(give·live)",
+  "ough-o": "ough 发 /oʊ/(though)",
+  "ough-u": "ough 发 /uː/(through)",
+  "al-o": "a 在 l 前常发 /ɔː/(false·also·salt)",
+  "ie-i": "词尾 ie 发 /aɪ/(lie·die·tie)",
+  "air": "air 发 /er/(hair·air·fair)",
+  "ti-sh": "ti 发 /ʃ/(patient·initial)",
+  "oy": "oy 发 /ɔɪ/(voyage·toy·boy)",
+  "c-s": "c 遇 e/i/y 发 /s/(city·citation)",
+  "ue": "ue 发 /uː/(blue·true·glue)",
+  "ost": "ost 常发 /oʊst/(post·most·host)",
+  "oor": "oor 发 /ɔːr/(door·floor)",
+  "eau": "eau 发 /juː/(beautiful)",
+  "u-i": "u 例外发 /ɪ/(busy)",
+  "ture": "词尾 ture 发 /tʃər/(picture·future)",
+  "eer": "eer 发 /ɪr/(career·deer·cheer)",
+  "kn": "kn 里 k 不发音(knit·knot·know)",
+  "a-l": "开音节 a 发 /eɪ/(naked·paper·baby)",
+  "augh": "augh 发 /ɔː/(daughter·caught)",
+  "ch-k": "ch 有时发 /k/(technically·school)",
+  "ear-er": "ear 例外发 /ɜːr/(learn·early·earth)",
+  "bt": "bt 里 b 不发音(doubt·debt)",
+  "ew": "ew 发 /uː·juː/(review·new·few)",
+  "cc": "cc 发 /ks/(access·success)",
+  "e-l": "开音节 e 发 /iː/(secret·we·be)",
+  "ate-x": "词尾 ate 非重读发 /ət/(accurate·chocolate)",
+  "ch-sh": "ch 法语借词发 /ʃ/(chef·machine)",
+  "ou-u": "ou 有时发 /uː/(youth·soup·group)"
+ },
  "录音": "维基词典母语者录音，Ogg Vorbis，文件在 static/audio/",
  "词表": [
   {
    "词": "AM",
    "音标": "æm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "AM"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "China",
    "音标": "ˈtʃaɪnə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Chi",
+    "na"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "Chinese",
    "音标": "tʃaɪˈniːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Chi",
+    "nese"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "English",
    "音标": "ˈɪŋɡlɪʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Eng",
+    "lish"
+   ],
+   "拼读规律": "sh",
+   "拼读规律说法": "sh 发 /ʃ/(sheep)",
+   "拆分来源": "codex"
   },
   {
    "词": "Finnish",
    "音标": "ˈfɪnɪʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Fin",
+    "nish"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "French",
    "音标": "frentʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Fren",
+    "ch"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "I",
    "音标": "aɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "I"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "IT",
    "音标": "ɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "IT"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "Miss",
    "音标": "mɪs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Mi",
+    "ss"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "Mr",
    "音标": "ˈmɪstər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Mr"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "Mrs",
    "音标": "ˈmɪsɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Mrs"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "Ms",
    "音标": "mɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "Ms"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "OK",
    "音标": "oʊˈkeɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "OK"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "PM",
    "音标": "piːˈem",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "PM"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "a",
    "音标": "ə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "ability",
    "音标": "əˈbɪlətiː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "bil",
+    "i",
+    "ty"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "about",
    "音标": "əˈbaʊt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "bout"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "across",
@@ -100,17 +315,34 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "act",
    "音标": "ækt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "ct"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "activity",
    "音标": "ækˈtɪvəti",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ac",
+    "tiv",
+    "i",
+    "ty"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "after",
@@ -122,7 +354,8 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "afternoon",
@@ -135,7 +368,8 @@
    ],
    "拼读规律": "oo",
    "拼读规律说法": "oo 长音 /uː/(room·food)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "age",
@@ -146,7 +380,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "ago",
@@ -158,17 +393,32 @@
    ],
    "拼读规律": "o",
    "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "all",
    "音标": "ɔːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "all"
+   ],
+   "拼读规律": "all",
+   "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
+   "拆分来源": "codex"
   },
   {
    "词": "already",
    "音标": "ɔːlˈredi",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "al",
+    "read",
+    "y"
+   ],
+   "拼读规律": "ea-e",
+   "拼读规律说法": "ea 短音 /e/(dead·death·instead)",
+   "拆分来源": "codex"
   },
   {
    "词": "also",
@@ -178,7 +428,8 @@
     "al",
     "so"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "always",
@@ -190,22 +441,45 @@
    ],
    "拼读规律": "al-o",
    "拼读规律说法": "a 在 l 前常发 /ɔː/(false·also·salt)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "am",
    "音标": "æm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "m"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "amazing",
    "音标": "əˈmeɪzɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "maz",
+    "ing"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "and",
    "音标": "ənd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "nd"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "animal",
@@ -218,7 +492,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "another",
@@ -231,7 +506,8 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "answer",
@@ -243,22 +519,39 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "any",
    "音标": "ˈeni",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "ny"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "apple",
    "音标": "ˈæpəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ap",
+    "ple"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "are",
    "音标": "ɑːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "are"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "around",
@@ -270,17 +563,31 @@
    ],
    "拼读规律": "ou",
    "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "art",
    "音标": "ɑːrt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "art"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "as",
    "音标": "æz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "s"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "ask",
@@ -292,17 +599,29 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "at",
    "音标": "æt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "a",
+    "t"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "aunt",
    "音标": "ænt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "aunt"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "baby",
@@ -314,7 +633,8 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "back",
@@ -326,7 +646,8 @@
    ],
    "拼读规律": "ck",
    "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "ball",
@@ -338,32 +659,68 @@
    ],
    "拼读规律": "all",
    "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "balloon",
    "音标": "bəˈluːn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bal",
+    "loon"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "band",
    "音标": "bænd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ba",
+    "nd"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "basketball",
    "音标": "ˈbæskətbɔːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bas",
+    "ket",
+    "ball"
+   ],
+   "拼读规律": "all",
+   "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
+   "拆分来源": "codex"
   },
   {
    "词": "bat",
    "音标": "bæt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "at"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "be",
    "音标": "biː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "be"
+   ],
+   "拼读规律": "e-l",
+   "拼读规律说法": "开音节 e 发 /iː/(secret·we·be)",
+   "拆分来源": "codex"
   },
   {
    "词": "beautiful",
@@ -376,12 +733,18 @@
    ],
    "拼读规律": "eau",
    "拼读规律说法": "eau 发 /juː/(beautiful)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "because",
    "音标": "bɪˈkɔːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "be",
+    "cause"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "bed",
@@ -393,12 +756,20 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "beef",
    "音标": "biːf",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "eef"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "before",
@@ -410,12 +781,20 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "begin",
    "音标": "bɪˈɡɪn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "be",
+    "gin"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "behind",
@@ -427,12 +806,20 @@
    ],
    "拼读规律": "ind",
    "拼读规律说法": "ind 发 /aɪnd/(mind·kindly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "bell",
    "音标": "bel",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "ell"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "best",
@@ -444,7 +831,8 @@
    ],
    "拼读规律": "st",
    "拼读规律说法": "st 连读 /st/(stand·instinct)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "between",
@@ -456,12 +844,21 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "bicycle",
    "音标": "ˈbaɪsɪkəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bi",
+    "cy",
+    "cle"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "big",
@@ -473,7 +870,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "biology",
@@ -487,12 +885,20 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "bird",
    "音标": "bɜːrd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "ird"
+   ],
+   "拼读规律": "ir",
+   "拼读规律说法": "ir 发 /ɜːr/(first·girl·bird)",
+   "拆分来源": "codex"
   },
   {
    "词": "birthday",
@@ -504,22 +910,44 @@
    ],
    "拼读规律": "ir",
    "拼读规律说法": "ir 发 /ɜːr/(first·girl·bird)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "black",
    "音标": "blæk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bl",
+    "ack"
+   ],
+   "拼读规律": "ck",
+   "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
+   "拆分来源": "codex"
   },
   {
    "词": "blackboard",
    "音标": "ˈblækbɔːrd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "black",
+    "board"
+   ],
+   "拼读规律": "ck",
+   "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
+   "拆分来源": "codex"
   },
   {
    "词": "blow",
    "音标": "bloʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bl",
+    "ow"
+   ],
+   "拼读规律": "ow-o",
+   "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
+   "拆分来源": "codex"
   },
   {
    "词": "blue",
@@ -531,32 +959,68 @@
    ],
    "拼读规律": "ue",
    "拼读规律说法": "ue 发 /uː/(blue·true·glue)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "book",
    "音标": "bʊk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "ook"
+   ],
+   "拼读规律": "oo-u",
+   "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
+   "拆分来源": "codex"
   },
   {
    "词": "bookcase",
    "音标": "ˈbʊkkeɪs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "book",
+    "case"
+   ],
+   "拼读规律": "oo-u",
+   "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
+   "拆分来源": "codex"
   },
   {
    "词": "boring",
    "音标": "ˈbɔːrɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bor",
+    "ing"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "both",
    "音标": "boʊθ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "oth"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "bottle",
    "音标": "ˈbɑːtəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "bot",
+    "tle"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "box",
@@ -568,7 +1032,8 @@
    ],
    "拼读规律": "x",
    "拼读规律说法": "x 发 /ks/(next·express)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "break",
@@ -580,12 +1045,20 @@
    ],
    "拼读规律": "ea-a",
    "拼读规律说法": "ea 例外 /eɪ/(great·break)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "breakfast",
    "音标": "ˈbrekfəst",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "break",
+    "fast"
+   ],
+   "拼读规律": "ea-e",
+   "拼读规律说法": "ea 短音 /e/(dead·death·instead)",
+   "拆分来源": "codex"
   },
   {
    "词": "brother",
@@ -597,22 +1070,42 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "brown",
    "音标": "braʊn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "br",
+    "own"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "brush",
    "音标": "brʌʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "br",
+    "ush"
+   ],
+   "拼读规律": "sh",
+   "拼读规律说法": "sh 发 /ʃ/(sheep)",
+   "拆分来源": "codex"
   },
   {
    "词": "building",
    "音标": "ˈbɪldɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "build",
+    "ing"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "busy",
@@ -624,12 +1117,20 @@
    ],
    "拼读规律": "u-i",
    "拼读规律说法": "u 例外发 /ɪ/(busy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "but",
    "音标": "bʌt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "b",
+    "ut"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "buy",
@@ -641,7 +1142,8 @@
    ],
    "拼读规律": "uy",
    "拼读规律说法": "uy 发 /aɪ/(guy·buy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "bye",
@@ -651,12 +1153,20 @@
     "b",
     "ye"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "cake",
    "音标": "keɪk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "ake"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "call",
@@ -668,17 +1178,32 @@
    ],
    "拼读规律": "all",
    "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "can",
    "音标": "kæn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "an"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "candle",
    "音标": "ˈkændəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "can",
+    "dle"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "candy",
@@ -690,17 +1215,32 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "cap",
    "音标": "kæp",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "ap"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "card",
    "音标": "kɑːrd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "ard"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "carrot",
@@ -712,12 +1252,20 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "cat",
    "音标": "kæt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "at"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "celebrate",
@@ -730,22 +1278,46 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "celebration",
    "音标": "seləbˈreɪʃən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ce",
+    "le",
+    "bra",
+    "tion"
+   ],
+   "拼读规律": "tion",
+   "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
+   "拆分来源": "codex"
   },
   {
    "词": "centre",
    "音标": "ˈsentər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "cen",
+    "tre"
+   ],
+   "拼读规律": "c-s",
+   "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
+   "拆分来源": "codex"
   },
   {
    "词": "chair",
    "音标": "tʃer",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ch",
+    "air"
+   ],
+   "拼读规律": "air",
+   "拼读规律说法": "air 发 /er/(hair·air·fair)",
+   "拆分来源": "codex"
   },
   {
    "词": "change",
@@ -757,17 +1329,32 @@
    ],
    "拼读规律": "ch",
    "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "chess",
    "音标": "tʃes",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ch",
+    "ess"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "chicken",
    "音标": "ˈtʃɪkən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "chick",
+    "en"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "child",
@@ -779,22 +1366,45 @@
    ],
    "拼读规律": "ch",
    "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "chocolate",
    "音标": "ˈtʃɔːklət",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "cho",
+    "co",
+    "late"
+   ],
+   "拼读规律": "ate-x",
+   "拼读规律说法": "词尾 ate 非重读发 /ət/(accurate·chocolate)",
+   "拆分来源": "codex"
   },
   {
    "词": "choose",
    "音标": "tʃuːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ch",
+    "oose"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "circle",
    "音标": "ˈsɜːrkəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "cir",
+    "cle"
+   ],
+   "拼读规律": "ir",
+   "拼读规律说法": "ir 发 /ɜːr/(first·girl·bird)",
+   "拆分来源": "codex"
   },
   {
    "词": "class",
@@ -804,22 +1414,44 @@
     "cl",
     "ass"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "classmate",
    "音标": "ˈklæsmeɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "class",
+    "mate"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "classroom",
    "音标": "ˈklæsruːm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "class",
+    "room"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "clean",
    "音标": "kliːn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "cl",
+    "ean"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "clever",
@@ -831,7 +1463,8 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "climb",
@@ -843,7 +1476,8 @@
    ],
    "拼读规律": "mb",
    "拼读规律说法": "词尾 mb 的 b 不发音(dumb)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "clock",
@@ -855,7 +1489,8 @@
    ],
    "拼读规律": "ck",
    "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "club",
@@ -867,17 +1502,32 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "collect",
    "音标": "kəˈlekt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "col",
+    "lect"
+   ],
+   "拼读规律": "e",
+   "拼读规律说法": "短音 e /e/(cadet·repellant)",
+   "拆分来源": "codex"
   },
   {
    "词": "colour",
    "音标": "ˈkʌlər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "co",
+    "lour"
+   ],
+   "拼读规律": "ou-x",
+   "拼读规律说法": "ou 例外发 /ʌ/(young·touch·enough)",
+   "拆分来源": "codex"
   },
   {
    "词": "come",
@@ -889,7 +1539,8 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "computer",
@@ -902,12 +1553,20 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "contact",
    "音标": "ˈkɑːntækt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "con",
+    "tact"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "conversation",
@@ -921,12 +1580,20 @@
    ],
    "拼读规律": "tion",
    "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "cook",
    "音标": "kʊk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "ook"
+   ],
+   "拼读规律": "oo-u",
+   "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
+   "拆分来源": "codex"
   },
   {
    "词": "corner",
@@ -938,7 +1605,8 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "count",
@@ -950,22 +1618,44 @@
    ],
    "拼读规律": "ou",
    "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "country",
    "音标": "ˈkʌntri",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "coun",
+    "try"
+   ],
+   "拼读规律": "ou-x",
+   "拼读规律说法": "ou 例外发 /ʌ/(young·touch·enough)",
+   "拆分来源": "codex"
   },
   {
    "词": "cousin",
    "音标": "ˈkʌzən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "cou",
+    "sin"
+   ],
+   "拼读规律": "ou-x",
+   "拼读规律说法": "ou 例外发 /ʌ/(young·touch·enough)",
+   "拆分来源": "codex"
   },
   {
    "词": "cow",
    "音标": "kaʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "c",
+    "ow"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "cute",
@@ -977,7 +1667,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "dad",
@@ -989,12 +1680,20 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "daily",
    "音标": "ˈdeɪli",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dai",
+    "ly"
+   ],
+   "拼读规律": "ai",
+   "拼读规律说法": "ai 发 /eɪ/(fail·maim)",
+   "拆分来源": "codex"
   },
   {
    "词": "dance",
@@ -1006,12 +1705,20 @@
    ],
    "拼读规律": "c-s",
    "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "dark",
    "音标": "dɑːrk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "d",
+    "ark"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "day",
@@ -1023,7 +1730,8 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "dear",
@@ -1035,7 +1743,8 @@
    ],
    "拼读规律": "ear",
    "拼读规律说法": "ear 发 /ɪr/(fear·hear·year)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "delicious",
@@ -1048,12 +1757,20 @@
    ],
    "拼读规律": "cious",
    "拼读规律说法": "cious 发 /ʃəs/(vicious)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "desk",
    "音标": "desk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "d",
+    "esk"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "different",
@@ -1066,7 +1783,8 @@
    ],
    "拼读规律": "i",
    "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "difficult",
@@ -1079,32 +1797,60 @@
    ],
    "拼读规律": "i",
    "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "dinner",
    "音标": "ˈdɪnər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "din",
+    "ner"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "discover",
    "音标": "dɪsˈkʌvər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dis",
+    "cov",
+    "er"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "do",
    "音标": "duː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "do"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "dog",
    "音标": "dɔːɡ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dog"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "doll",
    "音标": "dɑːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "doll"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "door",
@@ -1116,27 +1862,54 @@
    ],
    "拼读规律": "oor",
    "拼读规律说法": "oor 发 /ɔːr/(door·floor)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "down",
    "音标": "daʊn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "d",
+    "own"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "drama",
    "音标": "ˈdrɑːmə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dra",
+    "ma"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "draw",
    "音标": "drɔː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dr",
+    "aw"
+   ],
+   "拼读规律": "aw",
+   "拼读规律说法": "aw 发 /ɔː/(awesome)",
+   "拆分来源": "codex"
   },
   {
    "词": "drawer",
    "音标": "drɔːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "draw",
+    "er"
+   ],
+   "拼读规律": "aw",
+   "拼读规律说法": "aw 发 /ɔː/(awesome)",
+   "拆分来源": "codex"
   },
   {
    "词": "dress",
@@ -1148,22 +1921,44 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "drink",
    "音标": "drɪŋk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dr",
+    "ink"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "drum",
    "音标": "drʌm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "dr",
+    "um"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "duck",
    "音标": "dʌk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "d",
+    "uck"
+   ],
+   "拼读规律": "ck",
+   "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
+   "拆分来源": "codex"
   },
   {
    "词": "duty",
@@ -1175,17 +1970,31 @@
    ],
    "拼读规律": "u-l",
    "拼读规律说法": "开音节 u 发长音 /uː/(stupid·super)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "each",
    "音标": "iːtʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "each"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "early",
    "音标": "ˈɜːrli",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ear",
+    "ly"
+   ],
+   "拼读规律": "ear-er",
+   "拼读规律说法": "ear 例外发 /ɜːr/(learn·early·earth)",
+   "拆分来源": "codex"
   },
   {
    "词": "easy",
@@ -1197,7 +2006,8 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "eat",
@@ -1209,12 +2019,20 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "egg",
    "音标": "eɡ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "e",
+    "gg"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "else",
@@ -1226,22 +2044,45 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "email",
    "音标": "iˈmeɪl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "e",
+    "mail"
+   ],
+   "拼读规律": "ai",
+   "拼读规律说法": "ai 发 /eɪ/(fail·maim)",
+   "拆分来源": "codex"
   },
   {
    "词": "enjoy",
    "音标": "enˈdʒɔɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "en",
+    "joy"
+   ],
+   "拼读规律": "oy",
+   "拼读规律说法": "oy 发 /ɔɪ/(voyage·toy·boy)",
+   "拆分来源": "codex"
   },
   {
    "词": "eraser",
    "音标": "ɪˈreɪsər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "e",
+    "rase",
+    "r"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "even",
@@ -1251,7 +2092,8 @@
     "e",
     "ven"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "every",
@@ -1264,12 +2106,21 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "everyday",
    "音标": "evriˈdeɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "eve",
+    "ry",
+    "day"
+   ],
+   "拼读规律": "ay",
+   "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
+   "拆分来源": "codex"
   },
   {
    "词": "everyone",
@@ -1283,7 +2134,8 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "exactly",
@@ -1296,32 +2148,69 @@
    ],
    "拼读规律": "ly",
    "拼读规律说法": "副词尾 ly 发 /li/(actually·kindly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "example",
    "音标": "ɪɡˈzæmpəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ex",
+    "am",
+    "ple"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "excellent",
    "音标": "ˈeksələnt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ex",
+    "cel",
+    "lent"
+   ],
+   "拼读规律": "x",
+   "拼读规律说法": "x 发 /ks/(next·express)",
+   "拆分来源": "codex"
   },
   {
    "词": "exciting",
    "音标": "ɪkˈsaɪtɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ex",
+    "cit",
+    "ing"
+   ],
+   "拼读规律": "c-s",
+   "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
+   "拆分来源": "codex"
   },
   {
    "词": "exercise",
    "音标": "ˈeksərsaɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ex",
+    "er",
+    "cise"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "eye",
    "音标": "aɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "eye"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "fall",
@@ -1333,7 +2222,8 @@
    ],
    "拼读规律": "all",
    "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "family",
@@ -1346,12 +2236,20 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "famous",
    "音标": "ˈfeɪməs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fa",
+    "mous"
+   ],
+   "拼读规律": "a-l",
+   "拼读规律说法": "开音节 a 发 /eɪ/(naked·paper·baby)",
+   "拆分来源": "codex"
   },
   {
    "词": "farm",
@@ -1364,7 +2262,8 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "fast",
@@ -1376,7 +2275,8 @@
    ],
    "拼读规律": "st",
    "拼读规律说法": "st 连读 /st/(stand·instinct)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "father",
@@ -1388,12 +2288,19 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "favourite",
    "音标": "ˈfeɪvərɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fa",
+    "vour",
+    "ite"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "feel",
@@ -1405,22 +2312,42 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "feeling",
    "音标": "ˈfiːlɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "feel",
+    "ing"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "field",
    "音标": "fiːld",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "field"
+   ],
+   "拼读规律": "ie",
+   "拼读规律说法": "ie 发 /iː/(believe)",
+   "拆分来源": "codex"
   },
   {
    "词": "film",
    "音标": "fɪlm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "film"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "find",
@@ -1432,7 +2359,8 @@
    ],
    "拼读规律": "ind",
    "拼读规律说法": "ind 发 /aɪnd/(mind·kindly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "fine",
@@ -1444,7 +2372,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "finish",
@@ -1456,17 +2385,32 @@
    ],
    "拼读规律": "sh",
    "拼读规律说法": "sh 发 /ʃ/(sheep)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "fish",
    "音标": "fɪʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fi",
+    "sh"
+   ],
+   "拼读规律": "sh",
+   "拼读规律说法": "sh 发 /ʃ/(sheep)",
+   "拆分来源": "codex"
   },
   {
    "词": "flag",
    "音标": "flæɡ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fl",
+    "ag"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "flower",
@@ -1479,12 +2423,20 @@
    ],
    "拼读规律": "ow",
    "拼读规律说法": "ow 发 /aʊ/(cower·now)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "fly",
    "音标": "flaɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fl",
+    "y"
+   ],
+   "拼读规律": "y-i",
+   "拼读规律说法": "y 词尾发 /aɪ/(try·cry·fly)",
+   "拆分来源": "codex"
   },
   {
    "词": "food",
@@ -1495,22 +2447,44 @@
     "ood"
    ],
    "拼读规律": "oo",
-   "拼读规律说法": "oo 长音 /uː/(room·food)"
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "card"
   },
   {
    "词": "football",
    "音标": "ˈfʊtbɔːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "foot",
+    "ball"
+   ],
+   "拼读规律": "oo-u",
+   "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
+   "拆分来源": "codex"
   },
   {
    "词": "for",
    "音标": "fɔːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "f",
+    "or"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "found",
    "音标": "faʊnd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "f",
+    "ound"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "friend",
@@ -1523,17 +2497,32 @@
    ],
    "拼读规律": "ie-e",
    "拼读规律说法": "ie 发 /e/(friend)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "from",
    "音标": "frʌm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fr",
+    "om"
+   ],
+   "拼读规律": "o-u2",
+   "拼读规律说法": "o 发 /ʌ/(love·become)",
+   "拆分来源": "codex"
   },
   {
    "词": "front",
    "音标": "frʌnt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "fr",
+    "ont"
+   ],
+   "拼读规律": "o-u2",
+   "拼读规律说法": "o 发 /ʌ/(love·become)",
+   "拆分来源": "codex"
   },
   {
    "词": "full",
@@ -1545,7 +2534,8 @@
    ],
    "拼读规律": "u",
    "拼读规律说法": "短音 u(pull·full 发 /ʊ/)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "fun",
@@ -1557,7 +2547,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "funny",
@@ -1569,7 +2560,8 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "future",
@@ -1581,17 +2573,34 @@
    ],
    "拼读规律": "ture",
    "拼读规律说法": "词尾 ture 发 /tʃər/(picture·future)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "garden",
    "音标": "ˈɡɑːrdən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "gard",
+    "en"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "geography",
    "音标": "dʒiˈɑːɡrəfi",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ge",
+    "og",
+    "ra",
+    "phy"
+   ],
+   "拼读规律": "g-j",
+   "拼读规律说法": "g 遇 e/i/y 常发 /dʒ/(giant·magic)",
+   "拆分来源": "codex"
   },
   {
    "词": "get",
@@ -1603,12 +2612,20 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "gift",
    "音标": "ɡɪft",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "g",
+    "ift"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "girl",
@@ -1620,7 +2637,8 @@
    ],
    "拼读规律": "ir",
    "拼读规律说法": "ir 发 /ɜːr/(first·girl·bird)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "give",
@@ -1632,12 +2650,18 @@
    ],
    "拼读规律": "i-e-x",
    "拼读规律说法": "i…e 例外发短音 /ɪ/(give·live)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "glasses",
    "音标": "ˈɡlæsəz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "glass",
+    "es"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "go",
@@ -1649,7 +2673,8 @@
    ],
    "拼读规律": "o",
    "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "good",
@@ -1661,7 +2686,8 @@
    ],
    "拼读规律": "oo-u",
    "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "goodbye",
@@ -1673,12 +2699,21 @@
    ],
    "拼读规律": "y-i",
    "拼读规律说法": "y 词尾发 /aɪ/(try·cry·fly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "goose",
    "音标": "ɡuːs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "g",
+    "oo",
+    "se"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "grade",
@@ -1690,32 +2725,64 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "grandchild",
    "音标": "ˈɡrændtʃaɪld",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "grand",
+    "child"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "grandmother",
    "音标": "ˈɡrændmʌðər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "grand",
+    "mo",
+    "ther"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "grandpa",
    "音标": "ˈɡrændpɑː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "grand",
+    "pa"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "grandparent",
    "音标": "ˈɡrændperənt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "grand",
+    "par",
+    "ent"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "grass",
    "音标": "ɡræs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "gr",
+    "ass"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "great",
@@ -1728,7 +2795,8 @@
    ],
    "拼读规律": "ea-a",
    "拼读规律说法": "ea 例外 /eɪ/(great·break)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "green",
@@ -1740,12 +2808,21 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "greet",
    "音标": "ɡriːt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "gr",
+    "ee",
+    "t"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "grow",
@@ -1757,17 +2834,32 @@
    ],
    "拼读规律": "ow-o",
    "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "guitar",
    "音标": "ɡɪˈtɑːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "gui",
+    "tar"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "gym",
    "音标": "dʒɪm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "g",
+    "ym"
+   ],
+   "拼读规律": "g-j",
+   "拼读规律说法": "g 遇 e/i/y 常发 /dʒ/(giant·magic)",
+   "拆分来源": "codex"
   },
   {
    "词": "hair",
@@ -1778,7 +2870,8 @@
     "air"
    ],
    "拼读规律": "air",
-   "拼读规律说法": "air 发 /er/(hair·air·fair)"
+   "拼读规律说法": "air 发 /er/(hair·air·fair)",
+   "拆分来源": "card"
   },
   {
    "词": "half",
@@ -1789,7 +2882,8 @@
     "f"
    ],
    "拼读规律": "al",
-   "拼读规律说法": "al 里 l 常不发音(talk·walk)"
+   "拼读规律说法": "al 里 l 常不发音(talk·walk)",
+   "拆分来源": "card"
   },
   {
    "词": "hall",
@@ -1801,12 +2895,18 @@
    ],
    "拼读规律": "all",
    "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "handsome",
    "音标": "ˈhænsəm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "hand",
+    "some"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "happy",
@@ -1818,7 +2918,8 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "hard",
@@ -1831,22 +2932,41 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "hat",
    "音标": "hæt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "at"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "have",
    "音标": "hæv",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ave"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "he",
    "音标": "hiː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "he"
+   ],
+   "拼读规律": "e-l",
+   "拼读规律说法": "开音节 e 发 /iː/(secret·we·be)",
+   "拆分来源": "codex"
   },
   {
    "词": "head",
@@ -1858,7 +2978,8 @@
    ],
    "拼读规律": "ea-e",
    "拼读规律说法": "ea 短音 /e/(dead·death·instead)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "hear",
@@ -1870,17 +2991,32 @@
    ],
    "拼读规律": "ear",
    "拼读规律说法": "ear 发 /ɪr/(fear·hear·year)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "height",
    "音标": "haɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "eight"
+   ],
+   "拼读规律": "eigh",
+   "拼读规律说法": "eigh 发 /eɪ/(neighbor·eight·weigh)",
+   "拆分来源": "codex"
   },
   {
    "词": "hello",
    "音标": "həˈloʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "hel",
+    "lo"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "help",
@@ -1892,42 +3028,88 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "her",
    "音标": "hɜːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "her"
+   ],
+   "拼读规律": "er-s",
+   "拼读规律说法": "er 重读发 /ɜːr/(her·verb)",
+   "拆分来源": "codex"
   },
   {
    "词": "here",
    "音标": "hiːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ere"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "hey",
    "音标": "heɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ey"
+   ],
+   "拼读规律": "ey",
+   "拼读规律说法": "ey 发 /eɪ/(prey·they)",
+   "拆分来源": "codex"
   },
   {
    "词": "hi",
    "音标": "haɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "hi"
+   ],
+   "拼读规律": "i-l",
+   "拼读规律说法": "开音节 i 发 /aɪ/(item·tiger)",
+   "拆分来源": "codex"
   },
   {
    "词": "hike",
    "音标": "haɪk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ike"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "him",
    "音标": "hɪm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "im"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "his",
    "音标": "hɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "is"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "history",
@@ -1940,17 +3122,32 @@
    ],
    "拼读规律": "y",
    "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "hobby",
    "音标": "ˈhɑːbi",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "hob",
+    "by"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "hockey",
    "音标": "ˈhɑːki",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "hock",
+    "ey"
+   ],
+   "拼读规律": "ey-i",
+   "拼读规律说法": "ey 词尾发 /i/(honey·money)",
+   "拆分来源": "codex"
   },
   {
    "词": "home",
@@ -1962,17 +3159,32 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "homework",
    "音标": "ˈhoʊmwɜːrk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "home",
+    "work"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "horse",
    "音标": "hɔːrs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "orse"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "hot",
@@ -1984,7 +3196,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "hour",
@@ -1996,22 +3209,44 @@
    ],
    "拼读规律": "h-x",
    "拼读规律说法": "h 不发音(hour·honest)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "house",
    "音标": "haʊs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ouse"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "housework",
    "音标": "ˈhaʊswɜːrk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "house",
+    "work"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "how",
    "音标": "haʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "h",
+    "ow"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "husband",
@@ -2023,7 +3258,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "ice",
@@ -2034,7 +3270,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "idea",
@@ -2047,7 +3284,8 @@
    ],
    "拼读规律": "i-l",
    "拼读规律说法": "开音节 i 发 /aɪ/(item·tiger)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "important",
@@ -2060,32 +3298,72 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "in",
    "音标": "ɪn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "information",
    "音标": "ɪnfərˈmeɪʃən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in",
+    "for",
+    "ma",
+    "tion"
+   ],
+   "拼读规律": "tion",
+   "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
+   "拆分来源": "codex"
   },
   {
    "词": "insect",
    "音标": "ˈɪnsekt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in",
+    "sect"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "instrument",
    "音标": "ˈɪnstrəmənt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in",
+    "stru",
+    "ment"
+   ],
+   "拼读规律": "st",
+   "拼读规律说法": "st 连读 /st/(stand·instinct)",
+   "拆分来源": "codex"
   },
   {
    "词": "interested",
    "音标": "ˈɪntrəstɪd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in",
+    "ter",
+    "est",
+    "ed"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "interesting",
@@ -2099,22 +3377,45 @@
    ],
    "拼读规律": "i",
    "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "international",
    "音标": "ɪntərˈnæʃənəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "in",
+    "ter",
+    "na",
+    "tion",
+    "al"
+   ],
+   "拼读规律": "tion",
+   "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
+   "拆分来源": "codex"
   },
   {
    "词": "is",
    "音标": "ɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "is"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "it",
    "音标": "ɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "it"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "job",
@@ -2126,7 +3427,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "join",
@@ -2139,12 +3441,21 @@
    ],
    "拼读规律": "oi",
    "拼读规律说法": "oi 发 /ɔɪ/(join·soil·point)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "juice",
    "音标": "dʒuːs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "j",
+    "ui",
+    "ce"
+   ],
+   "拼读规律": "ui",
+   "拼读规律说法": "ui 发 /uː/(recruit·fruit·juice)",
+   "拆分来源": "codex"
   },
   {
    "词": "keep",
@@ -2157,7 +3468,8 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "key",
@@ -2169,12 +3481,20 @@
    ],
    "拼读规律": "ey-i",
    "拼读规律说法": "ey 词尾发 /i/(honey·money)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "kilo",
    "音标": "ˈkɪloʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ki",
+    "lo"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "kind",
@@ -2186,12 +3506,20 @@
    ],
    "拼读规律": "ind",
    "拼读规律说法": "ind 发 /aɪnd/(mind·kindly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "knee",
    "音标": "niː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "kn",
+    "ee"
+   ],
+   "拼读规律": "kn",
+   "拼读规律说法": "kn 里 k 不发音(knit·knot·know)",
+   "拆分来源": "codex"
   },
   {
    "词": "know",
@@ -2203,22 +3531,46 @@
    ],
    "拼读规律": "ow-o",
    "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "lake",
    "音标": "leɪk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "l",
+    "ake"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "language",
    "音标": "ˈlæŋɡwədʒ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "lan",
+    "gu",
+    "age"
+   ],
+   "拼读规律": "gu",
+   "拼读规律说法": "gu 里 u 不发音(guess)",
+   "拆分来源": "codex"
   },
   {
    "词": "large",
    "音标": "lɑːrdʒ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "l",
+    "ar",
+    "ge"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "last",
@@ -2230,7 +3582,8 @@
    ],
    "拼读规律": "st",
    "拼读规律说法": "st 连读 /st/(stand·instinct)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "later",
@@ -2242,12 +3595,20 @@
    ],
    "拼读规律": "a-l",
    "拼读规律说法": "开音节 a 发 /eɪ/(naked·paper·baby)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "laugh",
    "音标": "læf",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "l",
+    "augh"
+   ],
+   "拼读规律": "augh",
+   "拼读规律说法": "augh 发 /ɔː/(daughter·caught)",
+   "拆分来源": "codex"
   },
   {
    "词": "learn",
@@ -2260,7 +3621,8 @@
    ],
    "拼读规律": "ear-er",
    "拼读规律说法": "ear 例外发 /ɜːr/(learn·early·earth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "left",
@@ -2272,22 +3634,45 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "lesson",
    "音标": "ˈlesən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "les",
+    "son"
+   ],
+   "拼读规律": "e",
+   "拼读规律说法": "短音 e /e/(cadet·repellant)",
+   "拆分来源": "codex"
   },
   {
    "词": "let",
    "音标": "let",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "l",
+    "et"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "library",
    "音标": "ˈlaɪbreriː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "li",
+    "brar",
+    "y"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "life",
@@ -2298,7 +3683,8 @@
     "ife"
    ],
    "拼读规律": "magic-e",
-   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)"
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "card"
   },
   {
    "词": "like",
@@ -2310,7 +3696,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "list",
@@ -2322,7 +3709,8 @@
    ],
    "拼读规律": "st",
    "拼读规律说法": "st 连读 /st/(stand·instinct)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "listen",
@@ -2334,7 +3722,8 @@
    ],
    "拼读规律": "st-t",
    "拼读规律说法": "t 不发音(listen)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "little",
@@ -2346,7 +3735,8 @@
    ],
    "拼读规律": "le",
    "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "live",
@@ -2358,12 +3748,20 @@
     "ve"
    ],
    "拼读规律": "i",
-   "拼读规律说法": "短音 i /ɪ/(limit·criminal)"
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "card"
   },
   {
    "词": "locker",
    "音标": "ˈlɑːkər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "lock",
+    "er"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "long",
@@ -2375,7 +3773,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "look",
@@ -2386,7 +3785,8 @@
     "ook"
    ],
    "拼读规律": "oo-u",
-   "拼读规律说法": "oo 短音 /ʊ/(foot·good)"
+   "拼读规律说法": "oo 短音 /ʊ/(foot·good)",
+   "拆分来源": "card"
   },
   {
    "词": "lot",
@@ -2398,7 +3798,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "love",
@@ -2410,32 +3811,66 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "lunch",
    "音标": "lʌntʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "lun",
+    "ch"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "magic",
    "音标": "ˈmædʒɪk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ma",
+    "gic"
+   ],
+   "拼读规律": "g-j",
+   "拼读规律说法": "g 遇 e/i/y 常发 /dʒ/(giant·magic)",
+   "拆分来源": "codex"
   },
   {
    "词": "make",
    "音标": "meɪk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "ake"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "many",
    "音标": "ˈmeni",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ma",
+    "ny"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "map",
    "音标": "mæp",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "ap"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "mark",
@@ -2447,17 +3882,31 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "may",
    "音标": "meɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "ay"
+   ],
+   "拼读规律": "ay",
+   "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
+   "拆分来源": "codex"
   },
   {
    "词": "me",
    "音标": "miː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "me"
+   ],
+   "拼读规律": "e-l",
+   "拼读规律说法": "开音节 e 发 /iː/(secret·we·be)",
+   "拆分来源": "codex"
   },
   {
    "词": "mean",
@@ -2470,12 +3919,21 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "meaningful",
    "音标": "ˈmiːnɪŋfəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "mean",
+    "ing",
+    "ful"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "meet",
@@ -2487,7 +3945,8 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "member",
@@ -2499,7 +3958,8 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "middle",
@@ -2511,7 +3971,8 @@
    ],
    "拼读规律": "le",
    "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "milk",
@@ -2523,7 +3984,8 @@
    ],
    "拼读规律": "i",
    "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "mind",
@@ -2535,7 +3997,8 @@
    ],
    "拼读规律": "ind",
    "拼读规律说法": "ind 发 /aɪnd/(mind·kindly)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "minute",
@@ -2546,7 +4009,8 @@
     "nute"
    ],
    "拼读规律": "i",
-   "拼读规律说法": "短音 i /ɪ/(limit·criminal)"
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "card"
   },
   {
    "词": "mistake",
@@ -2558,12 +4022,20 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "modern",
    "音标": "ˈmɑːdərn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "mod",
+    "ern"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "month",
@@ -2575,12 +4047,20 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "more",
    "音标": "mɔːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "ore"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "morning",
@@ -2592,12 +4072,20 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "most",
    "音标": "moʊst",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "ost"
+   ],
+   "拼读规律": "ost",
+   "拼读规律说法": "ost 常发 /oʊst/(post·most·host)",
+   "拆分来源": "codex"
   },
   {
    "词": "mother",
@@ -2609,17 +4097,32 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "much",
    "音标": "mʌtʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "mu",
+    "ch"
+   ],
+   "拼读规律": "ch",
+   "拼读规律说法": "ch 发 /tʃ/(change·cheat)",
+   "拆分来源": "codex"
   },
   {
    "词": "mum",
    "音标": "mʌm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "um"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "music",
@@ -2631,7 +4134,8 @@
    ],
    "拼读规律": "u-l",
    "拼读规律说法": "开音节 u 发长音 /uː/(stupid·super)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "musical",
@@ -2644,27 +4148,57 @@
    ],
    "拼读规律": "u-l",
    "拼读规律说法": "开音节 u 发长音 /uː/(stupid·super)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "my",
    "音标": "maɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "m",
+    "y"
+   ],
+   "拼读规律": "y-i",
+   "拼读规律说法": "y 词尾发 /aɪ/(try·cry·fly)",
+   "拆分来源": "codex"
   },
   {
    "词": "name",
    "音标": "neɪm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "ame"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "national",
    "音标": "ˈnæʃənəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "na",
+    "tion",
+    "al"
+   ],
+   "拼读规律": "tion",
+   "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
+   "拆分来源": "codex"
   },
   {
    "词": "nature",
    "音标": "ˈneɪtʃər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "na",
+    "ture"
+   ],
+   "拼读规律": "ture",
+   "拼读规律说法": "词尾 ture 发 /tʃər/(picture·future)",
+   "拆分来源": "codex"
   },
   {
    "词": "need",
@@ -2677,7 +4211,8 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "new",
@@ -2687,12 +4222,21 @@
     "n",
     "ew"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "news",
    "音标": "nuːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "ew",
+    "s"
+   ],
+   "拼读规律": "ew",
+   "拼读规律说法": "ew 发 /uː·juː/(review·new·few)",
+   "拆分来源": "codex"
   },
   {
    "词": "next",
@@ -2704,7 +4248,8 @@
    ],
    "拼读规律": "x",
    "拼读规律说法": "x 发 /ks/(next·express)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "nice",
@@ -2716,7 +4261,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "night",
@@ -2729,17 +4275,32 @@
    ],
    "拼读规律": "igh",
    "拼读规律说法": "igh 发 /aɪ/(right·night·fight)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "no",
    "音标": "noʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "no"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "noodle",
    "音标": "ˈnuːdəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "oo",
+    "dle"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "nose",
@@ -2751,12 +4312,20 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "not",
    "音标": "nɑːt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "ot"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "notice",
@@ -2768,12 +4337,20 @@
    ],
    "拼读规律": "c-s",
    "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "now",
    "音标": "naʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "ow"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "number",
@@ -2785,22 +4362,43 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "nurse",
    "音标": "nɜːrs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "n",
+    "ur",
+    "se"
+   ],
+   "拼读规律": "ur",
+   "拼读规律说法": "ur 发 /ɜːr/(urge·return)",
+   "拆分来源": "codex"
   },
   {
    "词": "o'clock",
    "音标": "əkˈlɑːk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "o'",
+    "clock"
+   ],
+   "拼读规律": "ck",
+   "拼读规律说法": "ck 发 /k/(kick·snack·ticket)",
+   "拆分来源": "codex"
   },
   {
    "词": "of",
    "音标": "ʌv",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "o",
+    "f"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "office",
@@ -2812,17 +4410,29 @@
    ],
    "拼读规律": "c-s",
    "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "often",
    "音标": "ˈɔːfən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "of",
+    "ten"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "oh",
    "音标": "oʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "oh"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "old",
@@ -2833,17 +4443,32 @@
    ],
    "拼读规律": "old",
    "拼读规律说法": "old 发 /oʊld/(fold·hold·cold)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "on",
    "音标": "ɑːn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "o",
+    "n"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "only",
    "音标": "ˈoʊnli",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "on",
+    "ly"
+   ],
+   "拼读规律": "ly",
+   "拼读规律说法": "副词尾 ly 发 /li/(actually·kindly)",
+   "拆分来源": "codex"
   },
   {
    "词": "open",
@@ -2855,52 +4480,111 @@
    ],
    "拼读规律": "o",
    "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "or",
    "音标": "ɔːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "or"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "orange",
    "音标": "ˈɔːrəndʒ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "or",
+    "ange"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "other",
    "音标": "ˈʌðər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "o",
+    "ther"
+   ],
+   "拼读规律": "o-u2",
+   "拼读规律说法": "o 发 /ʌ/(love·become)",
+   "拆分来源": "codex"
   },
   {
    "词": "our",
    "音标": "ˈaʊər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "our"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "out",
    "音标": "aʊt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "out"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "outside",
    "音标": "aʊtˈsaɪd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "out",
+    "side"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "own",
    "音标": "oʊn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "own"
+   ],
+   "拼读规律": "ow-o",
+   "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
+   "拆分来源": "codex"
   },
   {
    "词": "page",
    "音标": "peɪdʒ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "page"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "paint",
    "音标": "peɪnt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "aint"
+   ],
+   "拼读规律": "ai",
+   "拼读规律说法": "ai 发 /eɪ/(fail·maim)",
+   "拆分来源": "codex"
   },
   {
    "词": "pair",
@@ -2912,12 +4596,20 @@
    ],
    "拼读规律": "air",
    "拼读规律说法": "air 发 /er/(hair·air·fair)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "panda",
    "音标": "ˈpændə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pan",
+    "da"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "parent",
@@ -2929,17 +4621,30 @@
    ],
    "拼读规律": "are",
    "拼读规律说法": "are 发 /er/(scare·declare)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "park",
    "音标": "pɑːrk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "ark"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "parrot",
    "音标": "ˈperət",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "par",
+    "rot"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "part",
@@ -2951,42 +4656,93 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "party",
    "音标": "ˈpɑːrti",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "par",
+    "ty"
+   ],
+   "拼读规律": "ar",
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "codex"
   },
   {
    "词": "past",
    "音标": "pæst",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pa",
+    "st"
+   ],
+   "拼读规律": "st",
+   "拼读规律说法": "st 连读 /st/(stand·instinct)",
+   "拆分来源": "codex"
   },
   {
    "词": "pencil",
    "音标": "ˈpensəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pen",
+    "cil"
+   ],
+   "拼读规律": "c-s",
+   "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
+   "拆分来源": "codex"
   },
   {
    "词": "people",
    "音标": "ˈpiːpəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "peo",
+    "ple"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "pet",
    "音标": "pet",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "et"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "photo",
    "音标": "ˈfoʊtoʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pho",
+    "to"
+   ],
+   "拼读规律": "ph",
+   "拼读规律说法": "ph 发 /f/(elephant·photo)",
+   "拆分来源": "codex"
   },
   {
    "词": "piano",
    "音标": "piˈænoʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pi",
+    "a",
+    "no"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "picture",
@@ -2998,27 +4754,55 @@
    ],
    "拼读规律": "ture",
    "拼读规律说法": "词尾 ture 发 /tʃər/(picture·future)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "pig",
    "音标": "pɪɡ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "ig"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "ping-pong",
    "音标": "ˈpɪŋpɔːŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ping",
+    "-",
+    "pong"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "pink",
    "音标": "pɪŋk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "ink"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "pizza",
    "音标": "ˈpiːtsə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "piz",
+    "za"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "place",
@@ -3030,7 +4814,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "plant",
@@ -3042,7 +4827,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "play",
@@ -3054,17 +4840,32 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "playground",
    "音标": "ˈpleɪɡraʊnd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "play",
+    "ground"
+   ],
+   "拼读规律": "ay",
+   "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
+   "拆分来源": "codex"
   },
   {
    "词": "please",
    "音标": "pliːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pl",
+    "ease"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "post",
@@ -3076,27 +4877,56 @@
    ],
    "拼读规律": "ost",
    "拼读规律说法": "ost 常发 /oʊst/(post·most·host)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "pot",
    "音标": "pɑːt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "p",
+    "ot"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "potato",
    "音标": "pəˈteɪtoʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "po",
+    "ta",
+    "to"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "prepare",
    "音标": "priˈper",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "pre",
+    "pare"
+   ],
+   "拼读规律": "are",
+   "拼读规律说法": "are 发 /er/(scare·declare)",
+   "拆分来源": "codex"
   },
   {
    "词": "price",
    "音标": "praɪs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "price"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "problem",
@@ -3108,7 +4938,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "put",
@@ -3120,12 +4951,20 @@
    ],
    "拼读规律": "u",
    "拼读规律说法": "短音 u(pull·full 发 /ʊ/)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "quarter",
    "音标": "ˈkwɔːrtər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "quar",
+    "ter"
+   ],
+   "拼读规律": "qu",
+   "拼读规律说法": "qu 发 /kw/(quit)",
+   "拆分来源": "codex"
   },
   {
    "词": "question",
@@ -3137,12 +4976,21 @@
    ],
    "拼读规律": "qu",
    "拼读规律说法": "qu 发 /kw/(quit)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "quiet",
    "音标": "ˈkwaɪət",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "qu",
+    "i",
+    "et"
+   ],
+   "拼读规律": "qu",
+   "拼读规律说法": "qu 发 /kw/(quit)",
+   "拆分来源": "codex"
   },
   {
    "词": "rabbit",
@@ -3154,7 +5002,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "raise",
@@ -3167,12 +5016,17 @@
    ],
    "拼读规律": "ai",
    "拼读规律说法": "ai 发 /eɪ/(fail·maim)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "re",
    "音标": "reɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "re"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "read",
@@ -3185,7 +5039,8 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "really",
@@ -3197,7 +5052,8 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "reason",
@@ -3209,7 +5065,8 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "red",
@@ -3221,7 +5078,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "remember",
@@ -3234,17 +5092,32 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "reporter",
    "音标": "rɪˈpɔːrtər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "re",
+    "por",
+    "ter"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "restaurant",
    "音标": "ˈrestərɑːnt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "res",
+    "tau",
+    "rant"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "right",
@@ -3257,12 +5130,19 @@
    ],
    "拼读规律": "igh",
    "拼读规律说法": "igh 发 /aɪ/(right·night·fight)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "rise",
    "音标": "raɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "rise"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "room",
@@ -3275,17 +5155,32 @@
    ],
    "拼读规律": "oo",
    "拼读规律说法": "oo 长音 /uː/(room·food)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "routine",
    "音标": "ruːˈtiːn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "rou",
+    "tine"
+   ],
+   "拼读规律": "ou-u",
+   "拼读规律说法": "ou 有时发 /uː/(youth·soup·group)",
+   "拆分来源": "codex"
   },
   {
    "词": "ruler",
    "音标": "ˈruːlər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ru",
+    "ler"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "run",
@@ -3297,17 +5192,30 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "sale",
    "音标": "seɪl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sale"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "same",
    "音标": "seɪm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "same"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "say",
@@ -3319,42 +5227,93 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "saying",
    "音标": "ˈseɪɪŋ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "say",
+    "ing"
+   ],
+   "拼读规律": "ay",
+   "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
+   "拆分来源": "codex"
   },
   {
    "词": "school",
    "音标": "skuːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "s",
+    "chool"
+   ],
+   "拼读规律": "ch-k",
+   "拼读规律说法": "ch 有时发 /k/(technically·school)",
+   "拆分来源": "codex"
   },
   {
    "词": "science",
    "音标": "ˈsaɪəns",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sci",
+    "ence"
+   ],
+   "拼读规律": "c-s",
+   "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
+   "拆分来源": "codex"
   },
   {
    "词": "scientist",
    "音标": "ˈsaɪəntɪst",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sci",
+    "en",
+    "tist"
+   ],
+   "拼读规律": "c-s",
+   "拼读规律说法": "c 遇 e/i/y 发 /s/(city·citation)",
+   "拆分来源": "codex"
   },
   {
    "词": "screen",
    "音标": "skriːn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "scr",
+    "een"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "seat",
    "音标": "siːt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "s",
+    "eat"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "section",
    "音标": "ˈsekʃən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sec",
+    "tion"
+   ],
+   "拼读规律": "tion",
+   "拼读规律说法": "tion 发 /ʃn/(exemption·congratulations)",
+   "拆分来源": "codex"
   },
   {
    "词": "see",
@@ -3366,7 +5325,8 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "send",
@@ -3378,17 +5338,32 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "share",
    "音标": "ʃer",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sh",
+    "are"
+   ],
+   "拼读规律": "are",
+   "拼读规律说法": "are 发 /er/(scare·declare)",
+   "拆分来源": "codex"
   },
   {
    "词": "she",
    "音标": "ʃiː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sh",
+    "e"
+   ],
+   "拼读规律": "sh",
+   "拼读规律说法": "sh 发 /ʃ/(sheep)",
+   "拆分来源": "codex"
   },
   {
    "词": "sheep",
@@ -3401,12 +5376,20 @@
    ],
    "拼读规律": "sh",
    "拼读规律说法": "sh 发 /ʃ/(sheep)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "shoe",
    "音标": "ʃuː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sh",
+    "oe"
+   ],
+   "拼读规律": "sh",
+   "拼读规律说法": "sh 发 /ʃ/(sheep)",
+   "拆分来源": "codex"
   },
   {
    "词": "shop",
@@ -3418,22 +5401,46 @@
    ],
    "拼读规律": "sh",
    "拼读规律说法": "sh 发 /ʃ/(sheep)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "short",
    "音标": "ʃɔːrt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sh",
+    "ort"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "shower",
    "音标": "ˈʃaʊər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sh",
+    "ow",
+    "er"
+   ],
+   "拼读规律": "ow",
+   "拼读规律说法": "ow 发 /aʊ/(cower·now)",
+   "拆分来源": "codex"
   },
   {
    "词": "similar",
    "音标": "ˈsɪmələr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "si",
+    "mi",
+    "lar"
+   ],
+   "拼读规律": "ar-er",
+   "拼读规律说法": "词尾 ar 非重读发 /ər/(polar·dollar)",
+   "拆分来源": "codex"
   },
   {
    "词": "sing",
@@ -3445,12 +5452,20 @@
    ],
    "拼读规律": "i",
    "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "singer",
    "音标": "ˈsɪŋər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sing",
+    "er"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "sister",
@@ -3462,7 +5477,8 @@
    ],
    "拼读规律": "er",
    "拼读规律说法": "er 轻音 /ər/(officer·killer)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "sit",
@@ -3474,7 +5490,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "small",
@@ -3486,7 +5503,8 @@
    ],
    "拼读规律": "all",
    "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "smart",
@@ -3498,22 +5516,43 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "so",
    "音标": "soʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "so"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "sock",
    "音标": "sɑːk",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "s",
+    "ock"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "some",
    "音标": "sʌm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "s",
+    "ome"
+   ],
+   "拼读规律": "o-u2",
+   "拼读规律说法": "o 发 /ʌ/(love·become)",
+   "拆分来源": "codex"
   },
   {
    "词": "something",
@@ -3525,7 +5564,8 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "sometimes",
@@ -3537,7 +5577,8 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "son",
@@ -3549,7 +5590,8 @@
    ],
    "拼读规律": "o-u2",
    "拼读规律说法": "o 发 /ʌ/(love·become)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "song",
@@ -3561,7 +5603,8 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "soon",
@@ -3573,12 +5616,20 @@
    ],
    "拼读规律": "oo",
    "拼读规律说法": "oo 长音 /uː/(room·food)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "sorry",
    "音标": "ˈsɑːri",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sor",
+    "ry"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "sound",
@@ -3590,7 +5641,8 @@
    ],
    "拼读规律": "ou",
    "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "speak",
@@ -3603,27 +5655,56 @@
    ],
    "拼读规律": "ea",
    "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "special",
    "音标": "ˈspeʃəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "spe",
+    "cial"
+   ],
+   "拼读规律": "cial",
+   "拼读规律说法": "cial 发 /ʃl/(officially)",
+   "拆分来源": "codex"
   },
   {
    "词": "spell",
    "音标": "spel",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sp",
+    "ell"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "spend",
    "音标": "spend",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sp",
+    "end"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "sport",
    "音标": "spɔːrt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sp",
+    "ort"
+   ],
+   "拼读规律": "or",
+   "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
+   "拆分来源": "codex"
   },
   {
    "词": "start",
@@ -3635,7 +5716,8 @@
    ],
    "拼读规律": "ar",
    "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "stay",
@@ -3647,7 +5729,8 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "story",
@@ -3659,22 +5742,44 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "student",
    "音标": "ˈstuːdənt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "stu",
+    "dent"
+   ],
+   "拼读规律": "u-l",
+   "拼读规律说法": "开音节 u 发长音 /uː/(stupid·super)",
+   "拆分来源": "codex"
   },
   {
    "词": "study",
    "音标": "ˈstʌdi",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "stu",
+    "dy"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "subject",
    "音标": "səbˈdʒekt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sub",
+    "ject"
+   ],
+   "拼读规律": "e",
+   "拼读规律说法": "短音 e /e/(cadet·repellant)",
+   "拆分来源": "codex"
   },
   {
    "词": "sure",
@@ -3684,12 +5789,20 @@
     "s",
     "ure"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "surprise",
    "音标": "sərpˈraɪz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sur",
+    "prise"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "swim",
@@ -3701,17 +5814,32 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "symbol",
    "音标": "ˈsɪmbəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "sym",
+    "bol"
+   ],
+   "拼读规律": "y-i2",
+   "拼读规律说法": "y 在词中发 /ɪ/(system)",
+   "拆分来源": "codex"
   },
   {
    "词": "table",
    "音标": "ˈteɪbəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ta",
+    "ble"
+   ],
+   "拼读规律": "le",
+   "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
+   "拆分来源": "codex"
   },
   {
    "词": "take",
@@ -3723,7 +5851,8 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "talk",
@@ -3736,17 +5865,32 @@
    ],
    "拼读规律": "al",
    "拼读规律说法": "al 里 l 常不发音(talk·walk)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "tall",
    "音标": "tɔːl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "t",
+    "all"
+   ],
+   "拼读规律": "all",
+   "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
+   "拆分来源": "codex"
   },
   {
    "词": "teacher",
    "音标": "ˈtiːtʃər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "teach",
+    "er"
+   ],
+   "拼读规律": "ea",
+   "拼读规律说法": "ea 长音 /iː/(dream·eat·peace)",
+   "拆分来源": "codex"
   },
   {
    "词": "tell",
@@ -3758,22 +5902,44 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "tennis",
    "音标": "ˈtenəs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ten",
+    "nis"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "term",
    "音标": "tɜːrm",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "t",
+    "erm"
+   ],
+   "拼读规律": "er-s",
+   "拼读规律说法": "er 重读发 /ɜːr/(her·verb)",
+   "拆分来源": "codex"
   },
   {
    "词": "than",
    "音标": "ðæn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "an"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "thank",
@@ -3785,47 +5951,100 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "that",
    "音标": "ðæt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "at"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "the",
    "音标": "ðə",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "e"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "their",
    "音标": "ðer",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "eir"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "them",
    "音标": "ðem",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "em"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "then",
    "音标": "ðen",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "en"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "there",
    "音标": "ðer",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "ere"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "these",
    "音标": "ðiːz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "ese"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "they",
    "音标": "ðeɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "ey"
+   ],
+   "拼读规律": "ey",
+   "拼读规律说法": "ey 发 /eɪ/(prey·they)",
+   "拆分来源": "codex"
   },
   {
    "词": "thing",
@@ -3837,7 +6056,8 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "think",
@@ -3849,22 +6069,44 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "this",
    "音标": "ðɪs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "is"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "those",
    "音标": "ðoʊz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "th",
+    "ose"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "tidy",
    "音标": "ˈtaɪdi",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ti",
+    "dy"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "time",
@@ -3876,12 +6118,17 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "to",
    "音标": "tuː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "to"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "today",
@@ -3893,12 +6140,20 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "tofu",
    "音标": "ˈtoʊfuː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "to",
+    "fu"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "together",
@@ -3911,47 +6166,107 @@
    ],
    "拼读规律": "th",
    "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "tomato",
    "音标": "təˈmeɪtoʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "to",
+    "ma",
+    "to"
+   ],
+   "拼读规律": "a-l",
+   "拼读规律说法": "开音节 a 发 /eɪ/(naked·paper·baby)",
+   "拆分来源": "codex"
   },
   {
    "词": "too",
    "音标": "tuː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "t",
+    "oo"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "tooth",
    "音标": "tuːθ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "t",
+    "oo",
+    "th"
+   ],
+   "拼读规律": "oo",
+   "拼读规律说法": "oo 长音 /uː/(room·food)",
+   "拆分来源": "codex"
   },
   {
    "词": "total",
    "音标": "ˈtoʊtəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "to",
+    "tal"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "travel",
    "音标": "ˈtrævəl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "trav",
+    "el"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "tree",
    "音标": "triː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "tr",
+    "ee"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "trousers",
    "音标": "ˈtraʊzərz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "tr",
+    "ou",
+    "sers"
+   ],
+   "拼读规律": "ou",
+   "拼读规律说法": "ou 发 /aʊ/(proud·announce)",
+   "拆分来源": "codex"
   },
   {
    "词": "twin",
    "音标": "twɪn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "tw",
+    "in"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "uncle",
@@ -3963,27 +6278,56 @@
    ],
    "拼读规律": "le",
    "拼读规律说法": "辅音+le 读轻音节 /əl/,e 不发音(noble·settle·impossible)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "under",
    "音标": "ˈʌndər",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "un",
+    "der"
+   ],
+   "拼读规律": "er",
+   "拼读规律说法": "er 轻音 /ər/(officer·killer)",
+   "拆分来源": "codex"
   },
   {
    "词": "unit",
    "音标": "ˈjuːnət",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "u",
+    "nit"
+   ],
+   "拼读规律": "u-l",
+   "拼读规律说法": "开音节 u 发长音 /uː/(stupid·super)",
+   "拆分来源": "codex"
   },
   {
    "词": "up",
    "音标": "ʌp",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "u",
+    "p"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "us",
    "音标": "ʌs",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "u",
+    "s"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "use",
@@ -3995,32 +6339,72 @@
    ],
    "拼读规律": "magic-e",
    "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "usually",
    "音标": "ˈjuːʒəwəli",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "u",
+    "su",
+    "al",
+    "ly"
+   ],
+   "拼读规律": "ly",
+   "拼读规律说法": "副词尾 ly 发 /li/(actually·kindly)",
+   "拆分来源": "codex"
   },
   {
    "词": "very",
    "音标": "ˈveri",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "ve",
+    "ry"
+   ],
+   "拼读规律": "y",
+   "拼读规律说法": "y 词尾发 /i/(bunny·city·happy)",
+   "拆分来源": "codex"
   },
   {
    "词": "village",
    "音标": "ˈvɪlədʒ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "vil",
+    "l",
+    "age"
+   ],
+   "拼读规律": "age",
+   "拼读规律说法": "age 词尾 /ɪdʒ/(package·savage)",
+   "拆分来源": "codex"
   },
   {
    "词": "violin",
    "音标": "vaɪəˈlɪn",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "vi",
+    "o",
+    "lin"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "visit",
    "音标": "ˈvɪzɪt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "vi",
+    "sit"
+   ],
+   "拼读规律": "i",
+   "拼读规律说法": "短音 i /ɪ/(limit·criminal)",
+   "拆分来源": "codex"
   },
   {
    "词": "wait",
@@ -4033,7 +6417,8 @@
    ],
    "拼读规律": "ai",
    "拼读规律说法": "ai 发 /eɪ/(fail·maim)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "walk",
@@ -4045,7 +6430,8 @@
    ],
    "拼读规律": "al",
    "拼读规律说法": "al 里 l 常不发音(talk·walk)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "wall",
@@ -4056,7 +6442,8 @@
     "all"
    ],
    "拼读规律": "all",
-   "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)"
+   "拼读规律说法": "all 发 /ɔːl/(fall·wall·small)",
+   "拆分来源": "card"
   },
   {
    "词": "want",
@@ -4066,7 +6453,8 @@
     "w",
     "ant"
    ],
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "watch",
@@ -4078,7 +6466,8 @@
    ],
    "拼读规律": "tch",
    "拼读规律说法": "tch 发 /tʃ/(twitch·watch)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "way",
@@ -4090,12 +6479,19 @@
    ],
    "拼读规律": "ay",
    "拼读规律说法": "ay 发 /eɪ/(way·mayor·play)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "we",
    "音标": "wiː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "we"
+   ],
+   "拼读规律": "e-l",
+   "拼读规律说法": "开音节 e 发 /iː/(secret·we·be)",
+   "拆分来源": "codex"
   },
   {
    "词": "wear",
@@ -4107,7 +6503,8 @@
    ],
    "拼读规律": "ear-air",
    "拼读规律说法": "ear 例外 /er/(bear·wear)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "week",
@@ -4120,12 +6517,20 @@
    ],
    "拼读规律": "ee",
    "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "weekend",
    "音标": "ˈwiːkend",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "week",
+    "end"
+   ],
+   "拼读规律": "ee",
+   "拼读规律说法": "ee 发 /iː/(seed·street·teeth)",
+   "拆分来源": "codex"
   },
   {
    "词": "welcome",
@@ -4137,32 +6542,68 @@
    ],
    "拼读规律": "CVC",
    "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "well",
    "音标": "wel",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "w",
+    "ell"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "what",
    "音标": "wʌt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "at"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "when",
    "音标": "wen",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "en"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "where",
    "音标": "wer",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "ere"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "which",
    "音标": "wɪtʃ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "ich"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "while",
@@ -4174,7 +6615,8 @@
    ],
    "拼读规律": "wh",
    "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "white",
@@ -4186,12 +6628,20 @@
    ],
    "拼读规律": "wh",
    "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "who",
    "音标": "huː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "o"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "whom",
@@ -4203,7 +6653,8 @@
    ],
    "拼读规律": "wh",
    "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "whose",
@@ -4215,22 +6666,44 @@
    ],
    "拼读规律": "wh",
    "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "why",
    "音标": "waɪ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wh",
+    "y"
+   ],
+   "拼读规律": "wh",
+   "拼读规律说法": "wh 里 w 或 h 不发音(whole)",
+   "拆分来源": "codex"
   },
   {
    "词": "wildlife",
    "音标": "ˈwaɪldlaɪf",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wild",
+    "life"
+   ],
+   "拼读规律": "magic-e",
+   "拼读规律说法": "神奇e:元音变字母音(nine·home·face)",
+   "拆分来源": "codex"
   },
   {
    "词": "will",
    "音标": "wɪl",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "w",
+    "ill"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "window",
@@ -4242,7 +6715,8 @@
    ],
    "拼读规律": "ow-o",
    "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "wish",
@@ -4254,17 +6728,32 @@
    ],
    "拼读规律": "sh",
    "拼读规律说法": "sh 发 /ʃ/(sheep)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "with",
    "音标": "wɪð",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wi",
+    "th"
+   ],
+   "拼读规律": "th",
+   "拼读规律说法": "th 发 /θ·ð/(teeth·brother)",
+   "拆分来源": "codex"
   },
   {
    "词": "woman",
    "音标": "ˈwʊmən",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "wo",
+    "man"
+   ],
+   "拼读规律": "o-u",
+   "拼读规律说法": "o 发 /ʊ/(wolf)",
+   "拆分来源": "codex"
   },
   {
    "词": "work",
@@ -4276,12 +6765,18 @@
    ],
    "拼读规律": "or",
    "拼读规律说法": "or 发 /ɔːr/;w 后发 /ɜːr/(force·world)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "would",
    "音标": "wʊd",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "w",
+    "ould"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "write",
@@ -4293,7 +6788,8 @@
    ],
    "拼读规律": "wr",
    "拼读规律说法": "wr 里 w 不发音,读 /r/(write·wrong)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "yard",
@@ -4304,7 +6800,8 @@
     "ard"
    ],
    "拼读规律": "ar",
-   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)"
+   "拼读规律说法": "ar 发 /ɑːr/(farm·hard·far)",
+   "拆分来源": "card"
   },
   {
    "词": "year",
@@ -4316,37 +6813,76 @@
    ],
    "拼读规律": "ear",
    "拼读规律说法": "ear 发 /ɪr/(fear·hear·year)",
-   "录音": true
+   "录音": true,
+   "拆分来源": "card"
   },
   {
    "词": "yellow",
    "音标": "ˈjeloʊ",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "yel",
+    "low"
+   ],
+   "拼读规律": "ow-o",
+   "拼读规律说法": "ow 词尾发 /oʊ/(tomorrow)",
+   "拆分来源": "codex"
   },
   {
    "词": "yes",
    "音标": "jes",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "y",
+    "es"
+   ],
+   "拼读规律": "CVC",
+   "拼读规律说法": "短元音:辅+元+辅(fox·kid·win)",
+   "拆分来源": "codex"
   },
   {
    "词": "yogurt",
    "音标": "ˈjoʊɡərt",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "yo",
+    "gurt"
+   ],
+   "拼读规律": "o",
+   "拼读规律说法": "开音节 o 发 /oʊ/(ago·moment)",
+   "拆分来源": "codex"
   },
   {
    "词": "you",
    "音标": "juː",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "you"
+   ],
+   "拆分来源": "codex"
   },
   {
    "词": "your",
    "音标": "jɔːr",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "y",
+    "our"
+   ],
+   "拼读规律": "our",
+   "拼读规律说法": "our 发 /ɔːr/(course·four)",
+   "拆分来源": "codex"
   },
   {
    "词": "yours",
    "音标": "jʊrz",
-   "音标来源": "cmudict"
+   "音标来源": "cmudict",
+   "音块": [
+    "y",
+    "our",
+    "s"
+   ],
+   "拆分来源": "codex"
   }
  ]
 }

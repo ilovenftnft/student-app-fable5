@@ -69,6 +69,8 @@ body {
 .point-row { display: flex; align-items: center; gap: 8px; } .point-row > .choice { flex: 1; min-width: 0; }
 /* 英语读音（家长 09-02 加）：音标 + 喇叭；喇叭与讲解的 ? 按钮同规格 */
 .pron { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 12px; font-size: 20px; line-height: 28px; color: var(--text-muted); }
+.chunks { text-align: center; margin-top: 12px; font-size: 20px; line-height: 28px; color: var(--text-muted); }
+.chunk-key { color: var(--text); font-weight: 600; }
 .speak { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--text-muted); background: none; color: var(--text); cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex: none; }
 .term { color: var(--weak); font-weight: 600; } /* 数学回想要点里的概念词加粗换红（家长 09-02 定，只数学）；weak/surface 4.9:1 */
 .choice[aria-pressed="true"] .term { color: var(--text); } /* 淡绿底上红字只有 4.1:1，选中后只保留加粗 */

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 部署：停 → build → 起 → 探测。唯一允许的上线方式（AGENTS.md）；不要单独 npm run build 换掉运行中的产物。
+# 部署：停 → build → 起 → 探测 → 重置试用库（家长 09-02：每次改完都重置）。唯一允许的上线方式（AGENTS.md）；不要单独 npm run build 换掉运行中的产物。
 #   npm run deploy          正常部署
 #   npm run deploy stop     只停
 # 环境：PORT（默认 8787）、DATA_DIR（默认 ./data）。日志与 pid 在 $DATA_DIR/run/。
@@ -26,7 +26,10 @@ DATA_DIR="$DATA_DIR" PORT="$PORT" nohup node src/server/index.ts >> "$LOG" 2>&1 
 echo $! > "$PIDFILE"
 for _ in $(seq 1 20); do
   if curl -s --noproxy '*' -m 2 "http://127.0.0.1:$PORT/api/health" | grep -q '"ok":true'; then
-    echo "已启动 pid $(cat "$PIDFILE")，http://127.0.0.1:$PORT  日志 $LOG"; exit 0
+    echo "已启动 pid $(cat "$PIDFILE")，http://127.0.0.1:$PORT  日志 $LOG"
+    # 试用库存在就一并重置重启（它直接跑源码，服务端改动不重启不生效）
+    if [[ -f "${TRIAL_DIR:-./data-trial}/app.db" ]]; then bash scripts/reset-trial.sh; fi
+    exit 0
   fi
   sleep 0.5
 done

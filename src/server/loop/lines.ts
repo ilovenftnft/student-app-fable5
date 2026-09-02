@@ -96,6 +96,26 @@ export function doneLines(c: DoneContext): string[] {
   return lines;
 }
 
+/** 结束页"下次上课"一块（家长 2026-09-02 加）：提醒预习。有今天勾选的章节就点名下一节；没有就一句通用的。陈述式，不问句。不说"明天"：没有课程表，不知道明天有没有这门课（家长 09-02 指出）。 */
+export interface PreviewContext { date: string; next: { subject: string; title: string }[] }
+export function previewLines(c: PreviewContext): string[] {
+  if (c.next.length === 0) {
+    return [pick(c.date, [
+      "下次上课前，翻一眼要学的那一节，哪怕只看标题。",
+      "上课前把要学的那一节翻一遍，看过就行，不用记。",
+      "要学的那一节先看一眼，上课的时候会熟一点。",
+    ])];
+  }
+  return [
+    pick(c.date, [
+      "下次上课大概到这，上课前翻一眼。",
+      "这几节上课前翻一眼，上课会轻松些。",
+      "下次上课前先看一眼，不用记，看过就行。",
+    ]),
+    ...c.next.map((n) => `${n.subject} · ${n.title}`),
+  ];
+}
+
 function clip(s: string, n = 14): string {
   const t = s.replace(/\s+/g, " ").trim();
   return t.length > n ? t.slice(0, n) + "…" : t;

@@ -12,6 +12,7 @@ export interface Today {
   weekDone: number;
   start: { bySubject: { subject: string; count: number; estSeconds: number; wrong: number }[]; count: number; minutes: number; lines: string[]; choices: { subjectFirst: string | null; extra: boolean } | null };
   doneLines: string[];
+  previewLines: string[];
 }
 export interface ChapterNode { id: string; title: string; page: number | null; points: { text: string; quote: string }[]; children: ChapterNode[] }
 export interface CardFront { itemId: string; subject: string; kind: string; subtype: string; front: string; isNew: boolean; audio?: string; sourceRef: string; preview: { knew: string; unknown: string }; lastSeen: string | null }
@@ -41,7 +42,7 @@ export const api = {
   checkin: (chapterIds: string[]) => req<Today>("/api/checkin", { chapterIds }),
   recallCarry: () => req<{ chapterId: string; title: string; points: { text: string; quote: string }[] }[]>("/api/recall/carry"),
   recall: (chapterId: string, thinkMs: number, missed: number[]) => req<Today>("/api/recall", { chapterId, thinkMs, missed }),
-  pronunciation: () => req<Record<string, { ipa: string; audio: string | null }>>("/api/pronunciation"),
+  pronunciation: () => req<Record<string, { ipa: string; audio: string | null; chunks?: string[]; rule?: string }>>("/api/pronunciation"),
   nextCard: () => req<CardFront | null>("/api/card/next"),
   answer: (id: string) => req<Answer>(`/api/card/${encodeURIComponent(id)}/answer`),
   review: (itemId: string, knew: boolean, elapsedMs: number) => req<{ rating: number; feedback: string; next: CardFront | null }>("/api/review", { itemId, knew, elapsedMs }),

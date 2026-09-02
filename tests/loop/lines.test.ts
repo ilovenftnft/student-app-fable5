@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { doneLines, pick, startLines, type DoneContext, type StartContext } from "../../src/server/loop/lines.ts";
+import { doneLines, pick, previewLines, startLines, type DoneContext, type StartContext } from "../../src/server/loop/lines.ts";
 
 const s0: StartContext = { date: "2026-09-08", count: 9, minutes: 8, carry: 0, wrong: 0, topSubject: "地理", weekDone: 1, deferredYesterday: 0 };
 const d0: DoneContext = { date: "2026-09-08", reviews: 9, dueTomorrow: 2, deferred: 0, wrongPassed: null, allRightSubject: null, weekDone: 2, minutes: 14 };
@@ -31,6 +31,15 @@ describe("开场与结束句子", () => {
     for (let d = 1; d <= 20; d++) seen.add(startLines({ ...s0, date: `2026-09-${String(d).padStart(2, "0")}` })[0]!);
     expect(seen.size).toBeGreaterThan(1);
     for (const l of [...a, ...doneLines(d0)]) expect(l).not.toMatch(/[!！\u{1F300}-\u{1FAFF}]/u);
+  });
+  it("结束页“下次上课”一块：有勾选就点名下一节，没有就一句通用的；陈述式不问句", () => {
+    const a = previewLines({ date: "2026-09-08", next: [{ subject: "数学", title: "1.3 有理数的乘除法" }, { subject: "生物", title: "第二节 生物的特征" }] });
+    expect(a).toHaveLength(3);
+    expect(a[1]).toBe("数学 · 1.3 有理数的乘除法");
+    expect(a[2]).toBe("生物 · 第二节 生物的特征");
+    const b = previewLines({ date: "2026-09-08", next: [] });
+    expect(b).toHaveLength(1);
+    for (const l of [...a, ...b]) expect(l).not.toMatch(/[?？!！]/);
   });
   it("pick 只依赖日期", () => {
     expect(pick("2026-09-08", ["a", "b", "c"])).toBe(pick("2026-09-08", ["a", "b", "c"]));
