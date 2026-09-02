@@ -1,18 +1,21 @@
 export interface Today {
   date: string;
   session: { id: number; started: boolean; ended: boolean } | null;
-  step: "checkin" | "recall" | "review" | "reflect" | "done";
+  step: "start" | "checkin" | "recall" | "review" | "reflect" | "done";
   progress: { index: number; total: number };
   timer: { minutes: number; phase: "normal" | "break" | "can_end" | "hard_stop"; accent: boolean; message: string | null } | null;
   checkins: string[];
   recallPending: { chapterId: string; title: string; points: string[] }[];
   queue: { remaining: number; deferred: number; estMinutes: number };
   summary: { reviews: number; dueTomorrow: number };
+  weekDone: number;
+  start: { bySubject: { subject: string; count: number; estSeconds: number; wrong: number }[]; count: number; minutes: number; lines: string[]; choices: { subjectFirst: string | null; extra: boolean } | null };
+  doneLines: string[];
 }
 export interface ChapterNode { id: string; title: string; page: number | null; points: { text: string; quote: string }[]; children: ChapterNode[] }
-export interface CardFront { itemId: string; kind: string; subtype: string; front: string; isNew: boolean; audio?: string }
+export interface CardFront { itemId: string; subject: string; kind: string; subtype: string; front: string; isNew: boolean; audio?: string; sourceRef: string; preview: { knew: string; unknown: string }; lastSeen: string | null }
 export interface Answer { back: string; answerPoints?: string[]; sourceQuote: string; sourceRef: string }
-export interface Weekly { week: { from: string; to: string }; daysDone: number; daysTotal: number; masteredCards: number; weakest: { subject: string; topic: string } | null; suggestion: string }
+export interface Weekly { week: { from: string; to: string }; daysDone: number; daysTotal: number; masteredCards: number; weakest: { subject: string; topic: string } | null; suggestion: string; explanations: number }
 export interface TodayItem { itemId: string; front: string }
 
 export const SUBJECTS = ["语文", "数学", "英语", "历史", "地理", "生物", "道法"];
@@ -32,6 +35,7 @@ async function req<T>(path: string, body?: unknown, method = "POST"): Promise<T>
 
 export const api = {
   today: () => req<Today>("/api/today"),
+  begin: (subjectFirst: string | null, extra: boolean) => req<Today>("/api/session/start", { subjectFirst, extra }),
   chapters: () => req<Record<string, ChapterNode[]>>("/api/chapters"),
   checkin: (chapterIds: string[]) => req<Today>("/api/checkin", { chapterIds }),
   recallCarry: () => req<{ chapterId: string; title: string; points: { text: string }[] }[]>("/api/recall/carry"),

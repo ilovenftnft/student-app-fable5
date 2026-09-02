@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@500;700&display=swap">
+  <style>
+    body { margin: 0; font-family: "Noto Sans SC", -apple-system, "PingFang SC", sans-serif; font-size: 16px; line-height: 24px; }
+    a { color: #4f5bd5; } a:hover { color: #3f4ab8; }
+  </style>
+</helmet>
+<div style="width: 480px; min-height: 860px; box-sizing: border-box; background: #ffffff; color: #1a1a1a; padding: 28px 20px; display: flex; flex-direction: column;">
+  <header style="font-size: 13px; color: #6b6b6b;">周二 · 本周 3 / 5</header>
+  <h1 style="margin: 48px 0 0; font-size: 30px; line-height: 40px; font-weight: 500;">先做哪科？</h1>
+  <p style="margin: 8px 0 0; color: #6b6b6b;">都要做，顺序你定。</p>
+  <div style="margin-top: 32px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+    <div style="box-sizing: border-box; padding: 20px; border: 2px solid #1a1a1a; border-radius: 14px; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between;"><span style="font-size: 22px; font-weight: 500;">地理</span><span style="font-family: 'DM Mono', monospace; font-size: 13px; color: #6b6b6b;">4 张 · 3 分钟</span></div>
+    <div style="box-sizing: border-box; padding: 20px; border: 1px solid #dcdcd8; border-radius: 14px; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between;"><span style="font-size: 22px; font-weight: 500;">数学</span><span style="font-family: 'DM Mono', monospace; font-size: 13px; color: #6b6b6b;">3 张 · 1 张错题</span></div>
+    <div style="box-sizing: border-box; padding: 20px; border: 1px solid #dcdcd8; border-radius: 14px; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between;"><span style="font-size: 22px; font-weight: 500;">语文</span><span style="font-family: 'DM Mono', monospace; font-size: 13px; color: #6b6b6b;">2 张 · 默写</span></div>
+    <div style="box-sizing: border-box; padding: 20px; border: 1px dashed #dcdcd8; border-radius: 14px; min-height: 120px; display: flex; flex-direction: column; justify-content: space-between; color: #6b6b6b;"><span style="font-size: 22px;">英语</span><span style="font-family: 'DM Mono', monospace; font-size: 13px;">今天没有</span></div>
+  </div>
+  <div style="margin-top: 32px; display: flex; gap: 8px; align-items: center; font-size: 13px; color: #6b6b6b;">
+    <span>今天</span>
+    <span style="padding: 6px 12px; border: 1px solid #dcdcd8; border-radius: 999px;">只做到期的</span>
+    <span style="padding: 6px 12px; border: 1px solid #1a1a1a; border-radius: 999px; color: #1a1a1a;">再多 5 张</span>
+  </div>
+  <div style="flex: 1;"></div>
+  <div style="padding: 18px; background: #1a1a1a; color: #fff; border-radius: 14px; text-align: center; font-size: 18px; line-height: 24px; font-weight: 500;">从地理开始</div>
+</div>
+</x-dc>
+</body>
+</html>

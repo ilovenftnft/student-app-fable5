@@ -15,5 +15,8 @@ export default function setup(): void {
   s.close();
   const d = new DatabaseSync(join(dir, "app.db"));
   d.prepare("INSERT OR REPLACE INTO setting (key, value) VALUES ('content_start', ?)").run(localDate(new Date()));
+  // 真实库里可能已有今天的会话（家长自己点过），测试副本从零开始
+  for (const t of ["review", "reflection", "recall", "checkin", "explanation", "session", "card_state"]) d.exec(`DELETE FROM ${t}`);
+  d.exec("DELETE FROM setting WHERE key LIKE 'start:%' OR key LIKE 'start_done:%' OR key LIKE 'checkin_done:%' OR key LIKE 'deferred:%'");
   d.close();
 }

@@ -10,18 +10,19 @@ export function Parent() {
   if (!w) return null;
   return (
     <section>
-      <p className="t-small muted" style={{ margin: 0 }}>{w.week.from} 至 {w.week.to}</p>
-      <h1 className="t-title" style={{ margin: "8px 0 24px" }}>这一周</h1>
-      <div className="card" style={{ padding: 16 }}>
+      <header className="mono t-small muted" style={{ display: "flex", justifyContent: "space-between" }}><span>家长</span><span>{w.week.from} 至 {w.week.to}</span></header>
+      <h1 className="t-title" style={{ margin: "32px 0 20px" }}>这一周</h1>
+      <div className="card" style={{ padding: "4px 18px" }}>
         <Row label="完成天数" value={`${w.daysDone} / ${w.daysTotal}`} />
         <Row label="已掌握卡片" value={String(w.masteredCards)} />
-        <Row label="最薄弱的一点" value={w.weakest ? `${w.weakest.subject} · ${w.weakest.topic}` : "还没有数据"} />
+        <Row label="讲解次数" value={String(w.explanations)} />
+        <Row label="最薄弱的一点" value={w.weakest ? `${w.weakest.subject} · ${w.weakest.topic}` : "还没有数据"} last />
       </div>
-      <p style={{ marginTop: 24 }}>{w.suggestion}</p>
+      <p style={{ margin: "20px 0 0", fontSize: 17, lineHeight: "27px" }}>{w.suggestion}</p>
 
       <Inbox />
 
-      <h2 className="t-title" style={{ margin: "40px 0 16px" }}>成绩与位次</h2>
+      <h2 className="t-h" style={{ margin: "44px 0 12px" }}>成绩与位次</h2>
       <RankChart exams={exams} />
       <ExamTable exams={exams} onDelete={(id) => void api.deleteExam(id).then(reload)} />
       <ExamForm onAdded={reload} />
@@ -29,9 +30,9 @@ export function Parent() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderBottom: last ? "none" : "1px solid var(--border)" }}>
       <span className="muted">{label}</span><span className="num">{value}</span>
     </div>
   );
@@ -51,8 +52,8 @@ function RankChart({ exams }: { exams: ExamScore[] }) {
   const ticks = [1, Math.round(maxRank / 2), maxRank];
   return (
     <figure style={{ margin: "0 0 16px" }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-        {subjects.map((s) => <button key={s} className="btn-text" aria-pressed={s === cur} style={{ color: s === cur ? "var(--text)" : undefined }} onClick={() => setSubject(s)}>{s}</button>)}
+      <div className="tabs" style={{ marginBottom: 12 }}>
+        {subjects.map((s) => <button key={s} aria-pressed={s === cur} onClick={() => setSubject(s)}>{s}</button>)}
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${cur} 班级位次趋势`} style={{ width: "100%", height: "auto", display: "block" }}>
         {ticks.map((t) => (
@@ -61,10 +62,10 @@ function RankChart({ exams }: { exams: ExamScore[] }) {
             <text x={L - 8} y={y(t) + 4} textAnchor="end" fontSize={11} fill="var(--text-muted)" className="num">{t}</text>
           </g>
         ))}
-        <polyline fill="none" stroke="var(--text)" strokeWidth={2} strokeLinejoin="round" points={pts.map((p, i) => `${x(i)},${y(p.class_rank!)}`).join(" ")} />
+        <polyline fill="none" stroke="var(--accent)" strokeWidth={2} strokeLinejoin="round" points={pts.map((p, i) => `${x(i)},${y(p.class_rank!)}`).join(" ")} />
         {pts.map((p, i) => (
           <g key={p.id}>
-            <circle cx={x(i)} cy={y(p.class_rank!)} r={4} fill="var(--text)" stroke="var(--surface)" strokeWidth={2} />
+            <circle cx={x(i)} cy={y(p.class_rank!)} r={4} fill="var(--accent)" stroke="var(--bg)" strokeWidth={2} />
             <circle cx={x(i)} cy={y(p.class_rank!)} r={12} fill="transparent"><title>{`${p.date} ${p.name}：第 ${p.class_rank} 名${p.class_size ? ` / ${p.class_size}` : ""}`}</title></circle>
             <text x={x(i)} y={H - 10} textAnchor="middle" fontSize={11} fill="var(--text-muted)">{p.name}</text>
           </g>
@@ -141,7 +142,7 @@ function Inbox() {
   const waiting = photos.filter((p) => p.status !== "done");
   return (
     <section>
-      <h2 className="t-title" style={{ margin: "40px 0 16px" }}>待确认</h2>
+      <h2 className="t-h" style={{ margin: "44px 0 12px" }}>待确认</h2>
       {waiting.length > 0 && (
         <ul className="t-small muted" style={{ paddingLeft: 16, margin: "0 0 16px" }}>
           {waiting.map((p) => <li key={p.id}>{p.path.split("/").pop()} · {label[p.status] ?? p.status}{p.error ? ` · ${p.error}` : ""}</li>)}
@@ -179,7 +180,7 @@ function ProblemCard({ p, onDone }: { p: Problem; onDone: () => void }) {
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12, alignItems: "center" }}>
         {msg && <span className="t-small muted">{msg}</span>}
         <button className="btn-text" onClick={() => void act(() => inboxApi.reject(p.id))}>不要</button>
-        <button className="btn-primary" style={{ margin: 0, width: 120 }} onClick={() => void act(() => inboxApi.confirm(p.id, { subject: subject || undefined, answer: answer || undefined }))}>成卡</button>
+        <button className="btn-primary" style={{ width: 120, padding: "10px 16px", fontSize: 16 }} onClick={() => void act(() => inboxApi.confirm(p.id, { subject: subject || undefined, answer: answer || undefined }))}>成卡</button>
       </div>
     </div>
   );

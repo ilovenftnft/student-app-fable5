@@ -165,3 +165,12 @@ export function addExamScore(db: DatabaseSync, e: Omit<ExamScore, "id">): number
 export function deleteExamScore(db: DatabaseSync, id: number): void {
   db.prepare("DELETE FROM exam_score WHERE id = ?").run(id);
 }
+
+// ---------- 开场页 / 结束页用 ----------
+export interface SessionReviewRow { item_id: string; subject_id: string; kind: string; front: string; rating: number; knew: number }
+export function reviewsWithItems(db: DatabaseSync, sessionId: number): SessionReviewRow[] {
+  return db.prepare("SELECT r.item_id, i.subject_id, i.kind, i.front, r.rating, r.knew FROM review r JOIN item i ON i.id = r.item_id WHERE r.session_id = ? ORDER BY r.id").all(sessionId) as unknown as SessionReviewRow[];
+}
+export function explanationsBetween(db: DatabaseSync, from: string, to: string): number {
+  return (db.prepare("SELECT COUNT(*) AS n FROM explanation WHERE date >= ? AND date <= ? AND status != 'failed'").get(from, to) as { n: number }).n;
+}

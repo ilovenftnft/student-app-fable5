@@ -16,6 +16,8 @@ export interface WeeklyReport {
   /** 本周最薄弱：答错次数最多的知识点；没有数据时为 null */
   weakest: { subject: string; topic: string } | null;
   suggestion: string;
+  /** 本周讲解次数（只给总数，不给逐条——硬约束 5；家长 2026-09-01 定） */
+  explanations: number;
 }
 
 export function masteredCount(cards: Iterable<Pick<Card, "state" | "scheduled_days">>): number {
@@ -46,8 +48,8 @@ export function suggestion(daysDone: number, weakest: WeeklyReport["weakest"]): 
   return "这周节奏稳定。周末不加内容，让他自己决定要不要多做一点。";
 }
 
-export function weeklyReport(sessions: WeekSession[], cards: Iterable<Pick<Card, "state" | "scheduled_days">>, reviews: WeekReview[]): WeeklyReport {
+export function weeklyReport(sessions: WeekSession[], cards: Iterable<Pick<Card, "state" | "scheduled_days">>, reviews: WeekReview[], explanations = 0): WeeklyReport {
   const daysDone = new Set(sessions.filter((s) => s.ended).map((s) => s.date)).size;
   const weakest = weakestTopic(reviews);
-  return { daysDone: Math.min(daysDone, 5), daysTotal: 5, masteredCards: masteredCount(cards), weakest, suggestion: suggestion(daysDone, weakest) };
+  return { daysDone: Math.min(daysDone, 5), daysTotal: 5, masteredCards: masteredCount(cards), weakest, suggestion: suggestion(daysDone, weakest), explanations };
 }

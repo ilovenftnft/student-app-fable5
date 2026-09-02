@@ -1,25 +1,135 @@
 {
  "科目": "英语",
  "教材版本": "人教版（2024 秋新版）",
- "说明": "单元 → Section A/B；要点待定（英语的回想对照物更适合是本单元词汇/句型，见 docs/待确认.md）。",
+ "说明": "单元 → Section A/B。Section A 要点 = 本单元 Grammar Focus 3a 的句子（整句核对）；Section B 与 Starter Unit 要点 = 本单元课标重点新词 5 个（词 + 释义，按词核对）。由 scripts/fill_vocab_units.py 生成。",
  "节点": [
   {
-   "标题": "Starter Unit 1 Hello!"
+   "标题": "Starter Unit 1 Hello!",
+   "要点": [
+    {
+     "文": "greet v. 招呼；问候",
+     "出处": "greet"
+    },
+    {
+     "文": "unit n. 单元",
+     "出处": "unit"
+    },
+    {
+     "文": "each adj. & pron.每个；各自",
+     "出处": "each"
+    },
+    {
+     "文": "everyone pron. 每人；所有人",
+     "出处": "everyone"
+    },
+    {
+     "文": "other pron. 另外的人（或物）adj. 另外的；其他的",
+     "出处": "other"
+    }
+   ]
   },
   {
-   "标题": "Starter Unit 2 Keep Tidy!"
+   "标题": "Starter Unit 2 Keep Tidy!",
+   "要点": [
+    {
+     "文": "bottle n. 瓶子",
+     "出处": "bottle"
+    },
+    {
+     "文": "eraser n. 橡皮",
+     "出处": "eraser"
+    },
+    {
+     "文": "key n. 钥匙；关键",
+     "出处": "key"
+    },
+    {
+     "文": "need v. & n. 需要",
+     "出处": "need"
+    },
+    {
+     "文": "thing n. 东西；事情",
+     "出处": "thing"
+    }
+   ]
   },
   {
-   "标题": "Starter Unit 3 Welcome!"
+   "标题": "Starter Unit 3 Welcome!",
+   "要点": [
+    {
+     "文": "carrot n. 胡萝卜",
+     "出处": "carrot"
+    },
+    {
+     "文": "fun n. 乐趣；快乐 adj. 有趣的；使人快乐的",
+     "出处": "fun"
+    },
+    {
+     "文": "yard n. 院子；园圃",
+     "出处": "yard"
+    },
+    {
+     "文": "another adj. & pron. 另一；又一（人或事物）",
+     "出处": "another"
+    },
+    {
+     "文": "count v. 数数",
+     "出处": "count"
+    }
+   ]
   },
   {
    "标题": "Unit 1 You and Me",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "Are you Peter? Yes, I am. / No, I’m not.",
+       "出处": "Are you Peter? Yes, I am. / No, I’m not."
+      },
+      {
+       "文": "Are Meimei and Peter in the same class? Yes, they are. / No, they aren’t.",
+       "出处": "Are Meimei and Peter in the same class? Yes, they are. / No, they aren’t."
+      },
+      {
+       "文": "Where is Mr Smith from? He’s from the US.",
+       "出处": "Where is Mr Smith from? He’s from the US."
+      },
+      {
+       "文": "What class are you in? I’m in Class 1, Grade 7.",
+       "出处": "What class are you in? I’m in Class 1, Grade 7."
+      },
+      {
+       "文": "Who’s your class teacher? It’s Ms Gao.",
+       "出处": "Who’s your class teacher? It’s Ms Gao."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "even adv. 甚至；连；愈加",
+       "出处": "even"
+      },
+      {
+       "文": "guitar n. 吉他",
+       "出处": "guitar"
+      },
+      {
+       "文": "page n. 页面；（书刊或纸张）页",
+       "出处": "page"
+      },
+      {
+       "文": "tennis n. 网球运动",
+       "出处": "tennis"
+      },
+      {
+       "文": "would modal v. 想（用于礼貌地邀请或向某人提供某物）；将会",
+       "出处": "would"
+      }
+     ]
     }
    ]
   },
@@ -27,10 +137,54 @@
    "标题": "Unit 2 We’re Family!",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "Teng Fei and his grandpa play ping-pong every week.",
+       "出处": "Teng Fei and his grandpa play ping-pong every week."
+      },
+      {
+       "文": "Teng Fei’s father has a fishing rod.",
+       "出处": "Teng Fei’s father has a fishing rod."
+      },
+      {
+       "文": "Do you play the piano? Yes, I do. / No, I don’t.",
+       "出处": "Do you play the piano? Yes, I do. / No, I don’t."
+      },
+      {
+       "文": "Does your father spend a lot of time fishing? Yes, he does. / No, he doesn’t.",
+       "出处": "Does your father spend a lot of time fishing? Yes, he does. / No, he doesn’t."
+      },
+      {
+       "文": "Whose piano is this? It’s my mother’s.",
+       "出处": "Whose piano is this? It’s my mother’s."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "handsome adj. 英俊的",
+       "出处": "handsome"
+      },
+      {
+       "文": "hat n. 帽子",
+       "出处": "hat"
+      },
+      {
+       "文": "knee n. 膝；膝盖",
+       "出处": "knee"
+      },
+      {
+       "文": "hike v. & n. 远足；徒步旅行",
+       "出处": "hike"
+      },
+      {
+       "文": "son n. 儿子",
+       "出处": "son"
+      }
+     ]
     }
    ]
   },
@@ -38,10 +192,54 @@
    "标题": "Unit 3 My School",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "It is behind the classroom building.",
+       "出处": "It is behind the classroom building."
+      },
+      {
+       "文": "Is there a whiteboard in your classroom?",
+       "出处": "Is there a whiteboard in your classroom?"
+      },
+      {
+       "文": "There is a teachers’ building across from the school hall.",
+       "出处": "There is a teachers’ building across from the school hall."
+      },
+      {
+       "文": "There is a student centre between the library and the gym.",
+       "出处": "There is a student centre between the library and the gym."
+      },
+      {
+       "文": "There are some trees in front of the sports field.",
+       "出处": "There are some trees in front of the sports field."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "amazing adj. 令人惊奇（惊喜或惊叹）的",
+       "出处": "amazing"
+      },
+      {
+       "文": "change v. & n. 改变；变化",
+       "出处": "change"
+      },
+      {
+       "文": "delicious adj. 美味的；可口的",
+       "出处": "delicious"
+      },
+      {
+       "文": "flag n. 旗；旗帜",
+       "出处": "flag"
+      },
+      {
+       "文": "modern adj. 现代的；当代的",
+       "出处": "modern"
+      }
+     ]
     }
    ]
   },
@@ -49,10 +247,54 @@
    "标题": "Unit 4 My Favourite Subject",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "I have art and geography today.",
+       "出处": "I have art and geography today."
+      },
+      {
+       "文": "English is important, and my English teacher is really nice.",
+       "出处": "English is important, and my English teacher is really nice."
+      },
+      {
+       "文": "Biology is difficult but important.",
+       "出处": "Biology is difficult but important."
+      },
+      {
+       "文": "History is my favourite subject, but my sister doesn’t like it.",
+       "出处": "History is my favourite subject, but my sister doesn’t like it."
+      },
+      {
+       "文": "I like Chinese because it’s fun.",
+       "出处": "I like Chinese because it’s fun."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "excellent adj. 优秀的；极好的",
+       "出处": "excellent"
+      },
+      {
+       "文": "future n. 将来；未来",
+       "出处": "future"
+      },
+      {
+       "文": "instrument n. 乐器；器械；工具",
+       "出处": "instrument"
+      },
+      {
+       "文": "life n. 生活；生命",
+       "出处": "life"
+      },
+      {
+       "文": "magic n. 魔法；魔力；魔术 adj. 有魔力的；有神奇力量的",
+       "出处": "magic"
+      }
+     ]
     }
    ]
   },
@@ -60,10 +302,54 @@
    "标题": "Unit 5 Fun Clubs",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "Can you play ping-pong? Yes, I can. / No, I can’t.",
+       "出处": "Can you play ping-pong? Yes, I can. / No, I can’t."
+      },
+      {
+       "文": "Can he play the violin? Yes, he can. / No, he can’t.",
+       "出处": "Can he play the violin? Yes, he can. / No, he can’t."
+      },
+      {
+       "文": "Can they play chess? Yes, they can. / No, they can’t.",
+       "出处": "Can they play chess? Yes, they can. / No, they can’t."
+      },
+      {
+       "文": "I can run fast, but I can’t swim.",
+       "出处": "I can run fast, but I can’t swim."
+      },
+      {
+       "文": "Emma can sing well, but she can’t play any musical instruments.",
+       "出处": "Emma can sing well, but she can’t play any musical instruments."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "act v. 扮演；行动 n. （戏剧等）一幕；行动",
+       "出处": "act"
+      },
+      {
+       "文": "beef n. 牛肉",
+       "出处": "beef"
+      },
+      {
+       "文": "collect v. 收集；采集",
+       "出处": "collect"
+      },
+      {
+       "文": "discover v. 发现；发觉",
+       "出处": "discover"
+      },
+      {
+       "文": "fall v. & n. 进入；掉落；跌倒 n.（美式）秋天",
+       "出处": "fall"
+      }
+     ]
     }
    ]
   },
@@ -71,10 +357,54 @@
    "标题": "Unit 6 A Day in the Life",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "I usually get up at 6:30 a.m.",
+       "出处": "I usually get up at 6:30 a.m."
+      },
+      {
+       "文": "He usually goes to bed at 9:30 p.m.",
+       "出处": "He usually goes to bed at 9:30 p.m."
+      },
+      {
+       "文": "They go on Monday afternoons.",
+       "出处": "They go on Monday afternoons."
+      },
+      {
+       "文": "He brushes his teeth and takes a shower.",
+       "出处": "He brushes his teeth and takes a shower."
+      },
+      {
+       "文": "Sometimes I read books or do my homework.",
+       "出处": "Sometimes I read books or do my homework."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "already adv. 已经；早已",
+       "出处": "already"
+      },
+      {
+       "文": "break n.休息；间断 v.（使）破碎；损坏",
+       "出处": "break"
+      },
+      {
+       "文": "daily adj. 每日的；日常的",
+       "出处": "daily"
+      },
+      {
+       "文": "dark adj. 昏暗的；深色的",
+       "出处": "dark"
+      },
+      {
+       "文": "everyday adj. 每天的；日常的",
+       "出处": "everyday"
+      }
+     ]
     }
    ]
   },
@@ -82,10 +412,54 @@
    "标题": "Unit 7 Happy Birthday!",
    "子": [
     {
-     "标题": "Section A"
+     "标题": "Section A",
+     "要点": [
+      {
+       "文": "When is your birthday? It’s on 2nd August.",
+       "出处": "When is your birthday? It’s on 2nd August."
+      },
+      {
+       "文": "How old are you? I’m 12.",
+       "出处": "How old are you? I’m 12."
+      },
+      {
+       "文": "What do you want to do on her birthday? I want to sing a song for her.",
+       "出处": "What do you want to do on her birthday? I want to sing a song for her."
+      },
+      {
+       "文": "How much are those oranges? Six yuan a kilo.",
+       "出处": "How much are those oranges? Six yuan a kilo."
+      },
+      {
+       "文": "How many kilos do you want? I want five kilos.",
+       "出处": "How many kilos do you want? I want five kilos."
+      }
+     ]
     },
     {
-     "标题": "Section B"
+     "标题": "Section B",
+     "要点": [
+      {
+       "文": "blow v. 吹；刮",
+       "出处": "blow"
+      },
+      {
+       "文": "celebration n. 庆典；庆祝（活动）",
+       "出处": "celebration"
+      },
+      {
+       "文": "enjoy v. 享受……的乐趣；喜欢",
+       "出处": "enjoy"
+      },
+      {
+       "文": "grow v. 成长；长大；增长",
+       "出处": "grow"
+      },
+      {
+       "文": "height n. 身高；高度",
+       "出处": "height"
+      }
+     ]
     }
    ]
   }

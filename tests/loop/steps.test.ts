@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { currentStep, progress, type LoopState } from "../../src/server/loop/steps.ts";
 import { timerView } from "../../src/server/loop/timer.ts";
 
-const base: LoopState = { checkins: [], recallPending: [], queueRemaining: 0, reflectionDone: false, ended: false, checkinDone: false };
+const base: LoopState = { started: true, checkins: [], recallPending: [], queueRemaining: 0, reflectionDone: false, ended: false, checkinDone: false };
 
 describe("每日闭环走法", () => {
-  it("勾选 → 回想 → 到期卡 → 三问 → 结束", () => {
+  it("开场 → 勾选 → 回想 → 到期卡 → 三问 → 结束", () => {
+    expect(currentStep({ ...base, started: false })).toBe("start");
+    expect(progress({ ...base, started: false })).toEqual({ index: 0, total: 4 });
     expect(currentStep(base)).toBe("checkin");
     expect(currentStep({ ...base, checkinDone: true, recallPending: ["生物:x"] })).toBe("recall");
     expect(currentStep({ ...base, checkinDone: true, queueRemaining: 3 })).toBe("review");
@@ -28,13 +30,13 @@ describe("每日闭环走法", () => {
 describe("计时规则", () => {
   const t0 = new Date("2026-09-07T09:00:00Z");
   const at = (min: number) => new Date(t0.getTime() + min * 60_000 + 10_000);
-  it("正常 → 25 分钟休息（仅当还有事）→ 30 分钟可以结束 → 60 分钟硬停", () => {
+  it("正常 → 30 分钟还有事先休息 3 分钟 → 可以结束 → 60 分钟硬停", () => {
     expect(timerView(t0, at(10), true)).toMatchObject({ minutes: 10, phase: "normal", accent: false });
-    expect(timerView(t0, at(25), true)).toMatchObject({ phase: "break", message: "休息 3 分钟。" });
-    expect(timerView(t0, at(27), true).phase).toBe("break");
-    expect(timerView(t0, at(28), true).phase).toBe("normal");
-    expect(timerView(t0, at(25), false).phase).toBe("normal");
-    expect(timerView(t0, at(30), true)).toMatchObject({ phase: "can_end", accent: true, message: "可以结束了，也可以继续。" });
+    expect(timerView(t0, at(25), true).phase).toBe("normal");
+    expect(timerView(t0, at(30), true)).toMatchObject({ phase: "break", accent: true, message: "休息 3 分钟。" });
+    expect(timerView(t0, at(32), true).phase).toBe("break");
+    expect(timerView(t0, at(33), true)).toMatchObject({ phase: "can_end", accent: true, message: "可以结束了，也可以继续。" });
+    expect(timerView(t0, at(30), false)).toMatchObject({ phase: "can_end", accent: true });
     expect(timerView(t0, at(60), false).phase).toBe("hard_stop");
   });
   it("只显示分钟，不出现秒", () => {

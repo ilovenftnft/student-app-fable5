@@ -20,26 +20,28 @@ export function Checkin({ onDone }: { onDone: (t: Today) => void }) {
   walk(tree, []);
 
   const toggle = (id: string, label: string) => setPicked((m) => { const n = new Map(m); if (n.has(id)) n.delete(id); else n.set(id, label); return n; });
+  const label = picked.size ? `好了，${[...picked.values()].map((v) => v.split(" ").slice(1).join(" ").split(" ")[0]).join("、")}` : "今天没学新的";
 
   return (
-    <section>
-      <h1 className="t-title" style={{ margin: "0 0 16px" }}>今天学到哪了</h1>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-        {SUBJECTS.map((s) => <button key={s} className="btn-text" aria-pressed={s === subject} style={{ color: s === subject ? "var(--text)" : undefined, fontSize: 16 }} onClick={() => setSubject(s)}>{s}</button>)}
+    <section className="screen" style={{ minHeight: 0 }}>
+      <h1 className="t-title" style={{ margin: "40px 0 4px" }}>今天学到哪了</h1>
+      <p className="muted" style={{ margin: "0 0 20px" }}>点一下今天上过的那节。</p>
+      <div className="tabs" style={{ marginBottom: 14 }}>
+        {SUBJECTS.map((s) => <button key={s} aria-pressed={s === subject} onClick={() => setSubject(s)}>{s}</button>)}
       </div>
-      <div style={{ maxHeight: "50vh", overflowY: "auto" }}>
+      <div style={{ maxHeight: "50vh", overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
         {error && <p className="muted t-small">章节目录没取到。{error}</p>}
         {!error && leaves.length === 0 && <p className="muted t-small">这一科还没有章节目录。</p>}
         {leaves.map((l) => (
           <button key={l.id} className="choice" aria-pressed={picked.has(l.id)} onClick={() => toggle(l.id, `${subject} ${l.title}`)}>
             <span>{l.title}</span>
-            {l.path && <span className="t-small muted" style={{ display: "block" }}>{l.path}</span>}
+            {l.path && <span className="mono t-small muted" style={{ display: "block", marginTop: 2 }}>{l.path}</span>}
           </button>
         ))}
       </div>
       {picked.size > 0 && <p className="t-small muted" style={{ marginTop: 12 }}>{[...picked.values()].join("，")}</p>}
       <div style={{ marginTop: 24 }}>
-        <button className="btn-primary" onClick={() => void api.checkin([...picked.keys()]).then(onDone)}>{picked.size ? "好了" : "今天没学新的"}</button>
+        <button className="btn-primary" onClick={() => void api.checkin([...picked.keys()]).then(onDone)}>{label}</button>
       </div>
     </section>
   );

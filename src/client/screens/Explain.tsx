@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
 
-/** 作答后才出现的"讲解"：文字按钮 → 准备中 → 文本。每日上限由服务器判定；失败只显示一句"稍后再看"。 */
+/** 作答后才出现的"讲解"：一行按钮 → 准备中 → 文本。每日上限由服务器判定；失败只显示一句"稍后再看"。 */
 export function Explain({ itemId }: { itemId: string }) {
   const [gate, setGate] = useState<{ allowed: boolean; remaining: number; existingId: number | null } | null>(null);
   const [id, setId] = useState<number | null>(null);
@@ -23,11 +23,11 @@ export function Explain({ itemId }: { itemId: string }) {
   }, [id]);
 
   if (!gate) return null;
-  if (view) return <div className="fade" style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}>{view.text ? <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{view.text}</p> : <p className="muted" style={{ margin: 0 }}>{view.message}</p>}</div>;
+  if (view) return <div className="card fade" style={{ marginTop: 12, padding: "14px 20px" }}>{view.text ? <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{view.text}</p> : <p className="muted" style={{ margin: 0 }}>{view.message}</p>}</div>;
   if (!gate.allowed) return gate.remaining === 0 ? <p className="t-small muted" style={{ marginTop: 12 }}>今天的讲解用完了。</p> : null;
   return (
-    <button className="btn-text" style={{ marginTop: 8 }} onClick={() => void api.explainRequest(itemId).then((r) => { if (r.ok && r.id) setId(r.id); }).catch(() => setView({ text: null, message: "这道题的讲解稍后再看。" }))}>
-      讲解（今天还有 {gate.remaining} 次）
+    <button className="btn-secondary fade" style={{ marginTop: 12, fontSize: 16, padding: "14px 20px" }} onClick={() => void api.explainRequest(itemId).then((r) => { if (r.ok && r.id) setId(r.id); }).catch(() => setView({ text: null, message: "这道题的讲解稍后再看。" }))}>
+      <span>让它讲一遍</span><span className="mono t-small muted">今天还有 {gate.remaining} 次</span>
     </button>
   );
 }

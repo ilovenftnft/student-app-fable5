@@ -47,4 +47,20 @@ describe("章节树", () => {
     expect(row.page).toBe(12);
     expect((db.prepare("select count(*) as n from chapter").get() as { n: number }).n).toBe(3);
   });
+
+  it("文件里删掉的节点从库里删掉：先删子后删父；被勾选过的保留", () => {
+    const db = openDb(":memory:");
+    const v1: ChapterFile = { 科目: "生物", 节点: [{ 标题: "第一章", 子: [{ 标题: "第一节" }, { 标题: "综合实践", 子: [{ 标题: "做模型" }] }] }] };
+    upsertChapters(db, flattenChapters(v1).rows);
+    expect((db.prepare("SELECT COUNT(*) AS n FROM chapter").get() as { n: number }).n).toBe(4);
+    // 第二版删掉了"综合实践"整枝（父 + 子）
+    const v2: ChapterFile = { 科目: "生物", 节点: [{ 标题: "第一章", 子: [{ 标题: "第一节" }] }] };
+    upsertChapters(db, flattenChapters(v2).rows);
+    expect((db.prepare("SELECT id FROM chapter ORDER BY id").all() as { id: string }[]).map((r) => r.id)).toEqual(["生物:第一章", "生物:第一章/第一节"]);
+    // 被勾选过的叶子即使从文件里删掉也保留
+    db.prepare("INSERT INTO session (date, started_at) VALUES ('2026-09-07', '2026-09-07T09:00:00Z')").run();
+    db.prepare("INSERT INTO checkin (session_id, chapter_id) VALUES (1, '生物:第一章/第一节')").run();
+    upsertChapters(db, flattenChapters({ 科目: "生物", 节点: [{ 标题: "第一章" }] }).rows);
+    expect((db.prepare("SELECT COUNT(*) AS n FROM chapter").get() as { n: number }).n).toBe(2);
+  });
 });

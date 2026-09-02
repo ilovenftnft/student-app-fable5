@@ -173,7 +173,7 @@ interface Word {
   音标?: string | null;
   组: string;
   课标重点?: boolean;
-  单元?: number | null;
+  单元?: string | null;
   教材页?: number | null;
 }
 

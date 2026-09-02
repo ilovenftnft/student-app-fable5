@@ -3,7 +3,7 @@
  * 剩余预算才引入新卡（按 intro_day ≤ 今天的天序），情境卡要等接句卡成熟。
  */
 import { State } from "ts-fsrs";
-import type { Item } from "../../shared/types.ts";
+import type { Item, Subject } from "../../shared/types.ts";
 import { FSRS_KINDS } from "../../shared/types.ts";
 import type { CardState } from "./fsrs.ts";
 import { DAILY_BUDGET_SECONDS, isMature, secondsFor } from "./policy.ts";
@@ -18,6 +18,10 @@ export interface QueueInput {
   budgetSeconds?: number;
   /** 今天已经花掉的秒数（会话中途重算队列时传入） */
   spentSeconds?: number;
+  /** 开场页选的"先做哪科"：这一科的卡排到最前，科内顺序不变（方向 F） */
+  subjectFirst?: Subject | null;
+  /** 开场页选的"再多 5 张"：预算用完后再从顺延/新卡里补这么多张（仍受 60 分钟硬停约束） */
+  extraCards?: number;
 }
 
 export interface QueueEntry { item: Item; isNew: boolean; estSeconds: number }
@@ -69,12 +73,39 @@ export function buildQueue(q: QueueInput): Queue {
 
   let newWaiting = 0;
   const freshEntries: QueueEntry[] = [];
+  const freshWaiting: QueueEntry[] = [];
   const fresh = q.items.filter((i) => eligibleNew(i, q.states, q.dayIndex)).sort((a, b) => a.introDay - b.introDay);
   for (const item of fresh) {
     const sec = secondsFor(item) * 1.5;
-    if (est + sec > budget) { newWaiting++; continue; }
+    if (est + sec > budget) { newWaiting++; freshWaiting.push({ item, isNew: true, estSeconds: sec }); continue; }
     freshEntries.push({ item, isNew: true, estSeconds: sec }); est += sec;
   }
+  // "再多 N 张"：预算之外再补 N 张，先补顺延的到期卡，再补等待的新卡
+  let extra = Math.max(0, q.extraCards ?? 0);
+  const pickedIds = new Set(picked.map((e) => e.item.id));
+  for (const e of due) {
+    if (extra === 0) break;
+    if (pickedIds.has(e.item.id)) continue;
+    picked.push(e); est += e.estSeconds; deferred--; extra--;
+  }
+  for (const e of freshWaiting) {
+    if (extra === 0) break;
+    freshEntries.push(e); est += e.estSeconds; newWaiting--; extra--;
+  }
   // 顺序：到期卡 → 新卡。FSRS 无同日学习步骤（policy.FSRS_PARAMS），到期按天，不会有"今天稍后才到期"的卡
-  return { entries: [...picked, ...freshEntries], deferred, newWaiting, estSeconds: est };
+  let entries = [...picked, ...freshEntries];
+  // 先做哪科：稳定分区，科内顺序不变
+  if (q.subjectFirst) entries = [...entries.filter((e) => e.item.subject === q.subjectFirst), ...entries.filter((e) => e.item.subject !== q.subjectFirst)];
+  return { entries, deferred, newWaiting, estSeconds: est };
+}
+
+/** 开场页用：整个队列按科目汇总（张数、估算秒数、错题张数）。 */
+export function bySubject(queue: Queue): { subject: Subject; count: number; estSeconds: number; wrong: number }[] {
+  const m = new Map<Subject, { subject: Subject; count: number; estSeconds: number; wrong: number }>();
+  for (const e of queue.entries) {
+    const s = m.get(e.item.subject) ?? { subject: e.item.subject, count: 0, estSeconds: 0, wrong: 0 };
+    s.count++; s.estSeconds += e.estSeconds; if (e.item.kind === "wrong") s.wrong++;
+    m.set(e.item.subject, s);
+  }
+  return [...m.values()].sort((a, b) => b.count - a.count);
 }

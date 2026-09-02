@@ -2,28 +2,33 @@ import { expect, test } from "@playwright/test";
 
 const shot = (name: string) => `docs/screenshots/${name}.png`;
 
-test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 → 家长页", async ({ page }) => {
+test("每日闭环：开场 → 勾选 → 回想 → 到期卡 → 三问 → 结束页 → 家长页", async ({ page }) => {
   await page.goto("/");
+  // 开场页（方向 F + G）：两句话 + 先做哪科 + 只做到期的
+  await expect(page.getByText(/先做哪科，你定。/)).toBeVisible();
+  await page.getByRole("button", { name: "只做到期的" }).click();
+  await page.screenshot({ path: shot("0-start"), animations: "disabled" });
+  await page.getByRole("button", { name: /^从.+开始$/ }).click();
   await expect(page.getByRole("heading", { name: "今天学到哪了" })).toBeVisible();
   await page.getByRole("button", { name: "生物", exact: true }).click();
   await page.getByRole("button", { name: /第二节 生物的特征/ }).click();
-  await page.screenshot({ path: shot("1-checkin") });
-  await page.getByRole("button", { name: "好了" }).click();
+  await page.screenshot({ path: shot("1-checkin"), animations: "disabled" });
+  await page.getByRole("button", { name: /^好了/ }).click();
 
   // 引导式回想
   await expect(page.getByText("这一节讲了什么？先想 1 分钟。")).toBeVisible();
-  await page.screenshot({ path: shot("2-recall-think") });
+  await page.screenshot({ path: shot("2-recall-think"), animations: "disabled" });
   await page.getByRole("button", { name: "想好了" }).click();
   await expect(page.getByRole("heading", { name: "点一下没想起来的" })).toBeVisible();
   const points = page.locator("button.choice");
   expect(await points.count()).toBeGreaterThanOrEqual(3);
   await points.nth(1).click();
-  await page.screenshot({ path: shot("3-recall-compare") });
+  await page.screenshot({ path: shot("3-recall-compare"), animations: "disabled" });
   await page.getByRole("button", { name: /1 条明天再看/ }).click();
 
   // 到期卡：先看答案再点会/不会
   await expect(page.getByRole("button", { name: "看答案" })).toBeVisible();
-  await page.screenshot({ path: shot("4-review-front") });
+  await page.screenshot({ path: shot("4-review-front"), animations: "disabled" });
   let n = 0;
   for (; n < 80; n++) {
     const look = page.getByRole("button", { name: "看答案" });
@@ -31,14 +36,14 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
     await expect(look.or(reflect)).toBeVisible({ timeout: 10_000 });
     if (await reflect.isVisible()) break;
     await look.click();
-    if (n === 0) { await expect(page.getByRole("button", { name: "会", exact: true })).toBeVisible(); await page.screenshot({ path: shot("5-review-back") }); }
-    await page.getByRole("button", { name: n % 5 === 4 ? "不会" : "会", exact: true }).click();
+    if (n === 0) { await expect(page.getByRole("button", { name: /^会/ })).toBeVisible(); await page.screenshot({ path: shot("5-review-back"), animations: "disabled" }); }
+    await page.getByRole("button", { name: n % 5 === 4 ? /^不会/ : /^会/ }).click();
     await expect(page.getByText(/^(对了。|再看一眼)/)).toBeVisible();
     if (n === 1) {
       // 作答后才解锁讲解（硬约束 2）
-      await page.getByRole("button", { name: /讲解（今天还有 5 次）/ }).click();
+      await page.getByRole("button", { name: /让它讲一遍.*今天还有 5 次/ }).click();
       await expect(page.getByText(/测试讲解/)).toBeVisible({ timeout: 10_000 });
-      await page.screenshot({ path: shot("5b-explain") });
+      await page.screenshot({ path: shot("5b-explain"), animations: "disabled" });
     }
     await page.getByRole("button", { name: "下一题" }).click();
   }
@@ -46,14 +51,14 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
 
   // 三问
   await expect(page.getByRole("heading", { name: "今天最卡的一点？" })).toBeVisible({ timeout: 15_000 });
-  await page.screenshot({ path: shot("6-reflect") });
+  await page.screenshot({ path: shot("6-reflect"), animations: "disabled" });
   await page.locator("button.choice").first().click();
   await page.getByRole("button", { name: "没有" }).click();
   await page.locator("button.choice").first().click();
 
   // 结束页
-  await expect(page.getByText(/今天 \d+ 题，\d+ 张卡明天到期。/)).toBeVisible();
-  await page.screenshot({ path: shot("7-done") });
+  await expect(page.getByText(/今天 \d+ 题，(\d+ 张卡明天到期|明天没有到期的卡)。/)).toBeVisible();
+  await page.screenshot({ path: shot("7-done"), animations: "disabled" });
   await page.getByRole("button", { name: "结束" }).click();
   await expect(page.getByText("明天见。")).toBeVisible();
 
@@ -61,7 +66,8 @@ test("每日闭环：勾选 → 回想 → 到期卡 → 三问 → 结束页 �
   await page.goto("/parent");
   await expect(page.getByRole("heading", { name: "这一周" })).toBeVisible();
   await expect(page.getByText("1 / 5")).toBeVisible();
-  await page.screenshot({ path: shot("8-parent") });
+  await expect(page.getByText("讲解次数")).toBeVisible();
+  await page.screenshot({ path: shot("8-parent"), animations: "disabled" });
   const body = await page.textContent("body");
   expect(body).not.toMatch(/分钟|报班/);
 });

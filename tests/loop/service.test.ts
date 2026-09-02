@@ -34,10 +34,17 @@ beforeEach(() => {
 });
 
 describe("每日闭环端到端（API）", () => {
-  it("勾选 → 回想 → 到期卡 → 三问 → 结束页", async () => {
+  it("开场 → 勾选 → 回想 → 到期卡 → 三问 → 结束页", async () => {
     let t = await j("/api/today");
-    expect(t.step).toBe("checkin");
+    expect(t.step).toBe("start");
     expect(t.session).toBeNull();
+    expect(t.start.lines.length).toBeGreaterThanOrEqual(1);
+    expect(t.start.bySubject[0]).toMatchObject({ subject: "生物" });
+
+    // 开场页：先做生物，不多做
+    t = await j("/api/session/start", { subjectFirst: "生物", extra: false });
+    expect(t.step).toBe("checkin");
+    expect(t.start.choices).toEqual({ subjectFirst: "生物", extra: false });
 
     t = await j("/api/checkin", { chapterIds: ["生物:第一章/第一节", "生物:第一章/第二节"] });
     expect(t.step).toBe("recall");
@@ -76,7 +83,11 @@ describe("每日闭环端到端（API）", () => {
 
   it("没勾章节、没到期卡：冷启动 = 勾选 + 三问", async () => {
     repo.setSetting(db, "content_start", "2026-10-01"); // 内容还没启用
-    let t = await j("/api/checkin", { chapterIds: [] });
+    let t = await j("/api/today");
+    expect(t.start.count).toBe(0);
+    expect(t.start.lines).toHaveLength(1);
+    await j("/api/session/start", { subjectFirst: null, extra: false });
+    t = await j("/api/checkin", { chapterIds: [] });
     expect(t.step).toBe("reflect");
   });
 
@@ -122,7 +133,8 @@ describe("每日闭环端到端（API）", () => {
     expect(w.week).toEqual({ from: "2026-09-07", to: "2026-09-13" });
     expect(w.daysDone).toBe(1);
     expect(w.weakest).toEqual({ subject: "生物", topic: "细胞" });
-    expect(Object.keys(w).sort()).toEqual(["daysDone", "daysTotal", "masteredCards", "suggestion", "weakest", "week"]);
+    expect(Object.keys(w).sort()).toEqual(["daysDone", "daysTotal", "explanations", "masteredCards", "suggestion", "weakest", "week"]);
+    expect(w.explanations).toBe(0);
   });
 });
 

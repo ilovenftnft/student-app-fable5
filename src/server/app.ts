@@ -4,11 +4,14 @@ import type { DatabaseSync } from "node:sqlite";
 import * as svc from "./loop/service.ts";
 import * as repo from "./db/repo.ts";
 import { weeklyReport } from "./report/weekly.ts";
-import { dayBounds } from "./scheduler/day.ts";
+import { dayBounds, weekBounds } from "./scheduler/day.ts";
+import type { Subject } from "../shared/types.ts";
 import * as inbox from "./inbox/store.ts";
 import { confirmProblem, rejectProblem } from "./inbox/service.ts";
 import { sortForReview } from "./inbox/recognize.ts";
 import * as explain from "./explain/service.ts";
+
+const SUBJECTS: readonly string[] = ["语文", "数学", "英语", "历史", "地理", "生物", "道法"];
 
 export interface AppOptions { explainer?: explain.Explainer }
 
@@ -26,7 +29,12 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
 
   // ---- 每日闭环 ----
   app.get("/api/today", (c) => c.json(svc.today(db, clock())));
-  app.post("/api/session/start", (c) => { const s = svc.start(db, clock()); return c.json({ id: s.id }); });
+  app.post("/api/session/start", async (c) => {
+    const body = await c.req.json<{ subjectFirst?: string | null; extra?: boolean }>().catch(() => ({} as { subjectFirst?: string | null; extra?: boolean }));
+    const subjectFirst = SUBJECTS.includes(body.subjectFirst as Subject) ? (body.subjectFirst as Subject) : null;
+    svc.begin(db, clock(), { subjectFirst, extra: !!body.extra });
+    return c.json(svc.today(db, clock()));
+  });
   app.post("/api/session/end", (c) => { svc.end(db, clock()); return c.json(svc.today(db, clock())); });
 
   app.get("/api/chapters", (c) => c.json(repo.chapterTrees(db)));
@@ -87,17 +95,14 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   app.get("/api/parent/weekly", (c) => {
     const now = clock();
     const { date } = dayBounds(now);
-    const d = new Date(`${date}T00:00:00Z`);
-    const dow = (d.getUTCDay() + 6) % 7; // 周一 = 0
-    const monday = new Date(d.getTime() - dow * 86_400_000).toISOString().slice(0, 10);
-    const sunday = new Date(d.getTime() + (6 - dow) * 86_400_000).toISOString().slice(0, 10);
+    const { from: monday, to: sunday } = weekBounds(date);
     const sessions = repo.sessionsBetween(db, monday, sunday).map((s) => ({ date: s.date, ended: !!s.ended_at }));
     const cards = [...repo.cardStates(db).values()].map((s) => s.card);
     const reviews = repo.reviewsBetween(db, monday, sunday).map((r) => {
       const meta = JSON.parse(r.meta) as Record<string, unknown>;
       return { itemId: r.item_id, rating: r.rating, subject: r.subject_id, topic: String(meta.重要概念 ?? meta.标题 ?? meta.词 ?? "") };
     });
-    return c.json({ week: { from: monday, to: sunday }, ...weeklyReport(sessions, cards, reviews) });
+    return c.json({ week: { from: monday, to: sunday }, ...weeklyReport(sessions, cards, reviews, repo.explanationsBetween(db, monday, sunday)) });
   });
 
   // ---- 成绩与位次（MVP #6） ----

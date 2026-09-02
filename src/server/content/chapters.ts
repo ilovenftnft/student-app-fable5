@@ -60,6 +60,18 @@ export function upsertChapters(db: DatabaseSync, rows: ChapterRow[]): number {
   db.exec("BEGIN");
   try {
     for (const r of rows) stmt.run(r.id, r.subject, r.parentId, r.title, r.sort, r.page, JSON.stringify(r.points));
+    // 文件里删掉的节点（如生物的综合实践项目）也从库里删掉：先删深的再删浅的（parent_id 自引用无级联）；
+    // 有勾选记录的、或还有子节点留在库里的，保留，避免破坏外键
+    const keep = new Set(rows.map((r) => r.id));
+    for (const subject of new Set(rows.map((r) => r.subject))) {
+      const stale = (db.prepare("SELECT id FROM chapter WHERE subject_id = ?").all(subject) as { id: string }[])
+        .map((r) => r.id).filter((id) => !keep.has(id)).sort((a, b) => b.split("/").length - a.split("/").length);
+      for (const id of stale) {
+        const used = (db.prepare("SELECT COUNT(*) AS n FROM checkin WHERE chapter_id = ?").get(id) as { n: number }).n;
+        const children = (db.prepare("SELECT COUNT(*) AS n FROM chapter WHERE parent_id = ?").get(id) as { n: number }).n;
+        if (used === 0 && children === 0) db.prepare("DELETE FROM chapter WHERE id = ?").run(id);
+      }
+    }
     db.exec("COMMIT");
   } catch (e) { db.exec("ROLLBACK"); throw e; }
   return rows.length;

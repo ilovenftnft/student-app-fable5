@@ -20,3 +20,11 @@ export function localDate(now: Date): string {
 export function daysBetween(a: string, b: string): number {
   return Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000);
 }
+
+/** 本周（周一到周日）的日期范围，输入 YYYY-MM-DD。 */
+export function weekBounds(date: string): { from: string; to: string } {
+  const d = new Date(`${date}T00:00:00Z`);
+  const dow = (d.getUTCDay() + 6) % 7; // 周一 = 0
+  const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
+  return { from: iso(d.getTime() - dow * 86_400_000), to: iso(d.getTime() + (6 - dow) * 86_400_000) };
+}

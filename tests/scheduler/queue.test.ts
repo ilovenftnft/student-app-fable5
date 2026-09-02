@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Rating, State } from "ts-fsrs";
-import { buildQueue } from "../../src/server/scheduler/queue.ts";
+import { buildQueue, bySubject } from "../../src/server/scheduler/queue.ts";
 import { fromRow, newCardState, review, toRow, type CardState } from "../../src/server/scheduler/fsrs.ts";
 import { dayBounds, daysBetween, localDate } from "../../src/server/scheduler/day.ts";
 import type { Item } from "../../src/shared/types.ts";
@@ -108,5 +108,27 @@ describe("card_state 行转换", () => {
     expect(back.passStreak).toBe(2);
     expect(back.lastPassSession).toBe(7);
     expect(back.archived).toBe(false);
+  });
+});
+
+describe("开场页的两个选择（方向 F）", () => {
+  const mk = (i: number, subject: Item["subject"]): Item => ({ ...concept(i, 999), subject });
+  it("先做哪科：这一科排到最前，科内顺序不变", () => {
+    const items = [mk(0, "生物"), mk(1, "地理"), mk(2, "生物"), mk(3, "地理")];
+    const states = new Map(items.map((it, i) => [it.id, dueState(it.id, new Date(now.getTime() - i * 60_000))]));
+    const q = buildQueue({ items, states, now, dayIndex: 0, subjectFirst: "地理" });
+    expect(q.entries.map((e) => e.item.id)).toEqual(["c3", "c1", "c2", "c0"]);
+    expect(bySubject(q)).toEqual([
+      { subject: "地理", count: 2, estSeconds: 30, wrong: 0 },
+      { subject: "生物", count: 2, estSeconds: 30, wrong: 0 },
+    ]);
+  });
+  it("再多 5 张：预算之外先补顺延的到期卡，再补等待的新卡", () => {
+    const items = Array.from({ length: 60 }, (_, i) => concept(i, 999));
+    const states = new Map(items.map((it, i) => [it.id, dueState(it.id, new Date(now.getTime() - i * 60_000))]));
+    const q = buildQueue({ items, states, now, dayIndex: 0, extraCards: 5 });
+    expect(q.entries).toHaveLength(45);
+    expect(q.deferred).toBe(15);
+    expect(q.entries[40]!.item.id).toBe("c19"); // 顺延里最早到期的先补
   });
 });

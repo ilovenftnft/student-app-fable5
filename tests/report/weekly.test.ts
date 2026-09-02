@@ -13,6 +13,10 @@ describe("周报", () => {
     expect(r.daysDone).toBe(2);
     expect(r.daysTotal).toBe(5);
   });
+  it("讲解次数只给总数", () => {
+    expect(weeklyReport([], cards, [], 4).explanations).toBe(4);
+    expect(weeklyReport([], cards, []).explanations).toBe(0);
+  });
   it("已掌握 = 成熟卡", () => {
     expect(weeklyReport([], cards, []).masteredCards).toBe(1);
   });

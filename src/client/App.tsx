@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, type Today } from "./api.ts";
+import { Start } from "./screens/Start.tsx";
 import { Checkin } from "./screens/Checkin.tsx";
 import { Recall } from "./screens/Recall.tsx";
 import { Review } from "./screens/Review.tsx";
@@ -14,8 +15,10 @@ export function App() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <main style={{ maxWidth: 640, margin: "0 auto", padding: "24px 16px" }}>{children}</main>;
+  return <main style={{ maxWidth: 640, margin: "0 auto", padding: "28px 20px" }}>{children}</main>;
 }
+
+const LABEL: Record<Today["step"], string> = { start: "今天", checkin: "学到哪了", recall: "回想", review: "到期卡", reflect: "三个问题", done: "结束" };
 
 function Daily() {
   const [today, setToday] = useState<Today | null>(null);
@@ -33,21 +36,23 @@ function Daily() {
 
   if (error) return <p className="muted">连不上服务。{error}</p>;
   if (!today) return null;
+  if (today.step === "start") return <div className="fade" key="start"><Start today={today} onDone={setToday} /></div>;
 
-  const steps = { checkin: 0, recall: 1, review: 2, reflect: 3, done: 4 };
-  const pct = (steps[today.step] / 4) * 100;
+  const idx = today.progress.index; // 0..4
   return (
-    <div className="fade" key={today.step}>
-      <header style={{ marginBottom: 24 }}>
-        <div className={`progress ${today.timer?.accent ? "accent" : ""}`}><div style={{ width: `${pct}%` }} /></div>
-        <div className="t-small muted num" style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-          <span>{Math.min(steps[today.step] + 1, 4)} / 4</span>
+    <div className="fade screen" key={today.step}>
+      <header style={{ marginBottom: 8 }}>
+        <div className="mono t-small muted" style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>{LABEL[today.step]}{today.step !== "done" ? ` · ${Math.min(idx + 1, 4)}/4` : ""}</span>
           {today.timer && <span>{today.timer.minutes} 分钟</span>}
         </div>
-        {today.timer?.message && <p className="t-small" style={{ marginTop: 8 }}>{today.timer.message}</p>}
+        <div className="seg" aria-hidden="true">
+          {[0, 1, 2, 3].map((i) => <div key={i} className={i < idx || today.step === "done" ? "done" : i === idx ? "now" : ""} />)}
+        </div>
+        {today.timer?.message && <p className="t-small" style={{ margin: "12px 0 0", color: "var(--accent)" }}>{today.timer.message}</p>}
       </header>
       {today.timer?.phase === "break" ? (
-        <section className="card" style={{ padding: 24, textAlign: "center" }}><p className="t-title">休息 3 分钟。</p><p className="muted t-small">离开屏幕，喝口水。</p></section>
+        <section style={{ paddingTop: 72 }}><p className="t-title" style={{ margin: 0 }}>休息 3 分钟。</p><p className="muted" style={{ margin: "8px 0 0" }}>离开屏幕，喝口水。</p></section>
       ) : today.step === "checkin" ? <Checkin onDone={setToday} />
         : today.step === "recall" ? <Recall pending={today.recallPending[0]!} onDone={setToday} />
         : today.step === "review" ? <Review remaining={today.queue.remaining} onDone={refresh} />
