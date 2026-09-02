@@ -15,9 +15,9 @@ export function Done({ today, onEnd }: { today: Today; onEnd: (t: Today) => void
       </div>
       {today.previewLines.length > 0 && (
         <div style={{ marginTop: 48 }}>
-          <p className="t-tag" style={{ margin: "0 0 10px" }}>下次上课</p>
+          {/* 一句话 + 每科一个框（家长 09-02 定：去掉小标题，各科加框） */}
           <p style={{ margin: 0, fontSize: 19, lineHeight: "30px" }}>{today.previewLines[0]}</p>
-          {today.previewLines.slice(1).map((l, i) => <p key={i} className="muted" style={{ margin: "6px 0 0", fontSize: 17, lineHeight: "26px" }}>{l}</p>)}
+          {today.previewLines.slice(1).map((l, i) => <div key={i} className="card" style={{ marginTop: i ? 8 : 12, padding: "12px 16px", fontSize: 17, lineHeight: "26px" }}>{l}</div>)}
         </div>
       )}
       <div className="spacer" />
