@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "deploy": "bash scripts/deploy.sh",
     "stop": "bash scripts/deploy.sh stop",
+    "trial:reset": "bash scripts/reset-trial.sh",
     "review": "node tools/dual_check/review.ts"
   },
   "dependencies": {

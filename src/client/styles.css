@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
-/* 界面规范 3（2026-09-01 定稿）：固定深色，不跟随系统；≤ 6 个色 token；强调色只用于主按钮、进度、填空、折线 */
+/* 界面规范 3（2026-09-02 改定）：固定米黄底，不跟随系统（深色看着不舒服，家长 09-02 定）；≤ 6 个色 token；强调色只用于主按钮、进度、填空、折线。
+   对比度：text/bg 12.8、text-muted/bg 4.9、accent/bg 4.8、accent-text/accent 5.3，均 ≥ 4.5 */
 :root {
-  --bg: #121417; --surface: #1c2027; --border: #2a2f36; --text: #e8e8e4; --text-muted: #7d8590;
-  --accent: #7ee2a8; --accent-text: #0f1a14; /* accent-text 只是 accent 上的字色，不单独使用 */
-  --weak: #b85c5c;
-  color-scheme: dark;
+  --bg: #f4eddb; --surface: #fdf9f0; --border: #e0d6c2; --text: #2b2622; --text-muted: #6f6557;
+  --accent: #267552; --accent-text: #fdf9f0; /* accent-text 只是 accent 上的字色，不单独使用 */
+  --weak: #b04f4f;
+  --label: #9a5b2b; /* 讲解里的小标题（第 N 步 / 关键一步 / 常见错因），家长 09-02 加；只用于此处 */
+  color-scheme: light;
+  --page-h: 860px; /* 各页统一尺寸（家长 09-02 定）：与视觉稿、e2e 视口同高；窗口更矮就滚动，不压缩 */
 }
-html { background: var(--bg); color: var(--text); }
+/* 浏览器底色（框外）：灰绿色 #D8DDD1，与米黄框对比、和强调绿同族（家长 09-02 定）；只用于框外，不算界面 token；窄窗口无框时回到 bg */
+html { background: #d8ddd1; color: var(--text); }
+@media (max-width: 680px) { html { background: var(--bg); } }
 body {
   margin: 0;
   font-family: -apple-system, "PingFang SC", "Noto Sans SC", "Noto Sans CJK SC", sans-serif;
@@ -19,10 +24,17 @@ body {
 .t-small { font-size: 13px; line-height: 18px; }
 .t-tag { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 16px; color: var(--text-muted); letter-spacing: 1px; }
 .muted { color: var(--text-muted); }
+.label { color: var(--label); font-weight: 500; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
 
-.screen { display: flex; flex-direction: column; min-height: calc(100vh - 56px); }
-.spacer { flex: 1; min-height: 24px; }
+/* 整页外框（家长 09-02 定）：640 宽、860 高、1px 边框、12px 圆角；窗口比 680 窄时去框贴边 */
+.frame { box-sizing: border-box; max-width: 640px; min-height: var(--page-h); margin: 24px auto; padding: 28px 20px; border: 1px solid color-mix(in srgb, var(--border), var(--text-muted) 75%); border-radius: 12px; background: var(--bg); } /* 外框比卡片边框深一档（家长 09-02：外框颜色加深），不新增 token */
+@media (max-width: 680px) { .frame { margin: 0 auto; border: 0; border-radius: 0; min-height: 100vh; } }
+
+.screen { display: flex; flex-direction: column; min-height: calc(var(--page-h) - 56px); }
+.screen .screen { flex: 1; min-height: 0; } /* 步骤内部的区块撑满剩余高度，spacer 才能把主按钮推到底 */
+.spacer { flex: 1; min-height: 32px; }
+.gap { flex: 1; min-height: 32px; } /* 等分空隙：到期卡的题块、答案块、按钮之间各放一个，内容均匀铺满框 */
 .seg { display: flex; gap: 4px; margin-top: 14px; }
 .seg > div { flex: 1; height: 3px; background: var(--border); }
 .seg > div.done { background: var(--accent); }
@@ -30,22 +42,29 @@ body {
 
 .btn-primary {
   display: flex; justify-content: center; align-items: center; gap: 12px; box-sizing: border-box; width: 100%; padding: 16px 20px;
-  background: var(--accent); color: var(--accent-text); border: 0; border-radius: 10px; font-size: 18px; line-height: 24px; font-weight: 500; cursor: pointer;
-  font-family: inherit;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 18px; line-height: 24px; font-weight: 500; cursor: pointer;
+  font-family: inherit; /* 主按钮不用绿（家长 09-02 定）：与次按钮同色，只靠字重区分；强调绿留给答案、进度、折线 */
 }
 .btn-primary.split { justify-content: space-between; }
+.btn-primary.split .mono { opacity: 1; color: var(--text-muted); }
 .btn-primary:disabled { opacity: .5; cursor: default; }
 .btn-secondary {
   display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; width: 100%; padding: 16px 20px;
   background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 18px; line-height: 24px; cursor: pointer; font-family: inherit;
 }
+.explain-mark { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--text-muted); background: none; color: var(--text); font-size: 20px; line-height: 34px; font-weight: 500; cursor: pointer; padding: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; flex: none; }
+.explain-mark:disabled { opacity: .4; cursor: default; }
+.explain-mark[aria-pressed="true"] { opacity: 1; border-color: var(--text); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; padding: 14px 16px; background: none; border: 0; color: var(--text); text-align: left; cursor: pointer; font-family: inherit; }
 .btn-text { background: none; border: 0; color: var(--text-muted); font-size: 13px; line-height: 18px; cursor: pointer; padding: 8px; font-family: inherit; }
 .choice {
   display: block; box-sizing: border-box; width: 100%; text-align: left; padding: 14px 16px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 16px; line-height: 24px; cursor: pointer; font-family: inherit;
 }
-.choice[aria-pressed="true"] { border-color: var(--accent); }
+.choice[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--surface), var(--accent) 14%); } /* 选中：绿边 + 淡绿底，点完保留 */
 .choice.center { text-align: center; }
+.term { color: var(--accent); font-weight: 600; } /* 回想要点里的概念词（家长 09-02 定）：accent 是"答案文字"的颜色，概念词就是这句的答案 */
+.choice[aria-pressed="true"] .term { color: var(--text); } /* 淡绿底上 accent 只有 4.4:1，选中后只保留加粗 */
 .tile {
   box-sizing: border-box; padding: 18px; min-height: 104px; display: flex; flex-direction: column; justify-content: space-between; text-align: left;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; font-family: inherit;
@@ -57,6 +76,10 @@ body {
 .tabs { display: flex; gap: 14px; flex-wrap: wrap; }
 .tabs > button { background: none; border: 0; padding: 0 0 4px; color: var(--text-muted); font-size: 13px; line-height: 18px; cursor: pointer; border-bottom: 2px solid transparent; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .tabs > button[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.mark { display: inline-block; font-size: 24px; line-height: 30px; font-weight: 600; margin: 0 0 0 10px; vertical-align: baseline; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.mark-side { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+.mark-side .mark { margin: 0; }
+h1 .mark { font-size: 32px; line-height: 48px; margin: 0 0 0 8px; }
 .fill { display: inline-block; min-width: 3em; border-bottom: 2px solid var(--accent); color: var(--accent); }
 .blank { display: inline-block; min-width: 3em; border-bottom: 2px solid var(--text-muted); }
 

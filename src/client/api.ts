@@ -5,7 +5,8 @@ export interface Today {
   progress: { index: number; total: number };
   timer: { minutes: number; phase: "normal" | "break" | "can_end" | "hard_stop"; accent: boolean; message: string | null } | null;
   checkins: string[];
-  recallPending: { chapterId: string; title: string; points: string[] }[];
+  recallPending: { chapterId: string; subject: string; parentTitle: string; title: string; points: { text: string; quote: string }[] }[];
+  recalled: { chapterId: string; missed: number }[];
   queue: { remaining: number; deferred: number; estMinutes: number };
   summary: { reviews: number; dueTomorrow: number };
   weekDone: number;
@@ -38,7 +39,7 @@ export const api = {
   begin: (subjectFirst: string | null, extra: boolean) => req<Today>("/api/session/start", { subjectFirst, extra }),
   chapters: () => req<Record<string, ChapterNode[]>>("/api/chapters"),
   checkin: (chapterIds: string[]) => req<Today>("/api/checkin", { chapterIds }),
-  recallCarry: () => req<{ chapterId: string; title: string; points: { text: string }[] }[]>("/api/recall/carry"),
+  recallCarry: () => req<{ chapterId: string; title: string; points: { text: string; quote: string }[] }[]>("/api/recall/carry"),
   recall: (chapterId: string, thinkMs: number, missed: number[]) => req<Today>("/api/recall", { chapterId, thinkMs, missed }),
   nextCard: () => req<CardFront | null>("/api/card/next"),
   answer: (id: string) => req<Answer>(`/api/card/${encodeURIComponent(id)}/answer`),

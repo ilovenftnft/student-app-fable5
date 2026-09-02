@@ -48,7 +48,7 @@ describe("每日闭环端到端（API）", () => {
 
     t = await j("/api/checkin", { chapterIds: ["生物:第一章/第一节", "生物:第一章/第二节"] });
     expect(t.step).toBe("recall");
-    expect(t.recallPending).toEqual([{ chapterId: "生物:第一章/第一节", title: "第一节", points: ["A", "B"] }]);
+    expect(t.recallPending).toEqual([{ chapterId: "生物:第一章/第一节", subject: "生物", parentTitle: "第一章", title: "第一节", points: [{ text: "A", quote: "a" }, { text: "B", quote: "b" }] }]); // 回想显示原句 quote，text 用来找概念词
     expect(t.timer.minutes).toBe(0);
 
     t = await j("/api/recall", { chapterId: "生物:第一章/第一节", thinkMs: 60000, missed: [1] });

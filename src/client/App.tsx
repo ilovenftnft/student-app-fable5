@@ -15,7 +15,7 @@ export function App() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <main style={{ maxWidth: 640, margin: "0 auto", padding: "28px 20px" }}>{children}</main>;
+  return <main className="frame">{children}</main>;
 }
 
 const LABEL: Record<Today["step"], string> = { start: "今天", checkin: "学到哪了", recall: "回想", review: "到期卡", reflect: "三个问题", done: "结束" };
@@ -53,7 +53,7 @@ function Daily() {
       </header>
       {today.timer?.phase === "break" ? (
         <section style={{ paddingTop: 72 }}><p className="t-title" style={{ margin: 0 }}>休息 3 分钟。</p><p className="muted" style={{ margin: "8px 0 0" }}>离开屏幕，喝口水。</p></section>
-      ) : today.step === "checkin" ? <Checkin onDone={setToday} />
+      ) : today.step === "checkin" ? <Checkin today={today} onDone={setToday} />
         : today.step === "recall" ? <Recall pending={today.recallPending[0]!} onDone={setToday} />
         : today.step === "review" ? <Review remaining={today.queue.remaining} onDone={refresh} />
         : today.step === "reflect" ? <Reflect onDone={setToday} />

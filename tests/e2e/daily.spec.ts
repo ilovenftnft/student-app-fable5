@@ -9,22 +9,24 @@ test("每日闭环：开场 → 勾选 → 回想 → 到期卡 → 三问 → �
   await page.getByRole("button", { name: "只做到期的" }).click();
   await page.screenshot({ path: shot("0-start"), animations: "disabled" });
   await page.getByRole("button", { name: /^从.+开始$/ }).click();
+  // 勾选 + 回想合成一屏，按科目展开（家长 09-02 定）
   await expect(page.getByRole("heading", { name: "今天学到哪了" })).toBeVisible();
-  await page.getByRole("button", { name: "生物", exact: true }).click();
+  await page.getByRole("button", { name: /^生物/ }).click();
   await page.getByRole("button", { name: /第二节 生物的特征/ }).click();
   await page.screenshot({ path: shot("1-checkin"), animations: "disabled" });
-  await page.getByRole("button", { name: /^好了/ }).click();
 
-  // 引导式回想
-  await expect(page.getByText("这一节讲了什么？先想 1 分钟。")).toBeVisible();
+  // 就地回想
+  await expect(page.getByRole("heading", { name: /这一节讲了什么|生字词/ })).toBeVisible();
   await page.screenshot({ path: shot("2-recall-think"), animations: "disabled" });
   await page.getByRole("button", { name: "想好了" }).click();
-  await expect(page.getByRole("heading", { name: "点一下没想起来的" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /点一下没(想起来|记牢)的/ })).toBeVisible();
   const points = page.locator("button.choice");
   expect(await points.count()).toBeGreaterThanOrEqual(3);
   await points.nth(1).click();
   await page.screenshot({ path: shot("3-recall-compare"), animations: "disabled" });
   await page.getByRole("button", { name: /1 条明天再看/ }).click();
+  await expect(page.getByRole("button", { name: /^生物.*1 条明天再看/ })).toBeVisible();
+  await page.getByRole("button", { name: "好了，去做卡" }).click();
 
   // 到期卡：先看答案再点会/不会
   await expect(page.getByRole("button", { name: "看答案" })).toBeVisible();
@@ -38,10 +40,10 @@ test("每日闭环：开场 → 勾选 → 回想 → 到期卡 → 三问 → �
     await look.click();
     if (n === 0) { await expect(page.getByRole("button", { name: /^会/ })).toBeVisible(); await page.screenshot({ path: shot("5-review-back"), animations: "disabled" }); }
     await page.getByRole("button", { name: n % 5 === 4 ? /^不会/ : /^会/ }).click();
-    await expect(page.getByText(/^(对了。|再看一眼)/)).toBeVisible();
+    await expect(page.getByRole("img", { name: /^(对了。|再看一眼)/ })).toBeVisible();
     if (n === 1) {
       // 作答后才解锁讲解（硬约束 2）
-      await page.getByRole("button", { name: /让它讲一遍.*今天还有 5 次/ }).click();
+      await page.getByRole("button", { name: /让它讲一遍，今天还有 5 次/ }).click();
       await expect(page.getByText(/测试讲解/)).toBeVisible({ timeout: 10_000 });
       await page.screenshot({ path: shot("5b-explain"), animations: "disabled" });
     }
@@ -52,8 +54,11 @@ test("每日闭环：开场 → 勾选 → 回想 → 到期卡 → 三问 → �
   // 三问
   await expect(page.getByRole("heading", { name: "今天最卡的一点？" })).toBeVisible({ timeout: 15_000 });
   await page.screenshot({ path: shot("6-reflect"), animations: "disabled" });
+  // 每问点完先亮 400ms 再翻页（家长 09-02 定），期间不收点击，所以每问都要等下一问出现
   await page.locator("button.choice").first().click();
+  await expect(page.getByRole("heading", { name: "做对的题里哪道是猜的？" })).toBeVisible();
   await page.getByRole("button", { name: "没有" }).click();
+  await expect(page.getByRole("heading", { name: "明天第一题做什么？" })).toBeVisible();
   await page.locator("button.choice").first().click();
 
   // 结束页

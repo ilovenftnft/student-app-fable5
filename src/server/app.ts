@@ -13,10 +13,11 @@ import * as explain from "./explain/service.ts";
 
 const SUBJECTS: readonly string[] = ["语文", "数学", "英语", "历史", "地理", "生物", "道法"];
 
-export interface AppOptions { explainer?: explain.Explainer }
+export interface AppOptions { explainer?: explain.Explainer; verifier?: explain.Verifier }
 
 export function createApp(db: DatabaseSync, clock: () => Date = () => new Date(), opts: AppOptions = {}): Hono {
   const explainer = opts.explainer ?? explain.codexExplainer;
+  const verifier = opts.verifier ?? explain.codexVerifier;
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ ok: true, items: repo.items(db).length }));
@@ -74,7 +75,7 @@ export function createApp(db: DatabaseSync, clock: () => Date = () => new Date()
   });
   app.post("/api/explain", async (c) => {
     const b = await c.req.json<{ itemId: string }>();
-    const r = explain.request(db, clock(), String(b.itemId), explainer);
+    const r = explain.request(db, clock(), String(b.itemId), explainer, verifier);
     return c.json(r, r.ok ? 200 : 403);
   });
   app.get("/api/explain/:id", (c) => {

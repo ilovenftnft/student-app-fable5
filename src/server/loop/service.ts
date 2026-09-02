@@ -26,7 +26,9 @@ export interface TodayView {
   progress: { index: number; total: number };
   timer: TimerView | null;
   checkins: string[];
-  recallPending: { chapterId: string; title: string; points: string[] }[];
+  recallPending: { chapterId: string; subject: string; parentTitle: string; title: string; points: { text: string; quote: string }[] }[];
+  /** 今天已回想过的章节（勾选页按科目展开时用来恢复状态） */
+  recalled: { chapterId: string; missed: number }[];
   queue: { remaining: number; deferred: number; estMinutes: number };
   /** 结束页文案："今天 N 题，M 张卡明天到期。" */
   summary: { reviews: number; dueTomorrow: number };
@@ -73,8 +75,9 @@ function loopState(db: DatabaseSync, now: Date, session: repo.SessionRow | undef
   for (const id of checkins) {
     if (done.has(id)) continue;
     const c = repo.chapter(db, id);
-    const points = c ? (JSON.parse(c.points) as { text: string }[]) : [];
-    if (points.length > 0) recallPending.push({ chapterId: id, title: c!.title, points: points.map((p) => p.text) });
+    const points = c ? (JSON.parse(c.points) as { text: string; quote: string }[]) : [];
+    // 回想页显示教材原句（quote），不显示压缩过的"文"（家长 2026-09-02 定）；text 一并给前端，用来找要高亮的概念词
+    if (points.length > 0) recallPending.push({ chapterId: id, subject: c!.subject_id, parentTitle: (c!.parent_id && repo.chapter(db, c!.parent_id)?.title) || "", title: c!.title, points: points.map((p) => ({ text: p.text, quote: p.quote || p.text })) });
   }
   const q = queueFor(db, now, session.id);
   return {
@@ -122,6 +125,7 @@ export function today(db: DatabaseSync, now: Date): TodayView {
     session: session ? { id: session.id, started: true, ended: !!session.ended_at } : null,
     step, progress: progress(state), timer,
     checkins: state.checkins, recallPending,
+    recalled: session ? repo.recalls(db, session.id).map((r) => ({ chapterId: r.chapter_id, missed: (JSON.parse(r.missed) as number[]).length })) : [],
     queue: { remaining: q.entries.length, deferred: q.deferred, estMinutes: Math.round(q.estSeconds / 60) },
     summary: { reviews, dueTomorrow },
     weekDone: wd,

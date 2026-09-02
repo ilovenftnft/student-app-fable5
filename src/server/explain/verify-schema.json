@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["consistent", "within_grade", "quotes_ok", "no_tutoring", "problems"],
+  "properties": {
+    "consistent": { "type": "boolean", "description": "讲解的结论与标准答案一致，没有另给答案或与标准答案矛盾" },
+    "within_grade": { "type": "boolean", "description": "没有超出七年级的知识" },
+    "quotes_ok": { "type": "boolean", "description": "讲解里说成教材说的引文，都是给定教材原句的逐字片段；引用题干或标准答案不算" },
+    "no_tutoring": { "type": "boolean", "description": "没有建议课外辅导、培训、报班" },
+    "problems": { "type": "string", "description": "有问题时一句话说明；没有问题写空字符串" }
+  }
+}
