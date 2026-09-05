@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 开机自启（孩子的 Mac）。复制到 ~/Library/LaunchAgents/com.studyapp.server.plist，改两处路径，然后
-     launchctl load ~/Library/LaunchAgents/com.studyapp.server.plist -->
+<!-- 开机自启（孩子的 Mac）模板：由 scripts/launchd.sh 按本机路径生成到 ~/Library/LaunchAgents 并加载，不用手改 -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>com.studyapp.server</string>
