@@ -8,8 +8,9 @@ export function Start({ today, onDone }: { today: Today; onDone: (t: Today) => v
   const subjects = today.start.bySubject;
   const [first, setFirst] = useState<string | null>(subjects[0]?.subject ?? null);
   const [extra, setExtra] = useState(false);
-  const d = new Date(`${today.date}T00:00:00+08:00`);
-  const dateLine = `${WEEKDAY[d.getDay()]} · ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+  // today.date 已是上海日期；用 UTC 取星期和日，避免浏览器本机时区（如美区）把它算成前一天（家长 09-05 问及）
+  const d = new Date(`${today.date}T00:00:00Z`);
+  const dateLine = `${WEEKDAY[d.getUTCDay()]} · ${d.getUTCMonth() + 1} 月 ${d.getUTCDate()} 日`;
   const go = () => void api.begin(first, extra).then(onDone);
   return (
     <section className="screen">
