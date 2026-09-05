@@ -117,9 +117,6 @@ export function today(db: DatabaseSync, now: Date): TodayView {
   };
   const rows = session ? repo.reviewsWithItems(db, session.id) : [];
   const wrongPassed = rows.find((r) => r.kind === "wrong" && r.knew === 1)?.front ?? null;
-  const perSubject = new Map<string, { n: number; wrong: number }>();
-  for (const r of rows) { const e = perSubject.get(r.subject_id) ?? { n: 0, wrong: 0 }; e.n++; if (r.knew !== 1) e.wrong++; perSubject.set(r.subject_id, e); }
-  const allRightSubject = [...perSubject.entries()].find(([, v]) => v.n >= 2 && v.wrong === 0)?.[0] ?? null;
   const minutes = session ? Math.floor(((session.ended_at ? Date.parse(session.ended_at) : now.getTime()) - Date.parse(session.started_at)) / 60_000) : 0;
   return {
     date,
@@ -131,7 +128,7 @@ export function today(db: DatabaseSync, now: Date): TodayView {
     summary: { reviews, dueTomorrow },
     weekDone: wd,
     start: { bySubject: subjects, count: q.entries.length, minutes: startCtx.minutes, lines: startLines(startCtx), choices: session ? startChoices(db, session.id) : null },
-    doneLines: doneLines({ date, reviews, dueTomorrow, deferred: q.deferred, wrongPassed, allRightSubject, weekDone: wd, minutes }),
+    doneLines: doneLines({ date, reviews, dueTomorrow, deferred: q.deferred, wrongPassed, weekDone: wd, minutes }),
     previewLines: previewLines({ date, next: nextSections(db, state.checkins) }),
   };
 }

@@ -28,7 +28,6 @@ export interface DoneContext {
   /** 今天答对的错题卡题面（取一条），没有则 null */
   wrongPassed: string | null;
   /** 今天全对的科目（取一科），没有则 null */
-  allRightSubject: string | null;
   weekDone: number;
   minutes: number;
 }
@@ -85,14 +84,8 @@ export function doneLines(c: DoneContext): string[] {
       `"${clip(c.wrongPassed)}"这道，你这次是自己算对的。`,
       `上次错的"${clip(c.wrongPassed)}"，今天对了。`,
     ]));
-  } else if (c.allRightSubject) {
-    lines.push(pick(c.date, [
-      `${c.allRightSubject}今天一张没错。`,
-      `${c.allRightSubject}全对。`,
-    ]));
-  } else if (c.reviews > 0 && c.minutes <= 15) {
-    lines.push(pick(c.date, [`${c.minutes} 分钟做完，比昨天顺。`, `今天 ${c.minutes} 分钟。`]));
   }
+  // "X 全对。"和"今天 N 分钟。"两句都去掉了（家长 09-02 定）：没有错题答对、没有顺延时第二句就空着
   return lines;
 }
 
