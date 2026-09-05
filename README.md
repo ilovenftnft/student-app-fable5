@@ -12,6 +12,7 @@ npm run load:chapters       # 章节树 + 每节要点 → chapter 表
 npm run deploy              # 停 → build → 起 → 探测；http://127.0.0.1:8787（家长页 /parent）
 npm run stop
 npm run trial:reset        # 试用库（./data-trial，8788 端口）：清空会话类数据、保留内容，重启
+bash scripts/launchd.sh    # 孩子电脑：开机自启（按本机路径生成 plist 并加载；git pull 后再跑一次即更新）；stop 卸载
 ```
 
 环境变量：`PORT`（8787）、`DATA_DIR`（./data，库、照片、日志都在这里）、`INBOX_DIR`（~/StudyInbox）、`INBOX=off` 关监听、`EXPLAIN=fake` 假讲解（测试用）。
