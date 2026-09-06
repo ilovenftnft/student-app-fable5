@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build docs/研究报告-app方案.html from the Markdown source (single source of truth)."""
+"""Build an HTML page from a Markdown report (single source of truth).
+
+Default: docs/研究报告-app方案.md -> docs/研究报告-app方案.html.
+Usage: build_report.py [--src in.md] [--out out.html] [--title T] [--eyebrow E] [--meta M] [--footer F]
+"""
+import argparse
 import html
 import re
 import sys
@@ -9,8 +14,17 @@ sys.path.insert(0, str(Path(__file__).parent))
 from md2html import convert  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "docs" / "研究报告-app方案.md"
-OUT = ROOT / "docs" / "研究报告-app方案.html"
+ap = argparse.ArgumentParser()
+ap.add_argument("--src", default=str(ROOT / "docs" / "研究报告-app方案.md"))
+ap.add_argument("--out", default=None)
+ap.add_argument("--title", default="初一学习 App 方案")
+ap.add_argument("--eyebrow", default="研究报告 · 2026-09-01")
+ap.add_argument("--meta", default="给一位厦门家长：孩子今天开学上初一，目标是三年后中考效率优先、每天有时间做自己喜欢的事。所有建议标注依据；\"判断\"为经验推断，\"待核实\"为未找到官方来源。")
+ap.add_argument("--footer", default="依据文件：docs/research/01–05 · docs/data/exam_summary.md · docs/experiments/2026-09-01-dualrun · 由 Claude 撰写，Codex 独立审阅（见末节）。")
+args = ap.parse_args()
+SRC = Path(args.src)
+OUT = Path(args.out) if args.out else SRC.with_suffix(".html")
+TITLE, EYEBROW, META, FOOTER = (html.escape(x, quote=False) for x in (args.title, args.eyebrow, args.meta, args.footer))
 
 md = SRC.read_text(encoding="utf-8")
 body, toc = convert(md)
@@ -25,7 +39,7 @@ toc_html = "\n".join(
     f'<a class="toc-{l}" href="#{s}">{html.escape(t)}</a>' for l, s, t in toc if l == 2
 )
 
-page = f"""<title>初一学习 App 方案</title>
+page = f"""<title>{TITLE}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>
@@ -100,9 +114,9 @@ footer {{ grid-column: 1 / -1; margin-top: 64px; padding-top: 16px; border-top: 
 </style>
 <div class="shell">
   <header class="masthead">
-    <div class="eyebrow">研究报告 · 2026-09-01</div>
-    <h1>初一学习 App 方案</h1>
-    <div class="meta">给一位厦门家长：孩子今天开学上初一，目标是三年后中考效率优先、每天有时间做自己喜欢的事。所有建议标注依据；"判断"为经验推断，"待核实"为未找到官方来源。</div>
+    <div class="eyebrow">{EYEBROW}</div>
+    <h1>{TITLE}</h1>
+    <div class="meta">{META}</div>
   </header>
   <nav class="toc" aria-label="目录"><div class="label">目录</div>
 {toc_html}
@@ -110,7 +124,7 @@ footer {{ grid-column: 1 / -1; margin-top: 64px; padding-top: 16px; border-top: 
   <main>
 {body}
   </main>
-  <footer>依据文件：docs/research/01–05 · docs/data/exam_summary.md · docs/experiments/2026-09-01-dualrun · 由 Claude 撰写，Codex 独立审阅（见末节）。</footer>
+  <footer>{FOOTER}</footer>
 </div>
 <script>
 (function(){{
